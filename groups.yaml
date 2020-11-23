@@ -105,7 +105,7 @@ default_view:
     - light.er_tong_fang_tai_deng
     - cover.curtain_158d00042cf265
     - fan.er_tong_fang_jing_hua_qi
-    - fan.er_tong_fang_feng_shan
+    # - fan.er_tong_fang_feng_shan
     - climate.er_tong_fang_kong_diao
 
 书房:
@@ -125,7 +125,7 @@ default_view:
     - cover.shu_fang_chuang_lian
     - cover.liang_yi_jia
     - vacuum.sao_di_ji
-    - fan.shu_fang_feng_shan
+    # - fan.shu_fang_feng_shan
     - fan.shu_fang_jing_hua_qi
     - climate.shu_fang_kong_diao
 
