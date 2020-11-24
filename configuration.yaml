@@ -475,11 +475,11 @@ xiaomi_aqara:
       #mac: 34CE0090901A
       #host: ZigBee
 
-# vacuum:
-#   - platform: xiaomi_miio
-#     name: 扫地机
-#     host: Vacuum
-#     token: !secret vacuum_token
+vacuum:
+  - platform: xiaomi_miio
+    name: 扫地机
+    host: Vacuum
+    token: !secret vacuum_token
 
 fan:
   - platform: viomi_washer
