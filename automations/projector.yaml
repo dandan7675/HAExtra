@@ -73,13 +73,13 @@
   action:
     - service: automation.turn_off
       entity_id: automation.shu_fang_an_niu_shuang_ji_kai_guan_tou_ying_yi
-    - service: switch.toggle
-      entity_id: switch.tou_ying_yi
-    - service: switch.toggle # Repeat to ensure
-      entity_id: switch.tou_ying_yi
+    - service: media_player.toggle
+      entity_id: media_player.tou_ying_yi
+    # - service: media_player.toggle # Repeat to ensure
+    #   entity_id: media_player.tou_ying_yi
     - service: automation.trigger
       data_template:
-        entity_id: 'automation.{% if is_state("switch.tou_ying_yi", "on") %}guan_bi{% else %}da_kai{% endif %}_tou_ying_yi_pei_tao'
+        entity_id: 'automation.{% if is_state("media_player.tou_ying_yi", "on") %}guan_bi{% else %}da_kai{% endif %}_tou_ying_yi_pei_tao'
     - delay: 10
     - service: automation.turn_on
       entity_id: automation.shu_fang_an_niu_shuang_ji_kai_guan_tou_ying_yi
@@ -96,8 +96,8 @@
       entity_id: automation.shu_fang_an_niu_chang_an_kai_guan_bo_fang_qi
     - service: zhimsg.miai
       data_template:
-        message: '正在{% if is_state("switch.tou_ying_yi", "on") %}关闭{% else %}打开{% endif %}播放器'
-    - service_template: 'switch.turn_{% if is_state("switch.tou_ying_yi", "on") %}off{% else %}on{% endif %}'
+        message: '正在{% if is_state("media_player.tou_ying_yi", "on") %}关闭{% else %}打开{% endif %}播放器'
+    - service_template: 'switch.turn_{% if is_state("media_player.tou_ying_yi", "on") %}off{% else %}on{% endif %}'
       entity_id: switch.yin_xiang
     - service: automation.trigger
       entity_id: automation.shu_fang_an_niu_shuang_ji_kai_guan_tou_ying_yi

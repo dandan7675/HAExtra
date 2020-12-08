@@ -26,6 +26,7 @@ default_view:
     - fan.ke_ting_xin_feng_ji
     - climate.ke_ting_kong_diao
     - climate.ke_ting_di_nuan
+    - remote.hong_wai_yao_kong
 
 餐厅:
   icon: mdi:silverware-fork-knife
@@ -100,7 +101,7 @@ default_view:
     - sensor.er_tong_fang_shi_du
     - sensor.er_tong_fang_ke_li_wu
     - sensor.er_tong_fang_er_yang_hua_tan
-    - sensor.feng_shan_wen_du
+    #- sensor.feng_shan_wen_du
     - light.er_tong_fang_deng
     - light.er_tong_fang_tai_deng
     - cover.curtain_158d00042cf265
@@ -118,7 +119,7 @@ default_view:
     - binary_sensor.motion_sensor_158d0003d0d46e
     - light.shu_fang_tai_deng
     - light.liang_yi_jia_deng
-    - switch.tou_ying_yi
+    - media_player.tou_ying_yi
     - switch.wang_luo_cun_chu
     - switch.yin_xiang
     - cover.tou_ying_mu_bu
@@ -128,6 +129,7 @@ default_view:
     # - fan.shu_fang_feng_shan
     - fan.shu_fang_jing_hua_qi
     - climate.shu_fang_kong_diao
+    - remote.wan_neng_yao_kong
 
 阳台:
   icon: mdi:home-minus

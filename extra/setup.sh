@@ -94,6 +94,7 @@ After=network-online.target
 Type=simple
 User=root
 ExecStart=/usr/local/bin/hass
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
