@@ -71,7 +71,6 @@ default_view:
     - sensor.zhu_wo_ke_li_wu
     - sensor.zhu_wo_er_yang_hua_tan
     - sensor.zhu_wo_liang_du
-    - binary_sensor.zhu_wo_gan_ying
     - binary_sensor.door_window_sensor_158d0004611461
     - light.zhu_wo_deng
     #- switch.zhu_wo_dian_shi

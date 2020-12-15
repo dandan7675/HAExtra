@@ -1,5 +1,6 @@
 binary_sensor.cube_158d0002a66db1:
   friendly_name: 魔方控制器
+  hidden: true
 binary_sensor.door_window_sensor_158d0001f3d2d1:
   friendly_name: 厨房门
 binary_sensor.door_window_sensor_158d0001f3e5be:
@@ -148,9 +149,9 @@ switch.can_ting_chu_shi_ji:
   icon: mdi:power-socket-uk
 switch.plug_158d0003a58422:
   friendly_name: 米家插座
-# switch.tou_ying_yi:
-#   genie_deviceName: 电视
-#   genie_deviceType: television
+media_player.tou_ying_yi:
+  genie_deviceName: 电视
+  genie_deviceType: television
 switch.wang_luo_cun_chu:
   genie_deviceName: 网关
   genie_deviceType: gateway
