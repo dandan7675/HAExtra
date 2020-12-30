@@ -100,10 +100,15 @@ light.xi_shou_jian_deng:
   icon: mdi:ceiling-light
 light.zhu_wo_deng:
   icon: mdi:ceiling-light
+media_player.tou_ying_yi:
+  genie_deviceName: 电视
+  genie_deviceType: television
 person.a_yi:
   dash_click: /config/automation
 person.ba_ba:
   dash_click: /config/server_control
+person.ma_ma:
+  dash_click: /local/aha.html
 sensor.can_ting_ke_li_wu:
   dash_click: if (self == top) location = '/'
   dash_relation: fan.can_ting_jing_hua_qi
@@ -149,9 +154,6 @@ switch.can_ting_chu_shi_ji:
   icon: mdi:power-socket-uk
 switch.plug_158d0003a58422:
   friendly_name: 米家插座
-media_player.tou_ying_yi:
-  genie_deviceName: 电视
-  genie_deviceType: television
 switch.wang_luo_cun_chu:
   genie_deviceName: 网关
   genie_deviceType: gateway

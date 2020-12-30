@@ -225,7 +225,7 @@ sensor:
   #   password: !secret phicomm_password
   - platform: aircat
     name: [['餐厅颗粒物', '餐厅甲醛', '餐厅温度', '餐厅湿度'], ['过道颗粒物', '过道甲醛', '过道温度', '过道湿度']]
-    mac: ['B0F8931EA148', 'B0F8931F1455'] #, 'B0F893249132']
+    mac: ['B0F8931EA148', 'B0F893249132']
   - platform: template
     sensors:
       ci_wo_wen_du:
