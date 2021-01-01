@@ -18,6 +18,7 @@ binary_sensor.motion_sensor_158d0001d66ce9:
 binary_sensor.motion_sensor_158d0001f4a238:
   friendly_name: 洗手间感应
 binary_sensor.motion_sensor_158d0003d0d46e:
+  dash_click: /config/logs
   friendly_name: 书房感应
 binary_sensor.switch_158d0001e59b33:
   friendly_name: 浴室按钮
