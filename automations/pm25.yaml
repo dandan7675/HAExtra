@@ -27,8 +27,8 @@
         entity_id: fan.zhu_wo_jing_hua_qi
         entity_attr: speed
         entity_values: [low, medium, high]
-        # condition_attr: oscillating
-        # condition_values: [false]
+        condition_attr: oscillating
+        condition_values: [false]
         delay: 0
 
 - alias: 次卧净化器调节
@@ -61,8 +61,8 @@
         entity_id: fan.er_tong_fang_jing_hua_qi
         entity_attr: speed
         entity_values: [low, medium, high]
-        # condition_attr: oscillating
-        # condition_values: [false]
+        condition_attr: oscillating
+        condition_values: [false]
         delay: 0
 
 - alias: 书房净化器调节
