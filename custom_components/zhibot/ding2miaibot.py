@@ -15,7 +15,7 @@ class ding2miaibotView(dingbotView):
         if query.startswith('音量'):
             pos = query.find('%')
             message = None if pos == -1 else query[pos+1:]
-            data = {'volume': query[2:None if if pos == -1 else pos]}
+            data = {'volume': query[2:None if pos == -1 else pos]}
             answer = '已设置音量：' + volume + (('，并喊话：' + message) if message else '') 
         else:
             message = query
