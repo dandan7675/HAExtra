@@ -11,18 +11,17 @@ _LOGGER = logging.getLogger(__name__)
 #
 class ding2miaibotView(dingbotView):
 
-    async def handle(self, data):
-        content = data['text']['content']
-        if content.startswith('音量'):
-            pos = content.find('%')
+    async def handleQuery(self, query):
+        if query.startswith('音量'):
+            pos = query.find('%')
             if pos == -1:
-                volume = content[2:]
+                volume = query[2:]
                 message = None
             else:
-                volume = content[2:pos]
-                message = content[pos+1:]
+                volume = query[2:pos]
+                message = query[pos+1:]
             await async_send_message('miai', message, {'volume': volume})
             return '已设置音量：' + volume + (('，并喊话：' + message) if message else '')
-        await async_send_message('miai', content)
-        return '已喊话：' + content
+        await async_send_message('miai', query)
+        return '已喊话：' + query
  

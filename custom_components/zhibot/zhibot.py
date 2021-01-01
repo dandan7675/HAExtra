@@ -7,8 +7,8 @@ _LOGGER = logging.getLogger(__name__)
 #
 
 
-async def zhibotQuery(hass, question):
-    query = question.strip()
+async def zhibotQuery(hass, query):
+    #query = question.strip()
     _LOGGER.debug("QUERY: %s", query)
     if not query:
         return "少说空话"
