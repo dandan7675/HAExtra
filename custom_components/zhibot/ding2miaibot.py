@@ -21,5 +21,5 @@ class ding2miaibotView(dingbotView):
             volume = None
             message = query
             answer = '已喊话：' + query
-        await async_send_message('miai', query, {'volume': volume} if volume else {})
+        await async_send_message('miai', message, {'volume': volume} if volume else {})
         return answer
