@@ -29,3 +29,7 @@ async def async_send(call):
     data = call.data
     message = data.get('message')
     await handler.async_send_message(message, data)
+
+
+async def async_send_message(service, message, data={}):
+    await _handlers[service].async_send_message(message, data)

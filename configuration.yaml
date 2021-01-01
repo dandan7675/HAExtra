@@ -674,6 +674,8 @@ zhibot:
     password: !secret zhibot_password
   - platform: miai
     password: !secret zhibot_password
+  - platform: ding2miai
+    password: !secret zhibot_password
 
 zhimsg:
   - platform: ding
