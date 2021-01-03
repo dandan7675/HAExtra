@@ -139,13 +139,14 @@ def setup_platform(hass, conf, add_devices, discovery_info=None):
                 return
         entities.append(ModbusClimate(bus, name[0] if isinstance(name, list) else name))
 
+    bus.count = len(entities)
     add_devices(entities, True)
 
 
 class ClimateModbus():
 
     def __init__(self, hass, conf):
-        self.exception = 0
+        self.error = 0
         self.hub = hass.data[MODBUS_DOMAIN][conf.get(CONF_HUB)]
         self.unit = hass.config.units.temperature_unit
         self.fan_modes = conf.get(CONF_FAN_MODES)
@@ -220,11 +221,12 @@ class ClimateModbus():
             timeout=self.hub._client.timeout)
         self.hub._client.connect()
 
-    def error(self):
-        self.exception += 1
-        if self.exception < 4 or (self.exception > 10 and self.exception % 10):
+    def exception(self):
+        turns = int(self.error / self.count)
+        self.error += 1
+        if turns == 0 or (turns > 6 and turns % 10):
             return
-        if self.exception % 3 == 0:
+        if turns % 3 == 0:
             self.reset()
         self.reconnect()
 
@@ -446,18 +448,18 @@ class ModbusClimate(ClimateEntity):
         """Update state."""
         if self._skip_update:
             self._skip_update = False
-            #_LOGGER.debug("Skip update on %s", self._name)
+            _LOGGER.debug("Skip update on %s", self._name)
             return
 
-        #_LOGGER.debug("Update on %s", self._name)
+        _LOGGER.debug("Update on %s", self._name)
         for prop in self._bus.regs:
             try:
                 self._values[prop] = self._bus.read_value(self._index, prop)
             except:
-                self._bus.error()
-                _LOGGER.debug("Exception %d on %s/%s", self._bus.exception, self._name, prop)
+                self._bus.exception()
+                _LOGGER.debug("Exception %d on %s/%s", self._bus.error, self._name, prop)
                 return
-        self._bus.exception = 0
+        self._bus.error = 0
 
     def get_value(self, prop):
         """Get property value."""
@@ -479,11 +481,11 @@ class ModbusClimate(ClimateEntity):
                 if v == value:
                     #_LOGGER.debug("get_mode: %s for %s", k, prop)
                     return k
-        _LOGGER.error("Invalid value %s for %s", value, prop)
+        _LOGGER.error("Invalid value %s for %s/%s", value, self._name, prop)
         return None
 
     def set_mode(self, modes, prop, mode):
         if mode in modes:
             self.set_value(prop, modes[mode])
             return
-        _LOGGER.error("Invalid mode %s for %s", mode, prop)
+        _LOGGER.error("Invalid mode %s for %s/%s", mode, self._name, prop)
