@@ -148,8 +148,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         data_type = mod.get(CONF_DATA_TYPE)
         if data_type != DATA_TYPE_CUSTOM:
             try:
-                mod[CONF_STRUCTURE] = '>{}'.format(data_types[
-                    DATA_TYPE_INT if data_type is None else data_type][count])
+                mod[CONF_STRUCTURE] = '>{}'.format(data_types[DATA_TYPE_INT if data_type is None else data_type][count])
             except KeyError:
                 _LOGGER.error("Unable to detect data type for %s", prop)
                 continue
@@ -210,6 +209,7 @@ class ModbusClimate(ClimateEntity):
         self._regs = mods
         self._values = {}
         self._last_on_operation = None
+        self._skip_update = False
 
     @property
     def name(self):
@@ -334,10 +334,15 @@ class ModbusClimate(ClimateEntity):
 
     def update(self):
         """Update state."""
+        if self._skip_update:
+            self._skip_update = False
+            #_LOGGER.debug("Skip update on %s", self._name)
+            return
+
+        #_LOGGER.debug("Update on %s", self._name)
         for prop in self._regs:
             mod = self._regs[prop]
-            register_type, slave, register, scale, offset = \
-                self.register_info(mod)
+            register_type, slave, register, scale, offset = self.register_info(mod)
             count = mod[CONF_COUNT] if CONF_COUNT in mod else 1
 
             try:
@@ -346,28 +351,25 @@ class ModbusClimate(ClimateEntity):
                     value = bool(result.bits[0])
                 else:
                     if register_type == REGISTER_TYPE_INPUT:
-                        result = self._hub.read_input_registers(slave,
-                                                                register, count)
+                        result = self._hub.read_input_registers(slave, register, count)
                     else:
-                        result = self._hub.read_holding_registers(slave,
-                                                                  register, count)
+                        result = self._hub.read_holding_registers(slave, register, count)
 
                     val = 0
                     registers = result.registers
                     if mod.get(CONF_REVERSE_ORDER):
                         registers.reverse()
 
-                    byte_string = b''.join(
-                        [x.to_bytes(2, byteorder='big') for x in registers]
-                    )
+                    byte_string = b''.join([x.to_bytes(2, byteorder='big') for x in registers])
                     val = struct.unpack(mod[CONF_STRUCTURE], byte_string)[0]
                     value = scale * val + offset
             except:
                 ModbusClimate._exception += 1
-                _LOGGER.debug("Exception %d on %s/%s at %s/slave%s/register%s",
-                              ModbusClimate._exception, self._name, prop, register_type, slave, register)
-                if (ModbusClimate._exception < 5) or (ModbusClimate._exception % 10 == 0):
-                    if (ModbusClimate._exception % 2 == 0):
+                _LOGGER.debug("Exception %d on %s/%s at %s/slave%s/register%s", ModbusClimate._exception, self._name, prop, register_type, slave, register)
+                if ModbusClimate._exception < 4:
+                    return
+                if ModbusClimate._exception < 10 or ModbusClimate._exception % 10 == 0:
+                    if ModbusClimate._exception % 3 == 0:
                         _LOGGER.warn("Reset %s", self._hub._client)
                         self.reset()
                     else:
@@ -463,7 +465,9 @@ class ModbusClimate(ClimateEntity):
         """Set property value."""
         mod = self._regs[prop]
         register_type, slave, register, scale, offset = self.register_info(mod)
-        #_LOGGER.info("Write %s: %s = %f", self.name, prop, value)
+
+        self._skip_update = True
+        _LOGGER.debug("Write %s: %s = %f", self.name, prop, value)
 
         if register_type == REGISTER_TYPE_COIL:
             self._hub.write_coil(slave, register, bool(value))
@@ -472,9 +476,8 @@ class ModbusClimate(ClimateEntity):
             self._hub.write_register(slave, register, int(val))
 
         self._values[prop] = value
-
-        self.async_write_ha_state()
-        async_call_later(self.hass, 2, self.async_schedule_update_ha_state)
+        #self.async_write_ha_state()
+        # async_call_later(self.hass, 2, self.async_schedule_update_ha_state)
 
     def get_mode(self, modes, prop):
         value = self.get_value(prop)
