@@ -2,7 +2,7 @@
 Platform for a Generic Modbus Thermostat.
 
 For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/climate.modbus/
+https://yonsm.github.io/modbus
 """
 
 import logging
@@ -121,88 +121,159 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def setup_platform(hass, conf, add_devices, discovery_info=None):
     """Set up the Modbus Thermostat Platform."""
     name = conf.get(CONF_NAME)
-    hub = hass.data[MODBUS_DOMAIN][conf.get(CONF_HUB)]
-
-    ModbusClimate._fan_modes = conf.get(CONF_FAN_MODES)
-    ModbusClimate._hvac_modes = conf.get(CONF_HVAC_MODES)
-    ModbusClimate._preset_modes = conf.get(CONF_PRESET_MODES)
-    ModbusClimate._swing_modes = conf.get(CONF_SWING_MODES)
-    ModbusClimate._hvac_off_value = conf.get(CONF_HVAC_OFF_VALUE)
-    ModbusClimate._hvac_on_value = conf.get(CONF_HVAC_ON_VALUE)
-    ModbusClimate._aux_heat_on_value = conf.get(CONF_AUX_HEAT_ON_VALUE)
-    ModbusClimate._aux_heat_off_value = conf.get(CONF_AUX_HEAT_OFF_VALUE)
-    ModbusClimate._unit = hass.config.units.temperature_unit
-
-    data_types = {DATA_TYPE_INT: {1: 'h', 2: 'i', 4: 'q'}}
-    data_types[DATA_TYPE_UINT] = {1: 'H', 2: 'I', 4: 'Q'}
-    data_types[DATA_TYPE_FLOAT] = {1: 'e', 2: 'f', 4: 'd'}
-
-    regs = {}
-    for prop in SUPPORTED_FEATURES:
-        reg = conf.get(prop)
-        if not reg:
-            continue
-
-        count = reg.get(CONF_COUNT, 1)
-        data_type = reg.get(CONF_DATA_TYPE)
-        if data_type != DATA_TYPE_CUSTOM:
-            try:
-                reg[CONF_STRUCTURE] = '>{}'.format(data_types[DATA_TYPE_INT if data_type is None else data_type][count])
-            except KeyError:
-                _LOGGER.error("Unable to detect data type for %s", prop)
-                continue
-
-        try:
-            size = struct.calcsize(reg[CONF_STRUCTURE])
-        except struct.error as err:
-            _LOGGER.error(
-                "Error in sensor %s structure: %s", prop, err)
-            continue
-
-        if count * 2 != size:
-            _LOGGER.error("Structure size (%d bytes) mismatch registers count (%d words)", size, count)
-            continue
-
-        regs[prop] = reg
-
-    if not regs:
+    bus = ClimateModbus(hass, conf)
+    if not bus.regs:
         _LOGGER.error("Invalid config %s: no modbus items", name)
         return
 
-    def has_valid_register(regs, index):
+    entities = []
+    for index in range(100):
+        if not bus.has_valid_register(index):
+            break
+        entities.append(ModbusClimate(bus, name[index] if isinstance(name, list) else (name + str(index + 1)), index))
+
+    if not entities:
+        for prop in bus.regs:
+            if CONF_REGISTER not in bus.regs[prop]:
+                _LOGGER.error("Invalid config %s/%s: no register", name, prop)
+                return
+        entities.append(ModbusClimate(bus, name[0] if isinstance(name, list) else name))
+
+    add_devices(entities, True)
+
+
+class ClimateModbus():
+
+    def __init__(self, hass, conf):
+        self.exception = 0
+        self.hub = hass.data[MODBUS_DOMAIN][conf.get(CONF_HUB)]
+        self.unit = hass.config.units.temperature_unit
+        self.fan_modes = conf.get(CONF_FAN_MODES)
+        self.hvac_modes = conf.get(CONF_HVAC_MODES)
+        self.preset_modes = conf.get(CONF_PRESET_MODES)
+        self.swing_modes = conf.get(CONF_SWING_MODES)
+        self.hvac_off_value = conf.get(CONF_HVAC_OFF_VALUE)
+        self.hvac_on_value = conf.get(CONF_HVAC_ON_VALUE)
+        self.aux_heat_on_value = conf.get(CONF_AUX_HEAT_ON_VALUE)
+        self.aux_heat_off_value = conf.get(CONF_AUX_HEAT_OFF_VALUE)
+
+        data_types = {DATA_TYPE_INT: {1: 'h', 2: 'i', 4: 'q'}}
+        data_types[DATA_TYPE_UINT] = {1: 'H', 2: 'I', 4: 'Q'}
+        data_types[DATA_TYPE_FLOAT] = {1: 'e', 2: 'f', 4: 'd'}
+
+        self.regs = {}
+        for prop in SUPPORTED_FEATURES:
+            reg = conf.get(prop)
+            if not reg:
+                continue
+
+            count = reg.get(CONF_COUNT, 1)
+            data_type = reg.get(CONF_DATA_TYPE)
+            if data_type != DATA_TYPE_CUSTOM:
+                try:
+                    reg[CONF_STRUCTURE] = '>{}'.format(data_types[DATA_TYPE_INT if data_type is None else data_type][count])
+                except KeyError:
+                    _LOGGER.error("Unable to detect data type for %s", prop)
+                    continue
+
+            try:
+                size = struct.calcsize(reg[CONF_STRUCTURE])
+            except struct.error as err:
+                _LOGGER.error("Error in sensor %s structure: %s", prop, err)
+                continue
+
+            if count * 2 != size:
+                _LOGGER.error("Structure size (%d bytes) mismatch registers count (%d words)", size, count)
+                continue
+
+            self.regs[prop] = reg
+
+    def has_valid_register(self, index):
         """Check valid register."""
-        for prop in regs:
-            registers = regs[prop].get(CONF_REGISTERS)
+        for prop in self.regs:
+            registers = self.regs[prop].get(CONF_REGISTERS)
             if not registers or index >= len(registers):
                 return False
         return True
 
-    devices = []
-    for index in range(100):
-        if not has_valid_register(regs, index):
-            break
-        devices.append(ModbusClimate(hub, name[index] if isinstance(name, list) else (name + str(index + 1)), regs, index))
+    def reset(self):
+        """Initialize USR module"""
+        _LOGGER.warn("Reset %s", self.hub._client)
+        import socket
+        import time
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(5)
+        s.connect((self.hub._client.host, self.hub._client.port))
+        s.sendall(b'\x55\xAA\x55\x00\x25\x80\x03\xA8')
+        s.close()
+        time.sleep(1)
 
-    if not devices:
-        for prop in regs:
-            if CONF_REGISTER not in regs[prop]:
-                _LOGGER.error("Invalid config %s/%s: no register", name, prop)
-                return
-        devices.append(ModbusClimate(hub, name[0] if isinstance(name, list) else name, regs))
+    def reconnect(self):
+        _LOGGER.warn("Reconnect %s", self.hub._client)
+        from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+        from pymodbus.transaction import ModbusRtuFramer as ModbusFramer
+        self.hub._client.close()
+        self.hub._client = ModbusClient(
+            host=self.hub._client.host,
+            port=self.hub._client.port,
+            framer=ModbusFramer,
+            timeout=self.hub._client.timeout)
+        self.hub._client.connect()
 
-    add_devices(devices, True)
+    def error(self):
+        self.exception += 1
+        if self.exception < 4 or (self.exception > 10 and self.exception % 10):
+            return
+        if self.exception % 3 == 0:
+            self.reset()
+        self.reconnect()
+
+    def reg_basic_info(self, reg, index):
+        """Get register info."""
+        register_type = reg.get(CONF_REGISTER_TYPE)
+        register = reg[CONF_REGISTER] if index == -1 else reg[CONF_REGISTERS][index]
+        slave = reg.get(CONF_SLAVE, 1)
+        scale = reg.get(CONF_SCALE, 1)
+        offset = reg.get(CONF_OFFSET, 0)
+        return (register_type, slave, register, scale, offset)
+
+    def read_value(self, index, prop):
+        reg = self.regs[prop]
+        register_type, slave, register, scale, offset = self.reg_basic_info(reg, index)
+        count = reg.get(CONF_COUNT, 1)
+        if register_type == REGISTER_TYPE_COIL:
+            result = self.hub.read_coils(slave, register, count)
+            return bool(result.bits[0])
+        if register_type == REGISTER_TYPE_INPUT:
+            result = self.hub.read_input_registers(slave, register, count)
+        else:
+            result = self.hub.read_holding_registers(slave, register, count)
+        val = 0
+        registers = result.registers
+        if reg.get(CONF_REVERSE_ORDER):
+            registers.reverse()
+        byte_string = b''.join([x.to_bytes(2, byteorder='big') for x in registers])
+        val = struct.unpack(reg[CONF_STRUCTURE], byte_string)[0]
+        return scale * val + offset
+
+    def write_value(self, index, prop, value):
+        """Set property value."""
+        reg = self.regs[prop]
+        register_type, slave, register, scale, offset = self.reg_basic_info(reg, index)
+        if register_type == REGISTER_TYPE_COIL:
+            self.hub.write_coil(slave, register, bool(value))
+        else:
+            val = (value - offset) / scale
+            self.hub.write_register(slave, register, int(val))
 
 
 class ModbusClimate(ClimateEntity):
     """Representation of a Modbus climate device."""
 
-    _exception = 0
-
-    def __init__(self, hub, name, regs, index=-1):
+    def __init__(self, bus, name, index=-1):
         """Initialize the climate device."""
-        self._hub = hub
+        self._bus = bus
         self._name = name
-        self._regs = regs
         self._index = index
         self._values = {}
         self._last_on_operation = None
@@ -217,14 +288,14 @@ class ModbusClimate(ClimateEntity):
     def supported_features(self):
         """Return the list of supported features."""
         features = 0
-        for prop in self._regs:
+        for prop in self._bus.regs:
             features |= SUPPORTED_FEATURES[prop]
         return features
 
     @property
     def temperature_unit(self):
         """Return the unit of measurement."""
-        return ModbusClimate._unit
+        return self._bus.unit
 
     @property
     def target_temperature_step(self):
@@ -258,10 +329,10 @@ class ModbusClimate(ClimateEntity):
 
     @property
     def hvac_mode(self):
-        if REG_HVAC_OFF in self._regs:
-            if self.get_value(REG_HVAC_OFF) == ModbusClimate._hvac_off_value:
+        if REG_HVAC_OFF in self._bus.regs:
+            if self.get_value(REG_HVAC_OFF) == self._bus.hvac_off_value:
                 return HVAC_MODE_OFF
-        hvac_mode = self.get_mode(ModbusClimate._hvac_modes, REG_HVAC_MODE) or HVAC_MODE_OFF
+        hvac_mode = self.get_mode(self._bus.hvac_modes, REG_HVAC_MODE) or HVAC_MODE_OFF
         if hvac_mode != HVAC_MODE_OFF:
             self._last_on_operation = hvac_mode
         return hvac_mode
@@ -269,27 +340,27 @@ class ModbusClimate(ClimateEntity):
     @property
     def hvac_modes(self):
         """Return the list of available operation modes."""
-        return list(ModbusClimate._hvac_modes)
+        return list(self._bus.hvac_modes)
 
     @property
     def fan_mode(self):
         """Return the fan setting."""
-        return self.get_mode(ModbusClimate._fan_modes, REG_FAN_MODE)
+        return self.get_mode(self._bus.fan_modes, REG_FAN_MODE)
 
     @property
     def fan_modes(self):
         """Return the list of available fan modes."""
-        return list(ModbusClimate._fan_modes)
+        return list(self._bus.fan_modes)
 
     @property
     def swing_mode(self):
         """Return the swing setting."""
-        return self.get_mode(ModbusClimate._swing_modes, REG_SWING_MODE)
+        return self.get_mode(self._bus.swing_modes, REG_SWING_MODE)
 
     @property
     def swing_modes(self):
         """List of available swing modes."""
-        return list(ModbusClimate._swing_modes)
+        return list(self._bus.swing_modes)
 
     @property
     def preset_mode(self):
@@ -299,83 +370,12 @@ class ModbusClimate(ClimateEntity):
     @property
     def preset_modes(self):
         """List of available swing modes."""
-        return list(ModbusClimate._preset_modes)
+        return list(self._bus.preset_modes)
 
     @property
     def is_aux_heat(self):
         """Return true if aux heat is on."""
-        return self.get_value(REG_AUX_HEAT) == ModbusClimate._aux_heat_on_value
-
-    def reset(self):
-        """Initialize USR module"""
-        import socket
-        import time
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(5)
-        s.connect((self._hub._client.host, self._hub._client.port))
-        s.sendall(b'\x55\xAA\x55\x00\x25\x80\x03\xA8')
-        s.close()
-        time.sleep(1)
-
-    def reconnect(self):
-        from pymodbus.client.sync import ModbusTcpClient as ModbusClient
-        from pymodbus.transaction import ModbusRtuFramer as ModbusFramer
-        self._hub._client.close()
-        self._hub._client = ModbusClient(
-            host=self._hub._client.host,
-            port=self._hub._client.port,
-            framer=ModbusFramer,
-            timeout=self._hub._client.timeout)
-        self._hub._client.connect()
-
-    def update(self):
-        """Update state."""
-        if self._skip_update:
-            self._skip_update = False
-            #_LOGGER.debug("Skip update on %s", self._name)
-            return
-
-        #_LOGGER.debug("Update on %s", self._name)
-        for prop in self._regs:
-            reg = self._regs[prop]
-            register_type, slave, register, scale, offset = self.reg_basic(reg)
-            count = reg.get(CONF_COUNT, 1)
-
-            try:
-                if register_type == REGISTER_TYPE_COIL:
-                    result = self._hub.read_coils(slave, register, count)
-                    value = bool(result.bits[0])
-                else:
-                    if register_type == REGISTER_TYPE_INPUT:
-                        result = self._hub.read_input_registers(slave, register, count)
-                    else:
-                        result = self._hub.read_holding_registers(slave, register, count)
-
-                    val = 0
-                    registers = result.registers
-                    if reg.get(CONF_REVERSE_ORDER):
-                        registers.reverse()
-
-                    byte_string = b''.join([x.to_bytes(2, byteorder='big') for x in registers])
-                    val = struct.unpack(reg[CONF_STRUCTURE], byte_string)[0]
-                    value = scale * val + offset
-            except:
-                ModbusClimate._exception += 1
-                _LOGGER.debug("Exception %d on %s/%s at %s/slave%s/register%s", ModbusClimate._exception, self._name, prop, register_type, slave, register)
-                if ModbusClimate._exception < 4:
-                    return
-                if ModbusClimate._exception < 10 or ModbusClimate._exception % 10 == 0:
-                    if ModbusClimate._exception % 3 == 0:
-                        _LOGGER.warn("Reset %s", self._hub._client)
-                        self.reset()
-                    else:
-                        _LOGGER.warn("Reconnect %s", self._hub._client)
-                    self.reconnect()
-                return
-
-            ModbusClimate._exception = 0
-            #_LOGGER.info("Read %s: %s = %f", self.name, prop, value)
-            self._values[prop] = value
+        return self.get_value(REG_AUX_HEAT) == self._bus.aux_heat_on_value
 
     def set_temperature(self, **kwargs):
         """Set new target temperatures."""
@@ -393,12 +393,12 @@ class ModbusClimate(ClimateEntity):
 
     def set_hvac_mode(self, hvac_mode):
         """Set new hvac mode."""
-        if REG_HVAC_OFF in self._regs:
-            self.set_value(REG_HVAC_OFF, ModbusClimate._hvac_off_value if hvac_mode == HVAC_MODE_OFF else ModbusClimate._hvac_on_value)
+        if REG_HVAC_OFF in self._bus.regs:
+            self.set_value(REG_HVAC_OFF, self._bus.hvac_off_value if hvac_mode == HVAC_MODE_OFF else self._bus.hvac_on_value)
             if hvac_mode == HVAC_MODE_OFF:
                 return
 
-        if hvac_mode not in ModbusClimate._hvac_modes:  # Support HomeKit Auto Mode
+        if hvac_mode not in self._bus.hvac_modes:  # Support HomeKit Auto Mode
             best_hvac_mode = self.best_hvac_mode
             _LOGGER.warn("Fix operation mode from %s to %s", hvac_mode, best_hvac_mode)
             hvac_mode = best_hvac_mode
@@ -406,12 +406,12 @@ class ModbusClimate(ClimateEntity):
             # target = self.target_temperature
             # hvac_mode = HVAC_MODE_HEAT if current and target and current < target else HVAC_MODE_COOL
 
-        self.set_mode(ModbusClimate._hvac_modes, REG_HVAC_MODE, hvac_mode)
+        self.set_mode(self._bus.hvac_modes, REG_HVAC_MODE, hvac_mode)
 
     @property
     def best_hvac_mode(self):
         for mode in (HVAC_MODE_HEAT_COOL, HVAC_MODE_COOL, HVAC_MODE_HEAT):
-            if mode in ModbusClimate._hvac_modes:
+            if mode in self._bus.hvac_modes:
                 return mode
         return None
 
@@ -434,20 +434,28 @@ class ModbusClimate(ClimateEntity):
 
     def turn_aux_heat_on(self):
         """Turn auxiliary heater on."""
-        self.set_value(REG_AUX_HEAT, ModbusClimate._aux_heat_on_value)
+        self.set_value(REG_AUX_HEAT, self._bus.aux_heat_on_value)
 
     def turn_aux_heat_off(self):
         """Turn auxiliary heater off."""
-        self.set_value(REG_AUX_HEAT, ModbusClimate._aux_heat_off_value)
+        self.set_value(REG_AUX_HEAT, self._bus.aux_heat_off_value)
 
-    def reg_basic(self, reg):
-        """Get register info."""
-        register_type = reg.get(CONF_REGISTER_TYPE)
-        register = reg[CONF_REGISTER] if self._index == -1 else reg[CONF_REGISTERS][self._index]
-        slave = reg.get(CONF_SLAVE, 1)
-        scale = reg.get(CONF_SCALE, 1)
-        offset = reg.get(CONF_OFFSET, 0)
-        return (register_type, slave, register, scale, offset)
+    def update(self):
+        """Update state."""
+        if self._skip_update:
+            self._skip_update = False
+            #_LOGGER.debug("Skip update on %s", self._name)
+            return
+
+        #_LOGGER.debug("Update on %s", self._name)
+        for prop in self._bus.regs:
+            try:
+                self._values[prop] = self._bus.read_value(self._index, prop)
+            except:
+                self._bus.error()
+                _LOGGER.debug("Exception %d on %s/%s", self.exception, self._name, prop)
+                return
+        self._bus.exception = 0
 
     def get_value(self, prop):
         """Get property value."""
@@ -455,20 +463,11 @@ class ModbusClimate(ClimateEntity):
 
     def set_value(self, prop, value):
         """Set property value."""
-        reg = self._regs[prop]
-        register_type, slave, register, scale, offset = self.reg_basic(reg)
-
-        self._skip_update = True
         _LOGGER.debug("Write %s: %s = %f", self.name, prop, value)
-
-        if register_type == REGISTER_TYPE_COIL:
-            self._hub.write_coil(slave, register, bool(value))
-        else:
-            val = (value - offset) / scale
-            self._hub.write_register(slave, register, int(val))
-
+        self._skip_update = True
+        self._bus.write_value(self._index, prop, value)
         self._values[prop] = value
-        #self.async_write_ha_state()
+        # self.async_write_ha_state()
         # async_call_later(self.hass, 2, self.async_schedule_update_ha_state)
 
     def get_mode(self, modes, prop):
