@@ -84,8 +84,8 @@ HVAC_ACTIONS = {
     HVAC_MODE_OFF: CURRENT_HVAC_OFF,
     HVAC_MODE_HEAT: CURRENT_HVAC_HEAT,
     HVAC_MODE_COOL: CURRENT_HVAC_COOL,
-    HVAC_MODE_HEAT_COOL: CURRENT_HVAC_IDLE,  # ?
-    HVAC_MODE_AUTO: CURRENT_HVAC_IDLE,  # ?
+    HVAC_MODE_HEAT_COOL: CURRENT_HVAC_IDLE,
+    HVAC_MODE_AUTO: CURRENT_HVAC_IDLE,
     HVAC_MODE_DRY: CURRENT_HVAC_DRY,
     HVAC_MODE_FAN_ONLY: CURRENT_HVAC_FAN,
 }
@@ -118,21 +118,20 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+def setup_platform(hass, conf, add_devices, discovery_info=None):
     """Set up the Modbus Thermostat Platform."""
-    name = config.get(CONF_NAME)
-    hub_name = config.get(CONF_HUB)
-    hub = hass.data[MODBUS_DOMAIN][hub_name]
+    name = conf.get(CONF_NAME)
+    hub = hass.data[MODBUS_DOMAIN][conf.get(CONF_HUB)]
 
-    ModbusClimate._fan_modes = config.get(CONF_FAN_MODES)
-    ModbusClimate._hvac_modes = config.get(CONF_HVAC_MODES)
-    ModbusClimate._preset_modes = config.get(CONF_PRESET_MODES)
-    ModbusClimate._swing_modes = config.get(CONF_SWING_MODES)
+    ModbusClimate._fan_modes = conf.get(CONF_FAN_MODES)
+    ModbusClimate._hvac_modes = conf.get(CONF_HVAC_MODES)
+    ModbusClimate._preset_modes = conf.get(CONF_PRESET_MODES)
+    ModbusClimate._swing_modes = conf.get(CONF_SWING_MODES)
+    ModbusClimate._hvac_off_value = conf.get(CONF_HVAC_OFF_VALUE)
+    ModbusClimate._hvac_on_value = conf.get(CONF_HVAC_ON_VALUE)
+    ModbusClimate._aux_heat_on_value = conf.get(CONF_AUX_HEAT_ON_VALUE)
+    ModbusClimate._aux_heat_off_value = conf.get(CONF_AUX_HEAT_OFF_VALUE)
     ModbusClimate._unit = hass.config.units.temperature_unit
-    ModbusClimate._hvac_off_value = config.get(CONF_HVAC_OFF_VALUE)
-    ModbusClimate._hvac_on_value = config.get(CONF_HVAC_ON_VALUE)
-    ModbusClimate._aux_heat_on_value = config.get(CONF_AUX_HEAT_ON_VALUE)
-    ModbusClimate._aux_heat_off_value = config.get(CONF_AUX_HEAT_OFF_VALUE)
 
     data_types = {DATA_TYPE_INT: {1: 'h', 2: 'i', 4: 'q'}}
     data_types[DATA_TYPE_UINT] = {1: 'H', 2: 'I', 4: 'Q'}
@@ -140,7 +139,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     mods = {}
     for prop in SUPPORTED_FEATURES:
-        mod = config.get(prop)
+        mod = conf.get(prop)
         if not mod:
             continue
 
@@ -206,7 +205,7 @@ class ModbusClimate(ClimateEntity):
         self._hub = hub
         self._name = name[0 if index == -1 else index] if isinstance(name, list) else (name + str(index + 1) if index != -1 else name)
         self._index = index
-        self._regs = mods
+        self._mods = mods
         self._values = {}
         self._last_on_operation = None
         self._skip_update = False
@@ -220,7 +219,7 @@ class ModbusClimate(ClimateEntity):
     def supported_features(self):
         """Return the list of supported features."""
         features = 0
-        for prop in self._regs:
+        for prop in self._mods:
             features |= SUPPORTED_FEATURES[prop]
         return features
 
@@ -261,11 +260,10 @@ class ModbusClimate(ClimateEntity):
 
     @property
     def hvac_mode(self):
-        if REG_HVAC_OFF in self._regs:
+        if REG_HVAC_OFF in self._mods:
             if self.get_value(REG_HVAC_OFF) == ModbusClimate._hvac_off_value:
                 return HVAC_MODE_OFF
-        hvac_mode = self.get_mode(
-            ModbusClimate._hvac_modes, REG_HVAC_MODE) or HVAC_MODE_OFF
+        hvac_mode = self.get_mode(ModbusClimate._hvac_modes, REG_HVAC_MODE) or HVAC_MODE_OFF
         if hvac_mode != HVAC_MODE_OFF:
             self._last_on_operation = hvac_mode
         return hvac_mode
@@ -340,8 +338,8 @@ class ModbusClimate(ClimateEntity):
             return
 
         #_LOGGER.debug("Update on %s", self._name)
-        for prop in self._regs:
-            mod = self._regs[prop]
+        for prop in self._mods:
+            mod = self._mods[prop]
             register_type, slave, register, scale, offset = self.register_info(mod)
             count = mod[CONF_COUNT] if CONF_COUNT in mod else 1
 
@@ -397,34 +395,31 @@ class ModbusClimate(ClimateEntity):
 
     def set_hvac_mode(self, hvac_mode):
         """Set new hvac mode."""
-        if REG_HVAC_OFF in self._regs:
-            self.set_value(REG_HVAC_OFF, ModbusClimate._hvac_off_value if hvac_mode ==
-                           HVAC_MODE_OFF else ModbusClimate._hvac_on_value)
+        if REG_HVAC_OFF in self._mods:
+            self.set_value(REG_HVAC_OFF, ModbusClimate._hvac_off_value if hvac_mode == HVAC_MODE_OFF else ModbusClimate._hvac_on_value)
             if hvac_mode == HVAC_MODE_OFF:
                 return
 
         if hvac_mode not in ModbusClimate._hvac_modes:  # Support HomeKit Auto Mode
             best_hvac_mode = self.best_hvac_mode
-            _LOGGER.warn("Fix operation mode from %s to %s",
-                         hvac_mode, best_hvac_mode)
+            _LOGGER.warn("Fix operation mode from %s to %s", hvac_mode, best_hvac_mode)
             hvac_mode = best_hvac_mode
             # current = self.current_temperature
             # target = self.target_temperature
             # hvac_mode = HVAC_MODE_HEAT if current and target and current < target else HVAC_MODE_COOL
 
-        self.set_mode(self._hvac_modes, REG_HVAC_MODE, hvac_mode)
+        self.set_mode(ModbusClimate._hvac_modes, REG_HVAC_MODE, hvac_mode)
 
     @property
     def best_hvac_mode(self):
         for mode in (HVAC_MODE_HEAT_COOL, HVAC_MODE_COOL, HVAC_MODE_HEAT):
-            if mode in self._hvac_modes:
+            if mode in ModbusClimate._hvac_modes:
                 return mode
         return None
 
     def turn_on(self):
         """Turn on."""
-        _LOGGER.debug("Turn on with last operation mode: %s",
-                      self._last_on_operation)
+        _LOGGER.debug("Turn on with last operation mode: %s", self._last_on_operation)
         self.set_hvac_mode(self._last_on_operation or self.best_hvac_mode)
 
     def set_fan_mode(self, fan_mode):
@@ -450,8 +445,7 @@ class ModbusClimate(ClimateEntity):
     def register_info(self, mod):
         """Get register info."""
         register_type = mod.get(CONF_REGISTER_TYPE)
-        register = mod[CONF_REGISTER] \
-            if self._index == -1 else mod[CONF_REGISTERS][self._index]
+        register = mod[CONF_REGISTER] if self._index == -1 else mod[CONF_REGISTERS][self._index]
         slave = mod[CONF_SLAVE] if CONF_SLAVE in mod else 1
         scale = mod[CONF_SCALE] if CONF_SCALE in mod else 1
         offset = mod[CONF_OFFSET] if CONF_OFFSET in mod else 0
@@ -463,7 +457,7 @@ class ModbusClimate(ClimateEntity):
 
     def set_value(self, prop, value):
         """Set property value."""
-        mod = self._regs[prop]
+        mod = self._mods[prop]
         register_type, slave, register, scale, offset = self.register_info(mod)
 
         self._skip_update = True
