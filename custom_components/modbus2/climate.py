@@ -254,7 +254,9 @@ class ClimateModbus():
             registers.reverse()
         byte_string = b''.join([x.to_bytes(2, byteorder='big') for x in registers])
         val = struct.unpack(reg[CONF_STRUCTURE], byte_string)[0]
-        return scale * val + offset
+        value = scale * val + offset
+        #_LOGGER.debug("Read %d: %s = %f at %s/slave%s/register%s", index, prop, value, register_type, slave, register)
+        return value
 
     def write_value(self, index, prop, value):
         """Set property value."""
@@ -453,7 +455,7 @@ class ModbusClimate(ClimateEntity):
                 self._values[prop] = self._bus.read_value(self._index, prop)
             except:
                 self._bus.error()
-                _LOGGER.debug("Exception %d on %s/%s", self.exception, self._name, prop)
+                _LOGGER.debug("Exception %d on %s/%s", self._bus.exception, self._name, prop)
                 return
         self._bus.exception = 0
 
