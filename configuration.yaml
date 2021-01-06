@@ -9,11 +9,11 @@ homeassistant:
 
 logger:
   default: warning
-  # logs:
+  logs:
+    custom_components: debug
+    custom_components.aircat: warning
     # custom_components.zhibot: debug
     #homeassistant.components.homekit: debug
-    #homeassistant.components.braviatv: debug
-    #braviarc.braviarc: debug
     #pyhap: debug
 
 recorder:
