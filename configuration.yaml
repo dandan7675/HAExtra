@@ -9,9 +9,7 @@ homeassistant:
 
 logger:
   default: warning
-  logs:
-    custom_components: debug
-    custom_components.aircat: warning
+  # logs:
     # custom_components.zhibot: debug
     #homeassistant.components.homekit: debug
     #pyhap: debug
@@ -219,13 +217,63 @@ sensor:
     state_topic: NodeMCU7/co2
     unit_of_measurement: ppm
     availability_topic: NodeMCU7/status
+
   # - platform: phicomm
   #   name: AirCat
   #   username: !secret phicomm_username
   #   password: !secret phicomm_password
-  - platform: aircat
-    name: [['餐厅颗粒物', '餐厅甲醛', '餐厅温度', '餐厅湿度'], ['过道颗粒物', '过道甲醛', '过道温度', '过道湿度']]
-    mac: ['B0F8931EA148', 'B0F893249132']
+  # - platform: aircat
+  #   name: [['餐厅颗粒物', '餐厅甲醛', '餐厅温度', '餐厅湿度'], ['过道颗粒物', '过道甲醛', '过道温度', '过道湿度']]
+  #   mac: ['B0F8931EA148', 'B0F893249132']
+
+  - platform: mqtt
+    name: 餐厅温度
+    device_class: temperature
+    state_topic: device/zm1/b0f8931ea148/sensor
+    value_template: '{{ value_json.temperature }}'
+    unit_of_measurement: °C
+  - platform: mqtt
+    name: 餐厅湿度
+    device_class: humidity
+    state_topic: device/zm1/b0f8931ea148/sensor
+    value_template: '{{ value_json.humidity }}'
+    unit_of_measurement: '%'
+  - platform: mqtt
+    name: 餐厅颗粒物
+    icon: mdi:blur
+    state_topic: device/zm1/b0f8931ea148/sensor
+    value_template: '{{ value_json.PM25 }}'
+    unit_of_measurement: μg/m³
+  - platform: mqtt
+    name: 餐厅甲醛
+    icon: mdi:biohazard
+    state_topic: device/zm1/b0f8931ea148/sensor
+    value_template: '{{ value_json.formaldehyde }}'
+
+  - platform: mqtt
+    name: 过道温度
+    device_class: temperature
+    state_topic: device/zm1/b0f893249132/sensor
+    value_template: '{{ value_json.temperature }}'
+    unit_of_measurement: °C
+  - platform: mqtt
+    name: 过道湿度
+    device_class: humidity
+    state_topic: device/zm1/b0f893249132/sensor
+    value_template: '{{ value_json.humidity }}'
+    unit_of_measurement: '%'
+  - platform: mqtt
+    name: 过道颗粒物
+    icon: mdi:blur
+    state_topic: device/zm1/b0f893249132/sensor
+    value_template: '{{ value_json.PM25 }}'
+    unit_of_measurement: μg/m³
+  - platform: mqtt
+    name: 过道甲醛
+    icon: mdi:biohazard
+    state_topic: device/zm1/b0f893249132/sensor
+    value_template: '{{ value_json.formaldehyde }}'
+
   - platform: template
     sensors:
       ci_wo_wen_du:
@@ -462,6 +510,24 @@ light:
     availability_topic: NodeMCU7/status
     payload_on: 3526,1658,426,418,426,1292,426,420,426,1288,428,418,426,1290,430,418,426,1290,428,418,426,418,426,416,426,1290,428,416,430,1290,428,1290,428,418,428,1288,428,416,428,418,426,418,428,1288,428,1288,428,1290,428,418,428,1290,428,418,428,1290,428,416,428,1290,428,1290,428,416,428,418,426,418,428,416,428,418,426,416,428,418,426,416,428,416,428,418,426,1292,426,418,428,1290,428,416,428,1292,424,1292,424,1294,424,418,426,1290,426,420,424,418,426,420,424,422,424,1294,424,420,424,420,424,1294,424,420,424,422,422,422,422,1298,422,422,422,1296,422,422,422,1,2,38
     payload_off: 3528,1658,426,418,426,1292,380,462,382,1334,382,464,382,1338,380,462,382,1336,382,462,382,462,382,462,382,1336,382,462,382,1336,380,1336,382,464,382,1338,378,462,384,462,382,464,380,1336,382,1336,382,1336,382,462,382,1334,384,464,382,1336,382,462,382,1336,382,1336,382,464,382,462,382,464,382,464,380,462,382,462,382,464,382,464,380,464,382,464,382,464,380,1338,380,462,382,464,382,462,380,464,380,464,380,464,380,1334,382,464,380,464,380,464,380,464,382,1336,382,464,382,462,382,1334,382,464,382,464,382,464,380,1336,382,1336,382,464,382,1338,380,1,2,38
+  - platform: mqtt
+    name: 餐厅传感器亮度
+    schema: template
+    command_topic: device/zm1/b0f8931ea148/set
+    state_topic: device/zm1/b0f8931ea148/state
+    command_on_template: '{"mac":"b0f8931ea148","brightness":{%- if brightness is defined -%}{{ ((brightness-1) / 64 )|int +1 }}{%- else -%}4{%- endif -%}}'
+    command_off_template: '{"mac":"b0f8931ea148","brightness":0}'
+    state_template: '{%- if value_json.brightness == 0 -%}off{%- else -%}on{%- endif -%}'
+    brightness_template: '{%- if value_json.brightness is defined -%}{{ ( value_json.brightness *64 )|int }}{%- endif -%}'
+  - platform: mqtt
+    name: 过道传感器亮度
+    schema: template
+    command_topic: device/zm1/b0f893249132/set
+    state_topic: device/zm1/b0f893249132/state
+    command_on_template: '{"mac":"b0f893249132","brightness":{%- if brightness is defined -%}{{ ((brightness-1) / 64 )|int +1 }}{%- else -%}4{%- endif -%}}'
+    command_off_template: '{"mac":"b0f893249132","brightness":0}'
+    state_template: '{%- if value_json.brightness == 0 -%}off{%- else -%}on{%- endif -%}'
+    brightness_template: '{%- if value_json.brightness is defined -%}{{ ( value_json.brightness *64 )|int }}{%- endif -%}'
 
 shell_command:
   station_off: 'ssh root@Station shutdown -h now'
