@@ -11,6 +11,8 @@ default_view:
     - group.shu_fang
     - person.ba_ba
     - person.ma_ma
+    - person.wai_gong
+    - person.wai_po
     - person.a_yi
 
 客厅:
