@@ -42,6 +42,7 @@ default_view:
     - binary_sensor.door_window_sensor_158d0001f3e5be
     - light.can_ting_tong_deng
     - light.gateway_light_34ce0090901a
+    - light.can_ting_jian_ce_yi
     - switch.can_ting_chu_shi_ji
     - fan.can_ting_jing_hua_qi
     - climate.can_ting_kong_diao
@@ -57,6 +58,7 @@ default_view:
     - binary_sensor.door_window_sensor_158d00041c74da
     - binary_sensor.cube_158d0002a66db1
     - light.guo_dao_bei_jing_deng
+    - light.guo_dao_jian_ce_yi
     - switch.plug_158d0003a58422
     - cover.curtain_158d0003f7951d
     - binary_sensor.motion_sensor_158d0001f4a238
