@@ -129,6 +129,14 @@ person:
   - name: 阿姨
     id: ayi
     device_trackers:
+      - device_tracker.aphone
+  - name: 外公
+    id: waigong
+    device_trackers:
+      - device_tracker.bphone
+  - name: 外婆
+    id: waipo
+    device_trackers:
       - device_tracker.cphone
 
 weather:
