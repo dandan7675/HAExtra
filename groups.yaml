@@ -14,6 +14,8 @@ default_view:
     - person.wai_gong
     - person.wai_po
     - person.a_yi
+    - camera.guo_dao_she_xiang_ji
+    - camera.er_tong_fang_she_xiang_ji
 
 客厅:
   icon: mdi:seat
@@ -68,7 +70,6 @@ default_view:
     - light.xi_shou_jian_deng
     - switch.xi_shou_jian_pai_qi_shan
     - input_text.yu_yin_bo_bao
-    - camera.guo_dao_she_xiang_ji
 
 主卧:
   icon: mdi:bed-king
@@ -114,7 +115,6 @@ default_view:
     - fan.er_tong_fang_jing_hua_qi
     # - fan.er_tong_fang_feng_shan
     - climate.er_tong_fang_kong_diao
-    - camera.er_tong_fang_she_xiang_ji
 
 书房:
   icon: mdi:bookshelf
