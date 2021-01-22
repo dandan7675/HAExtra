@@ -242,8 +242,8 @@
 				var width = (clientWidth - count * 4) / count
 				width = Math.floor(width * 10) / 10
 				document.styleSheets[1].cssRules[0].style.width = width + 'px'
-				document.styleSheets[1].insertRule('.camera { width:' + Math.round(width * 1.515) + 'px; }', 1)
-				//alert('clientWidth:' + clientWidth + ' count:' + count + ' width:' + width);
+				// Kavana: document.styleSheets[1].insertRule('.camera { width:' + Math.round(width * 1.515) + 'px; }', 1)
+				// console.log('clientWidth:' + clientWidth + ' count:' + count + ' width:' + width);
 
 				// Parse api url
 				var params = location.search.split('@')
