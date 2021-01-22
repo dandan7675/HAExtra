@@ -734,13 +734,16 @@ media_player:
   #   url: http://Magic:49153/description.xml
 
 camera:
-  - platform: generic
+  # - platform: generic
+  #   name: 儿童房摄像机
+  #   still_image_url: http://Camera5/last.php
+  #   stream_source: rtsp://Camera5/live/ch00_0
+  - platform: ffmpeg
     name: 儿童房摄像机
-    still_image_url: http://Camera5/last.php
-    stream_source: rtsp://Camera5/live/ch00_0
+    input: rtsp://Camera5/live/ch00_0
   - platform: ffmpeg
     name: 过道摄像机
-    input: rtsp://Camera2/ch0_1.h264
+    input: rtsp://Camera2/ch0_0.h264
 
 panel_iframe:
   dash:
