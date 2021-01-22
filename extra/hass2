@@ -1,0 +1,5 @@
+#!/bin/sh
+cd ~/Sites/home-assistant
+source venv/bin/activate
+hass
+

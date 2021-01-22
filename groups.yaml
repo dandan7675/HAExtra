@@ -68,6 +68,7 @@ default_view:
     - light.xi_shou_jian_deng
     - switch.xi_shou_jian_pai_qi_shan
     - input_text.yu_yin_bo_bao
+    - camera.guo_dao_she_xiang_ji
 
 主卧:
   icon: mdi:bed-king
