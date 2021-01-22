@@ -1,4 +1,4 @@
-- alias: 洗手间灯感应开
+- alias: 洗手间感应-开灯
   trigger:
     - platform: state
       entity_id: binary_sensor.motion_sensor_158d0001f4a238
@@ -14,11 +14,11 @@
     - service: light.turn_on
       entity_id: light.xi_shou_jian_deng
     - service: automation.turn_off
-      entity_id: automation.xi_shou_jian_deng_yan_shi_guan
+      entity_id: automation.xi_shou_jian_yan_fan_ying_yan_shi_guan_bi_deng
     - service: automation.turn_on
-      entity_id: automation.xi_shou_jian_deng_yan_shi_guan
+      entity_id: automation.xi_shou_jian_yan_fan_ying_yan_shi_guan_bi_deng
 
-- alias: 洗手间灯延时关
+- alias: 洗手间感应延时-关灯
   initial_state: false
   trigger:
     - platform: time_pattern
@@ -31,4 +31,4 @@
     - service: light.turn_off
       entity_id: light.xi_shou_jian_deng
     - service: automation.turn_off
-      entity_id: automation.xi_shou_jian_deng_yan_shi_guan
+      entity_id: automation.xi_shou_jian_yan_fan_ying_yan_shi_guan_bi_deng

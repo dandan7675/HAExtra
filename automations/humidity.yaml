@@ -1,4 +1,4 @@
-- alias: 餐厅除湿机开
+- alias: 餐厅湿度高-开除湿机
   trigger:
     - platform: numeric_state
       entity_id: sensor.can_ting_shi_du
@@ -9,7 +9,7 @@
     - service: switch.turn_on
       entity_id: switch.can_ting_chu_shi_ji
 
-- alias: 餐厅除湿机关
+- alias: 餐厅湿度正常-关除湿机
   trigger:
     - platform: numeric_state
       entity_id: sensor.can_ting_shi_du
@@ -20,7 +20,7 @@
     - service: switch.turn_off
       entity_id: switch.can_ting_chu_shi_ji
 
-# - alias: 衣柜除湿机开
+# - alias: 儿童房湿度高-开除湿机
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -36,7 +36,7 @@
 #     - service: switch.turn_on
 #       entity_id: switch.yi_gui_chu_shi_ji
 
-# - alias: 衣柜除湿机关
+# - alias: 儿童房湿度正常-开除湿机
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -50,7 +50,7 @@
 #     - service: switch.turn_off
 #       entity_id: switch.yi_gui_chu_shi_ji
 
-# - alias: 餐厅加湿器开
+# - alias: 餐厅湿度低-开加湿器
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -70,7 +70,7 @@
 #         entity_id: fan.can_ting_jing_hua_qi
 #         speed: low
 
-# - alias: 餐厅加湿器关
+# - alias: 餐厅湿度正常-关加湿器
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -86,7 +86,7 @@
 #         entity_id: fan.can_ting_jing_hua_qi
 #         oscillating: false
 
-# - alias: 主卧加湿器开
+# - alias: 主卧湿度低-开加湿器
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -106,7 +106,7 @@
 #         entity_id: fan.zhu_wo_jing_hua_qi
 #         speed: low
 
-# - alias: 主卧加湿器关
+# - alias: 主卧湿度正常-关加湿器
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -122,7 +122,7 @@
 #         entity_id: fan.zhu_wo_jing_hua_qi
 #         oscillating: false
 
-# - alias: 儿童房加湿器开
+# - alias: 儿童房湿度低-开加湿器
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state
@@ -142,7 +142,7 @@
 #         entity_id: fan.er_tong_fang_jing_hua_qi
 #         speed: low
 
-# - alias: 儿童房加湿器关
+# - alias: 儿童房湿度正常-关加湿器
 #   initial_state: true
 #   trigger:
 #     - platform: numeric_state

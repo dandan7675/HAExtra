@@ -1,5 +1,5 @@
 # 
-- alias: 过道背景灯感应
+- alias: 过道感应-开关背景灯
   trigger:
     - platform: state
       entity_id: binary_sensor.motion_sensor_158d0001d66ce9
@@ -29,23 +29,3 @@
     - wait_template: '{{ is_state("binary_sensor.motion_sensor_158d0001d66ce9", "off") }}'
     - service: light.turn_off
       entity_id: light.guo_dao_bei_jing_deng
-
-#
-- alias: 餐厅筒灯同步
-  trigger:
-    - platform: state
-      entity_id: light.can_ting_tong_deng_2, light.can_ting_tong_deng
-  action:
-    - service_template: '{% if trigger.to_state.state == "on" %}light.turn_on{% else %}light.turn_off{% endif %}'
-      data_template:
-        entity_id: '{% if trigger.entity_id == "light.can_ting_tong_deng_2" %}light.can_ting_tong_deng{% else %}light.can_ting_tong_deng_2{% endif %}'
-
-#
-- alias: 客厅筒灯同步
-  trigger:
-    - platform: state
-      entity_id: light.ke_ting_tong_deng_2, light.ke_ting_tong_deng
-  action:
-    - service_template: '{% if trigger.to_state.state == "on" %}light.turn_on{% else %}light.turn_off{% endif %}'
-      data_template:
-        entity_id: '{% if trigger.entity_id == "light.ke_ting_tong_deng_2" %}light.ke_ting_tong_deng{% else %}light.ke_ting_tong_deng_2{% endif %}'

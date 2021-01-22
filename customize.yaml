@@ -18,7 +18,6 @@ binary_sensor.motion_sensor_158d0001d66ce9:
 binary_sensor.motion_sensor_158d0001f4a238:
   friendly_name: 洗手间感应
 binary_sensor.motion_sensor_158d0003d0d46e:
-  dash_click: /config/logs
   friendly_name: 书房感应
 binary_sensor.switch_158d0001e59b33:
   friendly_name: 浴室按钮
@@ -110,6 +109,8 @@ person.ba_ba:
   dash_click: /config/server_control
 person.ma_ma:
   dash_click: /local/aha.html
+person.wai_po:
+  dash_click: /config/logs
 sensor.can_ting_ke_li_wu:
   dash_click: if (self == top) location = '/'
   dash_relation: fan.can_ting_jing_hua_qi

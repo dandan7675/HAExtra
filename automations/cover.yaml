@@ -1,4 +1,4 @@
-- alias: 书房窗帘关
+- alias: 书房亮度高-关窗帘
   trigger:
     - platform: time
       at: '12:30:00'
@@ -18,7 +18,7 @@
     - service: cover.close_cover
       entity_id: cover.shu_fang_chuang_lian
 
-- alias: 书房窗帘开
+- alias: 书房亮度正常-开窗帘
   trigger:
     - platform: sun
       event: sunset
@@ -34,7 +34,7 @@
     - service: cover.open_cover
       entity_id: cover.shu_fang_chuang_lian
 
-- alias: 过道卷帘开合
+- alias: 过道门开关-开关卷帘
   trigger:
     - platform: state
       entity_id: binary_sensor.door_window_sensor_158d00041c74da
@@ -50,7 +50,7 @@
     - service_template: 'cover.{% if is_state("binary_sensor.door_window_sensor_158d00041c74da", "off") %}open{% else %}close{% endif %}_cover'
       entity_id: cover.curtain_158d0003f7951d
 
-- alias: 主卧窗帘开合
+- alias: 主卧窗帘开关-调整新风机
   trigger:
     - platform: state
       entity_id: cover.curtain_158d000405d535

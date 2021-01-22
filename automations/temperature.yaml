@@ -1,4 +1,4 @@
-# - alias: 客厅空调开
+# - alias: 客厅温度高-开空调
 #   initial_state: false
 #   trigger:
 #     # - platform: state
@@ -37,7 +37,7 @@
 #     - service: climate.turn_on
 #       entity_id: climate.ke_ting_kong_diao
 
-# - alias: 客厅空调关
+# - alias: 客厅温度正常-关空调
 #   initial_state: false
 #   trigger:
 #     - platform: state

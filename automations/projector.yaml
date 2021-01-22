@@ -1,5 +1,5 @@
 
-- alias: 打开投影仪配套
+- alias: 投影仪开启
   trigger:
     - platform: state
       entity_id: device_tracker.projector
@@ -27,7 +27,7 @@
     # - service: climate.turn_on
     #   entity_id: climate.shu_fang_kong_diao
 
-- alias: 关闭投影仪配套
+- alias: 投影仪关闭
   trigger:
     - platform: state
       entity_id: device_tracker.projector

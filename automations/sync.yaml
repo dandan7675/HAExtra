@@ -1,5 +1,5 @@
 #
-- alias: 餐厅筒灯同步
+- alias: 同步餐厅筒灯
   trigger:
     - platform: state
       entity_id: light.can_ting_tong_deng_2, light.can_ting_tong_deng
@@ -9,7 +9,7 @@
         entity_id: '{% if trigger.entity_id == "light.can_ting_tong_deng_2" %}light.can_ting_tong_deng{% else %}light.can_ting_tong_deng_2{% endif %}'
 
 #
-- alias: 客厅筒灯同步
+- alias: 同步客厅筒灯
   trigger:
     - platform: state
       entity_id: light.ke_ting_tong_deng_2, light.ke_ting_tong_deng
