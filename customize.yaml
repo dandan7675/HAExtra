@@ -27,6 +27,8 @@ binary_sensor.switch_158d000201a73f:
   hidden: true
 binary_sensor.switch_158d00054e98b0:
   hidden: true
+camera.er_tong_fang_she_xiang_ji:
+  dash_click: mihome://device?did=63538723&uid=8816080&server=cn
 cover.curtain_158d0003f7951d:
   friendly_name: 过道卷帘
 cover.curtain_158d000405d535:
@@ -73,6 +75,8 @@ fan.zhu_wo_xin_feng_ji:
   icon: mdi:leaf
 group.default_view:
   friendly_name: 总览
+light.can_ting_jian_ce_yi:
+  hidden: true
 light.can_ting_tong_deng:
   icon: mdi:track-light
 light.can_ting_tong_deng_2:
@@ -86,6 +90,8 @@ light.gateway_light_34ce0090901a:
   icon: mdi:car-light-high
 light.guo_dao_bei_jing_deng:
   icon: mdi:car-light-dimmed
+light.guo_dao_jian_ce_yi:
+  hidden: true
 light.ke_ting_tong_deng:
   icon: mdi:track-light
 light.ke_ting_tong_deng_2:

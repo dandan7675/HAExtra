@@ -242,7 +242,7 @@
 				var width = (clientWidth - count * 4) / count
 				width = Math.floor(width * 10) / 10
 				document.styleSheets[1].cssRules[0].style.width = width + 'px'
-				document.styleSheets[1].insertRule('.camera { width:' + width * 1.515 + 'px; }', 1)
+				document.styleSheets[1].insertRule('.camera { width:' + Math.round(width * 1.515) + 'px; }', 1)
 				//alert('clientWidth:' + clientWidth + ' count:' + count + ' width:' + width);
 
 				// Parse api url
@@ -532,8 +532,8 @@
 				fan: 'fan',
 				climate: 'thermostat',
 
-				camera: 'camera',
 				group: 'home-heart',
+				camera: 'camera',
 			}
 
 			_CLICKABLE_DOMAINS = ['light', 'switch', 'media_player', 'cover', 'vacuum', 'fan', 'climate', 'group']
@@ -616,7 +616,7 @@
 				var html = '<div class="entity ' + domain + '" id="' + entity_id + '"'
 				if (entity.attributes.hasOwnProperty('dash_click')) {
 					var dash_click = entity.attributes.dash_click
-					if (dash_click.startsWith('http') || dash_click.startsWith('/')) {
+					if (dash_click.substring(0, 10).includes('://') || dash_click.startsWith('/')) {
 						dash_click = "location='" + dash_click + "'"
 					}
 					html += ' onclick="' + dash_click + '"'
