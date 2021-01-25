@@ -249,7 +249,7 @@
 				var width = (clientWidth - count * 4) / count
 				width = Math.floor(width * 10) / 10
 				document.styleSheets[1].cssRules[0].style.width = width + 'px'
-				document.styleSheets[1].cssRules[1].style.width = Math.round(width * 3 / 2 + 2) + 'px'
+				document.styleSheets[1].cssRules[1].style.width = Math.ceil(width * 1.5 + 1) + 'px'
 				// console.log('clientWidth:' + clientWidth + ' count:' + count + ' width:' + width);
 
 				// Parse api url
