@@ -25,6 +25,9 @@
 			}
 
 			.camera {
+				background-size: cover;
+				background-position: center;
+				background-repeat: no-repeat;
 				background-color: #555555;
 			}
 
@@ -628,7 +631,7 @@
 					html += ' onclick="onClick(this)"'
 				}
 				if (domain == 'camera') {
-					html += ' style="background:center/cover no-repeat url(' + entity.attributes.entity_picture + ');"'
+					html += ' style="background-image:url(' + entity.attributes.entity_picture + ')"'
 				}
 				html += '>'
 				html += makeEntity(entity)
