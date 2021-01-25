@@ -183,7 +183,7 @@ SERVICE_SCHEMA = vol.All(
 class miaimsg(object):
 
     def __init__(self, hass, conf):
-        self._miid = conf['miid']
+        self._miid = str(conf['miid'])
         self._password = conf.get('password')
         self._devices = None
 
