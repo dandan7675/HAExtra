@@ -26,7 +26,7 @@
           above: 800
   action:
     - service: zhimsg.miai
-      data_template:
+      data:
         message: 外面空气很好，可以打开门窗
 
 - alias: 室内空气差

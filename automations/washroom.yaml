@@ -14,9 +14,9 @@
     - service: light.turn_on
       entity_id: light.xi_shou_jian_deng
     - service: automation.turn_off
-      entity_id: automation.xi_shou_jian_yan_fan_ying_yan_shi_guan_bi_deng
+      entity_id: automation.xi_shou_jian_gan_ying_yan_shi_guan_deng
     - service: automation.turn_on
-      entity_id: automation.xi_shou_jian_yan_fan_ying_yan_shi_guan_bi_deng
+      entity_id: automation.xi_shou_jian_gan_ying_yan_shi_guan_deng
 
 - alias: 洗手间感应延时-关灯
   initial_state: false
@@ -31,4 +31,4 @@
     - service: light.turn_off
       entity_id: light.xi_shou_jian_deng
     - service: automation.turn_off
-      entity_id: automation.xi_shou_jian_yan_fan_ying_yan_shi_guan_bi_deng
+      entity_id: automation.xi_shou_jian_gan_ying_yan_shi_guan_deng
