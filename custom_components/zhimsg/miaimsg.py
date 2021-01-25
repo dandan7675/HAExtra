@@ -75,10 +75,12 @@ async def miai_login(miid, password):
 
 async def miai_serviceLogin():
     url = 'https://account.xiaomi.com/pass/serviceLogin?sid=micoapi'
-    pattern = re.compile(r'_sign":"(.*?)",')
+    pattern = re.compile(r'_sign=(.*?)&')
     try:
-        async with _session.get(url) as response:
-            return pattern.findall(await response.text())[0]
+        async with _session.get(url, allow_redirects=False) as response:
+            text = await response.text()
+            sign = pattern.findall(text)[0]
+            return parse.unquote(sign)
     except BaseException:
         import traceback
         _LOGGER.error(traceback.format_exc())
@@ -142,9 +144,19 @@ async def miai_device_list():
 
 
 async def test():
-    import sys
-    devices = await miai_login(sys.argv[1], sys.argv[2])
+    PY_DIR = os.path.split(os.path.realpath(__file__))[0]
+    with open(PY_DIR + '/../../secrets.yaml') as f:
+        lines = f.readlines()
+    miid = None
+    password = None
+    for line in lines:
+        if line.startswith('miai_miid:'):
+            miid = line[10:-1].strip()
+        elif line.startswith('miai_password:'):
+            password = line[14:-1].strip()
+    devices = await miai_login(miid, password)
     if devices:
+        import sys
         await miai_text_to_speech(devices[0]['deviceID'], sys.argv[3] if len(sys.argv) > 3 else "测试")
 
 if __name__ == '__main__':
