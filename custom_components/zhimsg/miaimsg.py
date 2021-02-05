@@ -143,6 +143,36 @@ async def miai_device_list():
     return result.get('data') if result else None
 
 
+async def miai_send_message(deviceId, message, volume=None):
+    result = True if volume is None else await miai_player_set_volume(deviceId, volume)
+    if result and message:
+        result = await miai_text_to_speech(deviceId, message)
+    if not result:
+        _LOGGER.error("Send failed: %s %s", message, volume)
+    return result
+
+
+async def miai_send_message2(devices, index, message, volume=None):
+    deviceId = devices[index]['deviceID']
+    result = await miai_send_message(deviceId, message, volume)
+    if not result:
+        result = await miai_send_message(deviceId, message, volume)
+    return result
+
+
+async def miai_send_message3(devices, devno, message, volume=None):
+    if devno is not None and devno != -1:
+        return await miai_send_message2(devices, devno, message, volume) 
+    result = False
+    for i in range(0, len(devices)):
+        if devno is None and not devices[i]['capabilities'].get('yunduantts'):
+            continue
+        result = await miai_send_message2(devices, i, message, volume)
+        if not result or devno is None:
+            break
+    return result
+
+
 async def test():
     PY_DIR = os.path.split(os.path.realpath(__file__))[0]
     with open(PY_DIR + '/../../secrets.yaml') as f:
@@ -157,7 +187,9 @@ async def test():
     devices = await miai_login(miid, password)
     if devices:
         import sys
-        await miai_text_to_speech(devices[0]['deviceID'], sys.argv[3] if len(sys.argv) > 3 else "测试")
+        await miai_send_message3(devices, None, sys.argv[1] if len(sys.argv) > 1 else "测试")
+    await _session.close()
+
 
 if __name__ == '__main__':
     import asyncio
@@ -188,25 +220,13 @@ class miaimsg(object):
         self._devices = None
 
     async def async_send_message(self, message, data):
-        devno = data.get('devno', 0)
-        volume = data.get('volume')
-        if message or volume:
-            if not await self.async_send_once(devno, message, volume):
-                if not await self.async_send_once(devno, message, volume):
-                    _LOGGER.error("Send failed: %s %s", message, data)
-
-    async def async_send_once(self, devno, message, volume):
         if self._devices is None:
             self._devices = await miai_login(self._miid, self._password)
             # _LOGGER.debug("miai_login: %s", self._devices)
         if self._devices is None:
             return False
 
-        deviceId = self._devices[devno]['deviceID']
-        result = True if volume is None else await miai_player_set_volume(deviceId, volume)
-        if result and message:
-            result = await miai_text_to_speech(deviceId, message)
-            # _LOGGER.debug("miai_text_to_speech: %s=%s", message， result)
-        if not result:
-            self._devices = None
-        return result
+        devno = data.get('devno', 0)
+        volume = data.get('volume')
+        if message or volume:
+            await miai_send_message3(self._devices, devno, message, volume)
