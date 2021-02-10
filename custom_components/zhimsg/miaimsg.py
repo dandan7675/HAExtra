@@ -148,7 +148,7 @@ async def miai_send_message(deviceId, message, volume=None):
     if result and message:
         result = await miai_text_to_speech(deviceId, message)
     if not result:
-        _LOGGER.error("Send failed: %s %s", message, volume)
+        _LOGGER.error("Send failed: %s", message or volume)
     return result
 
 
@@ -161,14 +161,15 @@ async def miai_send_message2(devices, index, message, volume=None):
 
 
 async def miai_send_message3(devices, devno, message, volume=None):
-    if devno is not None and devno != -1:
-        return await miai_send_message2(devices, devno, message, volume)
+    if devno and devno != -1:
+        return await miai_send_message2(devices, devno - 1, message, volume)
     result = False
     for i in range(0, len(devices)):
-        if devno is None and not devices[i]['capabilities'].get('yunduantts'):
+        if devno != -1 and not devices[i]['capabilities'].get('yunduantts'):
             continue
+        _LOGGER.debug("Send to devno=%d index=%d: %s", devno, i, message or volume)
         result = await miai_send_message2(devices, i, message, volume)
-        if not result or devno is None:
+        if devno != -1 or not result:
             break
     return result
 
