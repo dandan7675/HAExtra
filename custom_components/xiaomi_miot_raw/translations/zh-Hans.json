@@ -1,0 +1,69 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "已经配置过这个设备了"
+        },
+        "create_entry": {
+            "default": "如果您添加的设备具有子设备，最长需要等待 30 秒才会显示出所有设备。"
+        },
+        "error": {
+            "unexpected_error": "发生错误，请查看日志",
+            "cannot_connect": "无法连接",
+            "value_error": "输入错误",
+            "bad_params": "参数有误",
+            "no_local_access": "出现错误，可能有以下原因：\n(1) 输入的 siid 或 piid 有误\n(2) 设备不支持本地接入，请通过云端接入",
+            "no_connect_warning": "连接设备失败。如果您添加的是小爱音箱，这是正常现象；否则，请检查信息是否有误。请在下方输入小爱音箱的 model。"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "name": "名称",
+                    "host": "IP",
+                    "token": "token"
+                },
+                "description": "如果您的设备支持本地接入，无需登录小米账号",
+                "title": "选择操作"
+            },
+            "xiaomi_account": {
+				"title": "小米账号登录",
+				"description": "",
+				"data": {
+					"username": "邮箱/小米 ID",
+					"password": "密码"
+				}
+			},
+            "localinfo": {
+                "data": {
+                    "name": "名称",
+                    "host": "IP",
+                    "token": "token"
+                },
+                "description": "本地通信需要获取以下信息",
+                "title": "配置"
+            },
+            "devinfo": {
+                "title": "设备信息",
+                "data": {
+                    "devtype": "请选择设备类型",
+                    "mapping": "mapping",
+                    "params": "配置参数",
+                    "cloud_read": "从云端获取设备状态",
+                    "cloud_write": "通过云端控制设备"
+
+                },
+                "description": "{device_info}"
+            },
+            "cloudinfo": {
+                "title": "账号信息",
+                "data": {
+                    "did": "did",
+                    "userId": "userId",
+                    "serviceToken": "serviceToken",
+                    "ssecurity": "ssecurity"
+                },
+                "description": "云端通信需要获取以下信息"
+            }
+        },
+        "title": "MIoT"
+    }
+}
