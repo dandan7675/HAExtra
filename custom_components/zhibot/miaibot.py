@@ -1,6 +1,6 @@
 
 #
-from .zhibot import zhibotQuery
+from .zhichat import zhiChat
 from .chatbot import chatbotView
 
 # Logging
@@ -47,7 +47,7 @@ class miaibotView(chatbotView):
             self._open_mic = True
             return "您好主人，我能为你做什么呢？"
 
-        answer = await zhibotQuery(self.hass, data['query'])
+        answer = await zhiChat(self.hass, data['query'])
         self._open_mic = answer == "未找到设备"
         return answer
 

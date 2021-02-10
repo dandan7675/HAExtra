@@ -1,6 +1,6 @@
 
 #
-from .zhibot import zhibotQuery
+from .zhichat import zhiChat
 from .chatbot import chatbotView
 
 # Logging
@@ -26,7 +26,7 @@ class dingbotView(chatbotView):
         return await self.handleQuery(data['text']['content'].strip())
 
     async def handleQuery(self, query):
-        return await zhibotQuery(self.hass, query)
+        return await zhiChat(self.hass, query)
 
     def response(self, answer):
         return {'msgtype': 'text', 'text': {'content': answer}}
