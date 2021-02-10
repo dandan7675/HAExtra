@@ -213,7 +213,7 @@ SERVICE_SCHEMA = vol.All(
 )
 
 
-class miaimsg(object):
+class miaimsg:
 
     def __init__(self, hass, conf):
         self._miid = str(conf['miid'])

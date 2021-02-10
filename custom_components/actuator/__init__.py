@@ -140,7 +140,7 @@ def execute(params):
     _hass.services.call(domain, 'turn_off', {'entity_id': entity_id}, True)
 
 
-class DelayExecutor(object):
+class DelayExecutor:
 
     def __init__(self, key, delay, params):
         self.key = key

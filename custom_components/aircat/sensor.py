@@ -12,7 +12,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class AirCatData(object):
+class AirCatData:
     """Class for handling the data retrieval."""
 
     def __init__(self):

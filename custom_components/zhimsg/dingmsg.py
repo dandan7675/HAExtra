@@ -13,7 +13,7 @@ SERVICE_SCHEMA = vol.Schema({
 })
 
 
-class dingmsg(object):
+class dingmsg:
 
     def __init__(self, hass, conf):
         self._token = conf['token']
