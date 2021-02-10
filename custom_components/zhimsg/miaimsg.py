@@ -162,7 +162,7 @@ async def miai_send_message2(devices, index, message, volume=None):
 
 async def miai_send_message3(devices, devno, message, volume=None):
     if devno is not None and devno != -1:
-        return await miai_send_message2(devices, devno, message, volume) 
+        return await miai_send_message2(devices, devno, message, volume)
     result = False
     for i in range(0, len(devices)):
         if devno is None and not devices[i]['capabilities'].get('yunduantts'):
@@ -206,7 +206,7 @@ SERVICE_SCHEMA = vol.All(
     vol.Schema({
         vol.Optional('message'): cv.string,
         vol.Optional('volume'): vol.Range(min=0, max=100),
-        vol.Optional('devno'): vol.Range(min=0, max=9),
+        vol.Optional('devno'): vol.Range(min=-1, max=9),
     }),
     cv.has_at_least_one_key("message", "volume"),
 )

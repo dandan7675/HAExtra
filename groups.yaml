@@ -16,7 +16,7 @@ default_view:
     - person.a_yi
     - camera.can_ting_she_xiang_ji
     - camera.guo_dao_she_xiang_ji
-    - camera.er_tong_fang_she_xiang_ji
+    - camera.zhu_wo_she_xiang_ji
 
 客厅:
   icon: mdi:seat

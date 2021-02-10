@@ -15,5 +15,5 @@ miai:
       description: 指定音量（可选，默认不改变音量；指定音量时消息内容可以为空）
       example: '50'
     devno:
-      description: 指定音箱序号（可选，默认为 0）
+      description: 指定音箱序号（可选，-1 表示全部音箱，默认不配置则表示第一个支持云端 TTS 的音箱）
       example: '0'

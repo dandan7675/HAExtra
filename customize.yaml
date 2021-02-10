@@ -29,7 +29,9 @@ binary_sensor.switch_158d00054e98b0:
   hidden: true
 camera.can_ting_she_xiang_ji:
   dash_click: mihome://device?did=79750727&uid=8816080&server=cn
-camera.er_tong_fang_she_xiang_ji:
+camera.guo_dao_she_xiang_ji:
+  dash_click: mihome://device?did=130040912&uid=8816080&server=cn
+camera.zhu_wo_she_xiang_ji:
   dash_click: mihome://device?did=63538723&uid=8816080&server=cn
 cover.curtain_158d0003f7951d:
   friendly_name: 过道卷帘
