@@ -191,7 +191,7 @@ class SaswellData():
             with open(self._token_path) as file:
                 self._token = file.read()
                 _LOGGER.debug("Load token: %s", self._token_path)
-        except BaseException:
+        except Exception:
             self._token = None
 
     async def async_update(self, time):
@@ -230,7 +230,7 @@ class SaswellData():
                              ATTR_ID: dev['id']})
             self.devs = devs
             _LOGGER.info("List device: devs=%s", self.devs)
-        except BaseException:
+        except Exception:
             import traceback
             _LOGGER.error(traceback.format_exc())
 
@@ -256,7 +256,7 @@ class SaswellData():
                 self.devs[index][prop] = value
                 return True
             return False
-        except BaseException:
+        except Exception:
             import traceback
             _LOGGER.error('Exception: %s', traceback.format_exc())
             return False

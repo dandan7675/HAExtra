@@ -23,7 +23,7 @@ async def miai_request(url, data=None):
         url += "&requestId=" + requestId
         async with _session.post(url, data=data) if data is not None else _session.get(url) as response:
             return await response.json()
-    except BaseException:
+    except Exception:
         import traceback
         _LOGGER.error(traceback.format_exc())
     return False
@@ -81,7 +81,7 @@ async def miai_serviceLogin():
             text = await response.text()
             sign = pattern.findall(text)[0]
             return parse.unquote(sign)
-    except BaseException:
+    except Exception:
         import traceback
         _LOGGER.error(traceback.format_exc())
         return None
@@ -117,7 +117,7 @@ async def miai_serviceLoginAuth2(miid, password, sign, captCode=None, ick=None):
                 _LOGGER.error('Incorrect password')
             else:
                 _LOGGER.error(result)
-    except BaseException as e:
+    except Exception as e:
         import traceback
         _LOGGER.error(traceback.format_exc())
     return None
@@ -131,7 +131,7 @@ async def miai_login_miai(url, nonce, ssecurity):
     try:
         async with _session.get(url) as response:
             return response.status == 200
-    except BaseException:
+    except Exception:
         import traceback
         _LOGGER.error(traceback.format_exc())
         return False
