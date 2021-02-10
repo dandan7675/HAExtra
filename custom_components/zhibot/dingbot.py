@@ -23,9 +23,9 @@ class dingbotView(chatbotView):
         return "钉钉群“%s”的“%s”正在试图访问“%s”。\n\nchatbotUserId: %s" % (data['conversationTitle'], data['senderNick'], data['text']['content'], data['chatbotUserId'])
 
     async def handle(self, data):
-        return await self.handleQuery(data['text']['content'].strip())
+        return await self.handleChat(data['text']['content'].strip())
 
-    async def handleQuery(self, query):
+    async def handleChat(self, query):
         return await zhiChat(self.hass, query)
 
     def response(self, answer):

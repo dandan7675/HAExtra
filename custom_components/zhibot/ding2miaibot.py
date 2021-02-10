@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 #
 class ding2miaibotView(dingbotView):
 
-    async def handleQuery(self, query):
+    async def handleChat(self, query):
         if query.startswith('音量'):
             pos = query.find('%')
             volume = query[2:None if pos == -1 else pos]
