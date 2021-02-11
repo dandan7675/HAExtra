@@ -130,7 +130,7 @@ class MiCloud:
         return {'signature': signature, '_nonce': nonce, 'data': data}
 
     # class ResultError(Exception): ...
-        
+
     async def _request(self, uri, params=''):
         try:
             r = await self.account.session.post(self.server + uri, cookies={
@@ -179,28 +179,22 @@ class MiCloud:
         return await self.miotspec('prop/set', params)
 
     async def miot_action(self, params=''):
-        return await self.miotspec('action', params)
+        return await self.miotspec('action', {'params':params})
 
 
-async def test():
-    PY_DIR = os.path.split(os.path.realpath(__file__))[0]
-    with open(PY_DIR + '/../../secrets.yaml') as f:
-        lines = f.readlines()
-    username = None
-    password = None
-    for line in lines:
-        if line.startswith('mi_username:'):
-            username = line[12:-1].strip()
-        elif line.startswith('mi_password:'):
-            password = line[12:-1].strip()
-            if username:
-                break
+async def main(username, password):
     async with ClientSession() as session:
         cloud = MiCloud(MiAccount(session, username, password))
         print(json.dumps(await cloud.device_list(), indent=2, ensure_ascii=False))
 
+
 if __name__ == '__main__':
+    import sys
+    if len(sys.argv) <= 2:
+        print(f"Usage: %s <username> <password>" % sys.argv[0])
+        exit(0)
+    _LOGGER.setLevel(logging.DEBUG)
+    _LOGGER.addHandler(logging.StreamHandler())
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(test())
+    loop.run_until_complete(main(sys.argv[1], sys.argv[2]))
     loop.close()
-    exit(0)

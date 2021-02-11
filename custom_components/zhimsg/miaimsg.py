@@ -181,9 +181,9 @@ async def test():
     miid = None
     password = None
     for line in lines:
-        if line.startswith('miai_miid:'):
+        if line.startswith('mi_username:'):
             miid = line[10:-1].strip()
-        elif line.startswith('miai_password:'):
+        elif line.startswith('mi_password:'):
             password = line[14:-1].strip()
     devices = await miai_login(miid, password)
     if devices:

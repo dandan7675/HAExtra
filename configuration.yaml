@@ -769,8 +769,8 @@ zhimsg:
     token: !secret dingbot_token
     secret: !secret dingbot_secret
   - platform: miai
-    miid: !secret miai_miid
-    password: !secret miai_password
+    miid: !secret mi_username
+    password: !secret mi_password
 
 input_text:
   yu_yin_bo_bao:
