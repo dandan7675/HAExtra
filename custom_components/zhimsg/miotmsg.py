@@ -22,6 +22,8 @@ class miotmsg(MiCloud):
 
     def __init__(self, hass, conf):
         session = aiohttp_client.async_get_clientsession(hass)
+        # from aiohttp import ClientSession
+        # session = ClientSession()
         auth = MiAuth(session, conf['username'], conf['password'], hass.config.config_dir)
         super().__init__(auth, conf.get('region'))
         self.did = str(conf['did'])

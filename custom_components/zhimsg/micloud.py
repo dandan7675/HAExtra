@@ -80,6 +80,8 @@ class MiAuth:
     async def login(self):
         try:
             payload = await self._login1()
+            # if payload['code'] != 0:
+            #     return False
             data = await self._login2(payload)
             location = data['location']
             if not location:
