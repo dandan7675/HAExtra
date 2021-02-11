@@ -30,7 +30,6 @@ class miotmsg(MiCloud):
         self.devices = None
 
     async def async_send_message(self, message, data):
-        devno = data.get('devno', 0)
         volume = data.get('volume')
         params = {
             'did': self.did,
