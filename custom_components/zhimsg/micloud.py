@@ -76,7 +76,7 @@ class MiAuth:
                     _LOGGER.exception(f"Exception on save token to {self.token_path}")
             elif os.path.isfile(self.token_path):
                 os.remove(self.token_path)
-    
+
     async def login(self):
         try:
             payload = await self._login1()
@@ -164,11 +164,11 @@ class MiCloud:
         if code == 0:
             return resp.get('result')
 
-        _LOGGER.error(f"Error on request {uri}: {resp}")
+        _LOGGER.error(f"Error on request {uri} {params}: {resp}")
         if code == 2 and await self.auth.login():  # Auth error, relogin
             resp = await self._request(uri, params)
             if resp.get('code') == 0:
-                return resp.get('result')                
+                return resp.get('result')
         return None
 
     async def device_list(self):
@@ -181,10 +181,16 @@ class MiCloud:
         return await self.request('/miotspec/' + api, params)
 
     async def miot_prop_get(self, params=''):
-        return await self.miotspec('prop/get', params)
+        if type(params) != str:
+            params = json.dumps(params)
+        return await self.miotspec('prop/get', '{"datasource":1,"params":' + params + '}')
 
     async def miot_prop_set(self, params=''):
+        # if type(params) != str:
+        #     params = json.dumps(params)
         return await self.miotspec('prop/set', params)
 
     async def miot_action(self, params=''):
-        return await self.miotspec('action', {'params': params})
+        if type(params) != str:
+            params = json.dumps(params)
+        return await self.miotspec('action', '{"params":' +  params + '}')
