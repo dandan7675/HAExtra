@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# encoding: utf-8
-
 from .micloud import MiAuth, MiCloud
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers import aiohttp_client
@@ -24,7 +21,9 @@ SERVICE_SCHEMA = vol.All(
 class miotmsg(MiCloud):
 
     def __init__(self, hass, conf):
-        account = MiAuth(aiohttp_client.async_get_clientsession(hass), conf['username'], conf['password'])
+        username = conf['username']
+        session = aiohttp_client.async_get_clientsession(hass)
+        account = MiAuth(session, username, conf['password'], hass.config.config_dir)
         super().__init__(account, conf.get('region'))
         self.did = str(conf.get('did'))
         self.devices = None

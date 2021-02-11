@@ -49,11 +49,11 @@ def gen_signature(url, signed_nonce, nonce, data):
 
 class MiAuth:
 
-    def __init__(self, session: ClientSession, username, password, token_path=None):
+    def __init__(self, session: ClientSession, username, password, token_dir=''):
         self.session = session
         self.username = username
         self.password = password
-        self.token_path = token_path
+        self.token_path = os.path.join(token_dir, '.mi.' + username) if token_dir is not None else None
         self.token = self.load_token()
         self.device_id = get_random(16)
 

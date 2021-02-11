@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# encoding: utf-8
 
 from aiohttp import ClientSession
 from micloud import (MiAuth, MiCloud, _LOGGER)
@@ -10,7 +11,7 @@ import json
 
 async def main(argv):
     async with ClientSession() as session:
-        auth = MiAuth(session, sys.argv[1], sys.argv[2], '.mi.token')
+        auth = MiAuth(session, sys.argv[1], sys.argv[2])
         cloud = MiCloud(auth)
         argc = len(argv)
         if argc < 4 or argv[3] == 'list':
