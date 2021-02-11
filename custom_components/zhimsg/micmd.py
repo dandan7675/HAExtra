@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
 from aiohttp import ClientSession
-from micloud import (MiAccount, MiCloud)
+from micloud import (MiAuth, MiCloud, _LOGGER)
 
 import asyncio
 import logging
 import json
 
-_LOGGER = logging.getLogger(__name__)
-
-
 async def main(argv):
     async with ClientSession() as session:
-        cloud = MiCloud(MiAccount(session, sys.argv[1], sys.argv[2]))
+        auth = MiAuth(session, sys.argv[1], sys.argv[2], '.mi.token')
+        cloud = MiCloud(auth)
         if len(argv) <= 4:
             print(json.dumps(await cloud.device_list(), indent=2, ensure_ascii=False))
         else:

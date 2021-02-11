@@ -47,28 +47,36 @@ def gen_signature(url, signed_nonce, nonce, data):
     return base64.b64encode(signature).decode()
 
 
-class MiAccount:
+class MiAuth:
 
-    def __init__(self, session: ClientSession, username, password, user_id=None, ssecurity=None, service_token=None):
-        self.device_id = get_random(16)
+    def __init__(self, session: ClientSession, username, password, token_path=None):
         self.session = session
         self.username = username
         self.password = password
-        self.user_id = user_id
-        self.ssecurity = ssecurity
-        self.service_token = service_token
+        self.token_path = token_path
+        self.token = self.load_token()
+        self.device_id = get_random(16)
 
-    async def ensure_login(self):
-        if self.service_token is None:
-            return await self.login()
-        return True
+    def load_token(self):
+        if self.token_path and os.path.isfile(self.token_path):
+            try:
+                with open(self.token_path) as f:
+                    return json.load(f)
+            except Exception:
+                _LOGGER.exception(f"Exception on load token from {self.token_path}")
+        return None
 
-    async def re_login(self):
-        self.user_id = None
-        self.ssecurity = None
-        self.service_token = None
-        return await self.login()
-
+    def save_token(self):
+        if self.token_path:
+            if self.token:
+                try:
+                    with open(self.token_path, 'w') as f:
+                        json.dump(self.token, f)
+                except Exception:
+                    _LOGGER.exception(f"Exception on save token to {self.token_path}")
+            elif os.path.isfile(self.token_path):
+                os.remove(self.token_path)
+    
     async def login(self):
         try:
             payload = await self._login1()
@@ -76,14 +84,15 @@ class MiAccount:
             location = data['location']
             if not location:
                 return False
-            self.service_token = await self._login3(location)
-            self.user_id = data['userId']
-            self.ssecurity = data['ssecurity']
-            return True
+            token = await self._login3(location)
+            self.token = (data['userId'], data['ssecurity'], token)
 
         except Exception as e:
             _LOGGER.exception(f"Exception on login {self.username}: {e}")
-            return False
+            self.token = None
+
+        self.save_token()
+        return self.token
 
     async def _login1(self):
         r = await self.session.get('https://account.xiaomi.com/pass/serviceLogin',
@@ -110,31 +119,29 @@ class MiAccount:
 
     async def _login3(self, location):
         r = await self.session.get(location, headers={'User-Agent': UA})
-        service_token = r.cookies['serviceToken'].value
-        _LOGGER.debug(f"MiCloud step3: %s", service_token)
-        return service_token
+        token = r.cookies['serviceToken'].value
+        _LOGGER.debug(f"MiCloud step3: %s", token)
+        return token
 
 
 class MiCloud:
 
-    def __init__(self, account, region=None):
-        self.account = account
+    def __init__(self, auth, region=None):
+        self.auth = auth
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
     def sign(self, uri, params):
         data = params if type(params) == str else json.dumps(params)
         nonce = gen_nonce()
-        signed_nonce = gen_signed_nonce(self.account.ssecurity, nonce)
+        signed_nonce = gen_signed_nonce(self.auth.token[1], nonce)
         signature = gen_signature(uri, signed_nonce, nonce, data)
         return {'signature': signature, '_nonce': nonce, 'data': data}
 
-    # class ResultError(Exception): ...
-
     async def _request(self, uri, params=''):
         try:
-            r = await self.account.session.post(self.server + uri, cookies={
-                'userId': self.account.user_id,
-                'serviceToken': self.account.service_token,
+            r = await self.auth.session.post(self.server + uri, cookies={
+                'userId': self.auth.token[0],
+                'serviceToken': self.auth.token[2],
                 # 'locale': 'en_US'
             }, headers={
                 'User-Agent': UA,
@@ -149,17 +156,19 @@ class MiCloud:
         return None
 
     async def request(self, uri, params=''):
-        if not await self.account.ensure_login():
+        if self.auth.token is None and not await self.auth.login():  # Ensure login
             return None
+
         resp = await self._request(uri, params)
         code = resp.get('code')
         if code == 0:
             return resp.get('result')
+
         _LOGGER.error(f"Error on request {uri}: {resp}")
-        if code == 2 and await self.account.re_login():
+        if code == 2 and await self.auth.login():  # Auth error, relogin
             resp = await self._request(uri, params)
             if resp.get('code') == 0:
-                return resp.get('result')
+                return resp.get('result')                
         return None
 
     async def device_list(self):
