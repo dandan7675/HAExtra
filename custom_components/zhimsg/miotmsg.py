@@ -23,11 +23,11 @@ class miotmsg(MiCloud):
     def __init__(self, hass, conf):
         auth = MiAuth(async_get_clientsession(hass), str(conf['username']), str(conf['password']), hass.config.config_dir)
         super().__init__(auth, conf.get('region'))
-        self.params = conf.get('params')
-        if not self.params:
-            self.params = '{"did":"%s","siid":%s,"aiid":%s,"in":["%%s"]}' % (
-                conf['did'], conf.get('siid', 5), conf.get('aiid', 1))
+        self.did = conf['did']
+        self.siid = conf.get('siid', 5)
+        self.aiid = conf.get('aiid', 1) #4
+        self.template = conf.get('template', '["%s"]') #'["%s",1]'
 
     async def async_send(self, message, data):
-        result = await self.miot_action(self.params % message)
+        result = await self.miot_action(self.siid, self.aiid, self.template % message, self.did)
         return f"{result}" if type(result) == Exception else None
