@@ -41,7 +41,7 @@ class miotmsg(MiCloud):
             message = None if pos == -1 else message[pos+1:]
         if message:
             if message.startswith('执行') or message.startswith('询问'):
-                result = await self.miot_action(self.execute_siid, self.execute_aiid, self.execute_template % message, self.did)
+                result = await self.miot_action(self.execute_siid, self.execute_aiid, self.execute_template % message[2:], self.did)
             else:
                 result = await self.miot_action(self.siid, self.aiid, self.template % message, self.did)
         return f"{result}" if type(result) == Exception else None
