@@ -19,7 +19,7 @@ class dingmsg:
         self._token = conf['token']
         self._secret = conf.get('secret')
 
-    async def async_send_message(self, message, data):
+    async def async_send(self, message, data):
         url = "https://oapi.dingtalk.com/robot/send?access_token=" + self._token
         if self._secret is not None:
             import time
@@ -38,4 +38,7 @@ class dingmsg:
             async with session.post(url, json={'msgtype': 'text', 'text': {'content': message}}) as response:
                 json = await response.json()
                 if json['errcode'] != 0:
-                    _LOGGER.error("RESPONSE: %s", await response.text())
+                    text = await response.text()
+                    error = f'错误：{text}'
+                    _LOGGER.error(error)
+                    return error

@@ -1,17 +1,16 @@
-import importlib
+from importlib import import_module
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import slugify
 from homeassistant.components.input_text import (InputText, CONF_MIN, CONF_MIN_VALUE, CONF_MAX, CONF_MAX_VALUE, CONF_INITIAL, MODE_TEXT, SERVICE_SET_VALUE, ATTR_VALUE)
 from homeassistant.const import (CONF_ID, CONF_NAME, CONF_ICON, CONF_MODE)
 
-
 # Logging
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'zhimsg'
-_handlers = {}
+SERVICES = {}
 
 
 async def async_setup(hass, config):
@@ -20,7 +19,7 @@ async def async_setup(hass, config):
         return True
 
     entities = []
-    global _handlers
+    global SERVICES
     for conf in _confs:
         name = conf.get('name')
         platform = conf['platform']
@@ -31,10 +30,10 @@ async def async_setup(hass, config):
             service = platform
         parts = platform.split('_')
         handler = parts[0] + 'msg'
-        mod = importlib.import_module('.' + handler, __package__)
-        _handlers[service] = getattr(mod, handler)(hass, conf)
+        mod = import_module('.' + handler, __package__)
+        SERVICES[service] = getattr(mod, handler)(hass, conf)
         SERVICE_SCHEMA = getattr(mod, 'SERVICE_SCHEMA')
-        hass.services.async_register(DOMAIN, service, async_send, schema=SERVICE_SCHEMA)
+        hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
         _LOGGER.debug("Register service: %s.%s", DOMAIN, service)
 
     if len(entities):
@@ -42,20 +41,21 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_send(call):
-    handler = _handlers[call.service]
+async def async_call(call):
     data = call.data
-    message = data.get('message')
-    await handler.async_send_message(message, data)
+    await async_send(call.service, data.get('message'), data)
 
 
-async def async_send_message(service, message, data={}):
-    await _handlers[service].async_send_message(message, data)
+async def async_send(service, message, data={})
+   try:
+        return await SERVICES[service].async_send(message, data)
+    except Exception as e:
+        return f'异常：{e}'
 
 
-def create_input_entity(hass, name, uniquey_id):
+def create_input_entity(hass, name, id):
     config = {
-        CONF_ID: uniquey_id,
+        CONF_ID: id,
         CONF_NAME: name,
         CONF_MIN: CONF_MIN_VALUE,
         CONF_MAX: CONF_MAX_VALUE,
@@ -64,7 +64,7 @@ def create_input_entity(hass, name, uniquey_id):
         CONF_MODE: MODE_TEXT
     }
     input_text = InputText(config)
-    input_text.entity_id = f"input_text.{uniquey_id}"
+    input_text.entity_id = f"input_text.{id}"
     input_text.editable = False
     hass.helpers.event.async_track_state_change_event([input_text.entity_id], async_input_changed)
     return input_text

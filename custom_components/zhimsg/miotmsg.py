@@ -28,7 +28,7 @@ class miotmsg(MiCloud):
         super().__init__(auth, conf.get('region'))
         self.did = str(conf['did'])
 
-    async def async_send_message(self, message, data):
+    async def async_send(self, message, data):
         volume = data.get('volume')
         params = {
             'did': self.did,

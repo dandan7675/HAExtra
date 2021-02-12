@@ -52,7 +52,7 @@ class miaibotView(chatbotView):
         return answer
 
     def response(self, answer):
-        return {
+        return self.json({
             'version': '1.0',
             'is_session_end': not self._open_mic,
             'response': {
@@ -60,4 +60,4 @@ class miaibotView(chatbotView):
                 'to_speak': {'type': 0, 'text': answer},
                 # 'to_display': {'type': 0,'text': text}
             }
-        }
+        })

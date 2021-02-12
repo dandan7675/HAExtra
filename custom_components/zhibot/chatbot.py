@@ -35,10 +35,10 @@ class chatbotView(HomeAssistantView):
             _LOGGER.error(traceback.format_exc())
             answer = "程序出错啦！"
         _LOGGER.debug("RESPONSE: %s", answer)
-        return self.json(self.response(answer))
+        return self.response(answer)
 
     def response(self, answer):
-        return None
+        return answer
 
     async def handle(self, data):
         return "未能处理"

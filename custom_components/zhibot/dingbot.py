@@ -29,4 +29,4 @@ class dingbotView(chatbotView):
         return await zhiChat(self.hass, query)
 
     def response(self, answer):
-        return {'msgtype': 'text', 'text': {'content': answer}}
+        return self.json({'msgtype': 'text', 'text': {'content': answer}})
