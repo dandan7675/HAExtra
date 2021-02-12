@@ -166,7 +166,7 @@ class MiCloud:
         except Exception as e:
             resp = e
         error = f"Request {uri} error: {resp}"
-        _LOGGER.exception(error)
+        _LOGGER.error(error)
         return Exception(error)
 
     async def miotspec(self, api, data='{}'):
@@ -178,9 +178,9 @@ class MiCloud:
         return await self.miotspec('prop/get', '{"datasource":1, "params":' + params + '}')
 
     async def miot_prop_set(self, params=''):
-        # if type(params) != str:
-        #     params = json.dumps(params)
-        return await self.miotspec('prop/set', params)
+        if type(params) != str:
+            params = json.dumps(params)
+        return await self.miotspec('prop/set', '{"params":' + params + '}')
 
     async def miot_action(self, siid, aiid, _in='[]', did=None):
         if type(_in) != str:

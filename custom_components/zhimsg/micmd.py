@@ -72,7 +72,7 @@ async def miot_prop(cloud, did, argv):
         if value is None:
             gets.append({'did': did, 'siid': int(siid), 'piid': int(piid)})
         else:
-            sets.append({'did': did, 'siid': int(siid), 'piid': int(piid), 'value': value})
+            sets.append({'did': did, 'siid': int(siid), 'piid': int(piid), 'value': int(value[1:]) if value[0] == '=' else value})
     if len(sets):
         result = await cloud.miot_prop_set(sets)
     if len(gets):
