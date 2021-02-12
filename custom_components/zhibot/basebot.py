@@ -1,11 +1,10 @@
-
-from homeassistant.components.http import HomeAssistantView
+from homeassistant.util import slugify
 from homeassistant.util.json import load_json, save_json
+from homeassistant.components.http import HomeAssistantView
 # from homeassistant.components.http import KEY_HASS
 
-# Logging
 import logging
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__package__)
 
 
 class basebotView(HomeAssistantView):
@@ -13,16 +12,19 @@ class basebotView(HomeAssistantView):
 
     def __init__(self, platform, hass, conf):
         self.platform = platform
-        self.name = conf.get('name')
-        self.url = '/' + (self.name or platform)
-        self.requires_auth = False
         self.hass = hass
+        self.name = slugify(conf['name']) if 'name' in conf else None
         self.password = conf.get('password')
+
         if self.password is None:  # Auth: config UI confirmation, intead of pre shared password
             self._configuring = None
             self.conf = load_json(hass.config.path('.' + platform))
             if not self.conf:
                 self.conf = []
+
+        self.url = '/' + (self.name or platform)
+        self.requires_auth = False
+        _LOGGER.debug(f"Serving on {self.url}")
 
     async def post(self, request):
         try:

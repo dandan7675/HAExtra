@@ -756,21 +756,40 @@ actuator:
 
 genie:
 
-zhibot:
-  - platform: ding
-    password: !secret zhibot_password
-  - platform: miai
-    password: !secret zhibot_password
-  - platform: ding2miai
-    password: !secret zhibot_password
-
 zhimsg:
   - platform: ding
     token: !secret dingbot_token
     secret: !secret dingbot_secret
-  - platform: miai
-    miid: !secret mi_username
+  - platform: miot
+    name: 客厅音箱
+    did: 380205692
+    username: !secret mi_username
     password: !secret mi_password
+  - platform: miot
+    name: 过道音箱
+    did: 89463074
+    username: !secret mi_username
+    password: !secret mi_password
+  - platform: miot
+    name: 儿童房音箱
+    did: 267090026
+    username: !secret mi_username
+    password: !secret mi_password
+
+zhibot:
+  # - platform: miai
+  #   password: !secret zhibot_password
+  - platform: ding
+    password: !secret zhibot_password
+  - platform: ding
+    name: 客厅音箱
+    password: !secret zhibot_password
+  - platform: ding
+    name: 过道音箱
+    password: !secret zhibot_password
+  - platform: ding
+    name: 儿童房音箱
+    password: !secret zhibot_password
 
 input_text:
   yu_yin_bo_bao:

@@ -34,7 +34,7 @@ async def async_setup(hass, config):
         SERVICES[service] = getattr(mod, handler)(hass, conf)
         SERVICE_SCHEMA = getattr(mod, 'SERVICE_SCHEMA')
         hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
-        _LOGGER.debug("Register service: %s.%s", DOMAIN, service)
+        _LOGGER.debug("Service: %s.%s", DOMAIN, service)
 
     if len(entities):
         await async_add_input_entities(hass, entities)
@@ -46,8 +46,8 @@ async def async_call(call):
     await async_send(call.service, data.get('message'), data)
 
 
-async def async_send(service, message, data={})
-   try:
+async def async_send(service, message, data={}):
+    try:
         return await SERVICES[service].async_send(message, data)
     except Exception as e:
         return f'异常：{e}'

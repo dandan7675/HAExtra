@@ -139,7 +139,10 @@ class MiCloud:
         signature = gen_signature(uri, signed_nonce, nonce, data)
         return {'signature': signature, '_nonce': nonce, 'data': data}
 
-    async def _request(self, uri, params=''):
+    async def request(self, uri, params='', relogin=True):
+        if self.auth.token is None and not await self.auth.login():  # Ensure login
+            return None
+
         try:
             r = await self.auth.session.post(self.server + uri, cookies={
                 'userId': self.auth.token[0],
@@ -149,28 +152,19 @@ class MiCloud:
                 'User-Agent': UA,
                 'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2'
             }, data=self.sign(uri, params), timeout=10)
-            return await r.json(content_type=None)
+            resp = await r.json(content_type=None)
+            code = resp['code']
+            if code == 0:
+                return resp['result']
+            elif code == 2 and relogin:
+                _LOGGER.debug(f"Auth error on request {uri}, relogin...")
+                self.auth.token = None  # Auth error, reset login
+                return self.request(uri, params, False)
+            _LOGGER.error(f"Error on request {uri}: {resp}")
         except asyncio.TimeoutError:
             _LOGGER.error(f"Timeout on request {uri}")
         except Exception as e:
             _LOGGER.exception(f"Exception on request {uri}: {e}")
-
-        return None
-
-    async def request(self, uri, params=''):
-        if self.auth.token is None and not await self.auth.login():  # Ensure login
-            return None
-
-        resp = await self._request(uri, params)
-        code = resp.get('code')
-        if code == 0:
-            return resp.get('result')
-
-        _LOGGER.error(f"Error on request {uri} {params}: {resp}")
-        if code == 2 and await self.auth.login():  # Auth error, relogin
-            resp = await self._request(uri, params)
-            if resp.get('code') == 0:
-                return resp.get('result')
         return None
 
     async def device_list(self):
@@ -195,4 +189,4 @@ class MiCloud:
     async def miot_action(self, params=''):
         if type(params) != str:
             params = json.dumps(params)
-        return await self.miotspec('action', '{"params":' +  params + '}')
+        return await self.miotspec('action', '{"params":' + params + '}')
