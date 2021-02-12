@@ -172,15 +172,31 @@ class MiCloud:
     async def miotspec(self, api, data='{}'):
         return await self.request('/miotspec/' + api, data)
 
-    async def miot_prop_get(self, params='[]'):
-        if type(params) != str:
-            params = json.dumps(params)
-        return await self.miotspec('prop/get', '{"datasource":1, "params":' + params + '}')
+    async def miot_prop_get(self, did, props=[]):
+        data = '{"datasource":1, "params": ['
+        for prop in props:
+            data += '{"did":"%s", "siid":%s, "piid":%s}' % (did, prop[0], prop[1])
+        data += ']}'
+        return await self.miotspec('prop/get',  data)
 
-    async def miot_prop_set(self, params=''):
-        if type(params) != str:
-            params = json.dumps(params)
-        return await self.miotspec('prop/set', '{"params":' + params + '}')
+    async def miot_prop(self, did, props=[]):
+        api = 'prop/get'
+        params = ''
+        for prop in props:
+            if params:
+                params += ', '
+            params += '{"did":"%s", "siid":%s, "piid":%s' % (did, prop[0], prop[1])
+            if (len(prop) > 2):
+                api = 'prop/set'
+                value = prop[2]
+                value_type = type(value)
+                if value_type == bool or value is None:
+                    value = str(value).lower()
+                elif value_type == str and (len(prop) == 3 or prop[3]):
+                    value = ('"' + value + '"')
+                params += ', "value":%s' % value
+            params += '}'
+        return await self.miotspec(api, '{"params": [' + params + ']}')
 
     async def miot_action(self, siid, aiid, _in='[]', did=None):
         if type(_in) != str:

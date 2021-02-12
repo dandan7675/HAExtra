@@ -16,7 +16,7 @@ def usage(arg0):
     print("  List Devs: micmd.py [username] [password]")
     print("  Get Infos: micmd.py [username] [password] <did>")
     print("  Get Props: micmd.py [username] [password] <did> <siid>[/piid] [...]")
-    print("  Set Props: micmd.py [username] [password] <did> <siid>[/piid]=<value> [...]")
+    print("  Set Props: micmd.py [username] [password] <did> <siid>[/piid]=[=]<value> [...]")
     print("  Do Action: micmd.py [username] [password] <did> <siid>[/aiid] <in|'[in1,...]'>")
     print("  Call MIoT: micmd.py [username] [password] <'{params}'> [api]")
     print("\nExample:")
@@ -25,7 +25,7 @@ def usage(arg0):
     print(f"  List Devs: {arg0}")
     print(f"  Get Infos: {arg0} 267090026")
     print(f"  Get Props: {arg0} 267090026 1 1/2 2")
-    print(f"  Set Props: {arg0} 267090026 2=60 2/2=false")
+    print(f"  Set Props: {arg0} 267090026 2==60 2/2==false 3=test")
     print(f"  Do Action: {arg0} 267090026 5 您好")
     print(f"  Do Action: {arg0} 267090026 5/4 '[\"天气\",1]'")
     print(f'  Call MIoT: {arg0} \'{{"params":{{"did":"267090026","siid":5,"aiid":1,"in":["您好"]}}}}\' action')
@@ -63,26 +63,23 @@ async def miot(cloud, argv):
 
 
 async def miot_prop(cloud, did, argv):
-    gets = []
-    sets = []
+    props = []
     for i in range(2, len(argv)):
         arg = argv[i]
         key, value = twins_split(arg, '=')
-        siid, piid = twins_split(key, '/', 1)
-        if value is None:
-            gets.append({'did': did, 'siid': int(siid), 'piid': int(piid)})
-        else:
-            sets.append({'did': did, 'siid': int(siid), 'piid': int(piid), 'value': int(value[1:]) if value[0] == '=' else value})
-    if len(sets):
-        result = await cloud.miot_prop_set(sets)
-    if len(gets):
-        result = await cloud.miot_prop_get(gets)
-    return result
+        prop = twins_split(key, '/', 1)
+        if value is not None:
+            keep = value[0] == '='
+            prop.append(value[1:] if keep else value)
+            if keep:
+                prop.append(False)
+        props.append(prop)
+    return await cloud.miot_prop(did, props)
 
 
 def twins_split(string, sep='/', default=None):
     pos = string.find(sep)
-    return (string, default) if pos == -1 else (string[0:pos], string[pos + 1:])
+    return [string, default] if pos == -1 else [string[0:pos], string[pos + 1:]]
 
 
 if __name__ == '__main__':
