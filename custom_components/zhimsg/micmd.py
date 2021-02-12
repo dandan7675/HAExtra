@@ -34,7 +34,7 @@ async def main(argv):
                 result = await cloud.miot_action(params)
             else:
                 result = await cloud.miotspec(api, params)
-        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(json.dumps(result, indent=2, ensure_ascii=False) if type(result) != Exception else result)
 
 if __name__ == '__main__':
     import sys
