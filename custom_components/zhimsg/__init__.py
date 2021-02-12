@@ -34,7 +34,7 @@ async def async_setup(hass, config):
         SERVICES[service] = getattr(mod, handler)(hass, conf)
         SERVICE_SCHEMA = getattr(mod, 'SERVICE_SCHEMA')
         hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
-        _LOGGER.debug("Service: %s.%s", DOMAIN, service)
+        _LOGGER.debug("Service as %s.%s", DOMAIN, service)
 
     if len(entities):
         await async_add_input_entities(hass, entities)

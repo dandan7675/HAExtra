@@ -107,7 +107,7 @@ class MiAuth:
         return {k: v for k, v in resp.items() if k in ('sid', 'qs', 'callback', '_sign')}
 
     async def _login2(self, payload):
-        payload['user'] = str(self.username)
+        payload['user'] = self.username
         payload['hash'] = hashlib.md5(self.password.encode()).hexdigest().upper()
         r = await self.session.post('https://account.xiaomi.com/pass/serviceLoginAuth2',
                                     cookies={'sdkVersion': '3.8.6', 'deviceId': self.device_id},
