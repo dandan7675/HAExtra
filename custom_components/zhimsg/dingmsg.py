@@ -37,7 +37,5 @@ class dingmsg:
         async with self._session.post(url, json={'msgtype': 'text', 'text': {'content': message}}) as response:
             json = await response.json()
             if json['errcode'] != 0:
-                text = await response.text()
-                error = f'错误：{text}'
-                _LOGGER.error(error)
-                return error
+                return "错误：" + await response.text()
+        return None

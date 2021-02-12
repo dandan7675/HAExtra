@@ -1,6 +1,5 @@
 # The base logic was taken from project https://github.com/squachen/micloud
 
-import asyncio
 import base64
 import hashlib
 import hmac
@@ -155,21 +154,18 @@ class MiCloud:
             resp = await r.json(content_type=None)
             code = resp['code']
             if code == 0:
-                return resp['result']
+                result = resp['result']
+                if result is not None:
+                    return result
             elif code == 2 and relogin:
                 _LOGGER.debug(f"Auth error on request {uri}, relogin...")
                 self.auth.token = None  # Auth error, reset login
                 return self.request(uri, params, False)
-            _LOGGER.error(f"Error on request {uri}: {resp}")
-        except asyncio.TimeoutError:
-            _LOGGER.error(f"Timeout on request {uri}")
         except Exception as e:
-            _LOGGER.exception(f"Exception on request {uri}: {e}")
-        return None
-
-    async def device_list(self):
-        result = await self.request('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
-        return result.get('list') if result else None
+            resp = e
+        error = f"Request {uri} error: {resp}"
+        _LOGGER.exception(error)
+        return Exception(error)
 
     async def miotspec(self, api, params=''):
         return await self.request('/miotspec/' + api, params)
@@ -188,3 +184,7 @@ class MiCloud:
         if type(params) != str:
             params = json.dumps(params)
         return await self.miotspec('action', '{"params":' + params + '}')
+
+    async def device_list(self):
+        result = await self.request('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
+        return result.get('list') if type(result) != Exception else None

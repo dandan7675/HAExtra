@@ -48,10 +48,12 @@ async def async_call(call):
 
 async def async_send(service, message, data={}):
     try:
-        return await SERVICES[service].async_send(message, data)
+        error = await SERVICES[service].async_send(message, data)
     except Exception as e:
-        return f'异常：{e}'
-
+        error = e
+    if error:
+        _LOGGER.error(error)
+    return error
 
 def create_input_entity(hass, name, id):
     config = {

@@ -28,4 +28,5 @@ class miotmsg(MiCloud):
         self.aiid = conf.get('aiid', 1)
 
     async def async_send(self, message, data):
-        await self.miot_action({'did': self.did, 'siid': self.siid, 'aiid': self.aiid,'in': [message]})
+        result = await self.miot_action({'did': self.did, 'siid': self.siid, 'aiid': self.aiid,'in': [message]})
+        return f"{result}" if type(result) == Exception else None
