@@ -11,15 +11,16 @@ _LOGGER = logging.getLogger(__name__)
 class basebotView(HomeAssistantView):
     """View to handle Configuration requests."""
 
-    def __init__(self, hass, conf):
-        self.name = conf.get('name', self.__class__.__name__.rstrip('View').lower())
-        self.url = '/' + self.name
+    def __init__(self, platform, hass, conf):
+        self.platform = platform
+        self.name = conf.get('name')
+        self.url = '/' + (self.name or platform)
         self.requires_auth = False
         self.hass = hass
         self.password = conf.get('password')
         if self.password is None:  # Auth: config UI confirmation, intead of pre shared password
             self._configuring = None
-            self.conf = load_json(hass.config.path('.' + self.name))
+            self.conf = load_json(hass.config.path('.' + platform))
             if not self.conf:
                 self.conf = []
 
@@ -60,7 +61,7 @@ class basebotView(HomeAssistantView):
             _LOGGER.debug(fields)
             if fields.get('agree') == 'ok':
                 self.config_done(data)
-                save_json(self.hass.config.path('.' + self.name), self.conf)
+                save_json(self.hass.config.path('.' + self.platform), self.conf)
 
         self._configuring = configurator.async_request_config(
             '智加加', config_callback,

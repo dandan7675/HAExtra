@@ -2,7 +2,7 @@
 #
 from .zhichat import zhiChat
 from .basebot import basebotView
-#from ..zhimsg import async_send
+from ..zhimsg import async_send
 
 # Logging
 import logging
@@ -27,8 +27,10 @@ class dingbotView(basebotView):
         return await self.handleChat(data['text']['content'].strip())
 
     async def handleChat(self, query):
-        return await zhiChat(self.hass, query)
-        #return await async_send(self.name, query)
+        if self.name:
+            return await async_send(self.name, query)
+        else:
+            return await zhiChat(self.hass, query)
 
     def response(self, answer):
         return self.json({'msgtype': 'text', 'text': {'content': answer}})
