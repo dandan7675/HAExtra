@@ -8,11 +8,11 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class chatbotView(HomeAssistantView):
+class basebotView(HomeAssistantView):
     """View to handle Configuration requests."""
 
     def __init__(self, hass, conf):
-        self.name = self.__class__.__name__.rstrip('View').lower()
+        self.name = conf.get('name', self.__class__.__name__.rstrip('View').lower())
         self.url = '/' + self.name
         self.requires_auth = False
         self.hass = hass

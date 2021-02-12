@@ -1,5 +1,4 @@
-
-# Logging
+import importlib
 import logging
 _LOGGER = logging.getLogger(__name__)
 
@@ -7,7 +6,6 @@ DOMAIN = 'zhibot'
 
 
 async def async_setup(hass, config):
-    import importlib
     confs = config.get(DOMAIN)
     if confs:
         http = config.get('http')

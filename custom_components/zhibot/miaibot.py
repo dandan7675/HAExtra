@@ -1,14 +1,14 @@
 
 #
 from .zhichat import zhiChat
-from .chatbot import chatbotView
+from .basebot import basebotView
 
 # Logging
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class miaibotView(chatbotView):
+class miaibotView(basebotView):
 
     def config(self, data):
         if data['session']['application']['app_id'] in self.conf:
