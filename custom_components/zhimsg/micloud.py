@@ -131,17 +131,19 @@ class MiCloud:
         self.auth = auth
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
-    def sign(self, uri, params):
-        data = params if type(params) == str else json.dumps(params)
+    def sign(self, uri, data):
+        if type(data) != str:
+            data = json.dumps(data)
         nonce = gen_nonce()
         signed_nonce = gen_signed_nonce(self.auth.token[1], nonce)
         signature = gen_signature(uri, signed_nonce, nonce, data)
         return {'signature': signature, '_nonce': nonce, 'data': data}
 
-    async def request(self, uri, params='', relogin=True):
+    async def request(self, uri, data='', relogin=True):
         if self.auth.token is None and not await self.auth.login():  # Ensure login
             return None
 
+        _LOGGER.debug(f"Request {uri} with {data}")
         try:
             r = await self.auth.session.post(self.server + uri, cookies={
                 'userId': self.auth.token[0],
@@ -150,7 +152,7 @@ class MiCloud:
             }, headers={
                 'User-Agent': UA,
                 'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2'
-            }, data=self.sign(uri, params), timeout=10)
+            }, data=self.sign(uri, data), timeout=10)
             resp = await r.json(content_type=None)
             code = resp['code']
             if code == 0:
@@ -160,30 +162,33 @@ class MiCloud:
             elif code == 2 and relogin:
                 _LOGGER.debug(f"Auth error on request {uri}, relogin...")
                 self.auth.token = None  # Auth error, reset login
-                return self.request(uri, params, False)
+                return self.request(uri, data, False)
         except Exception as e:
             resp = e
         error = f"Request {uri} error: {resp}"
         _LOGGER.exception(error)
         return Exception(error)
 
-    async def miotspec(self, api, params=''):
-        return await self.request('/miotspec/' + api, params)
+    async def miotspec(self, api, data='{}'):
+        return await self.request('/miotspec/' + api, data)
 
-    async def miot_prop_get(self, params=''):
+    async def miot_prop_get(self, params='[]'):
         if type(params) != str:
             params = json.dumps(params)
-        return await self.miotspec('prop/get', '{"datasource":1,"params":' + params + '}')
+        return await self.miotspec('prop/get', '{"datasource":1, "params":' + params + '}')
 
     async def miot_prop_set(self, params=''):
         # if type(params) != str:
         #     params = json.dumps(params)
         return await self.miotspec('prop/set', params)
 
-    async def miot_action(self, params=''):
-        if type(params) != str:
-            params = json.dumps(params)
-        return await self.miotspec('action', '{"params":' + params + '}')
+    async def miot_action(self, siid, aiid, _in='[]', did=None):
+        if type(_in) != str:
+            _in = json.dumps(_in)
+        elif _in[0] != '[':
+            _in = f'["{_in}"]'
+        return await self.miotspec('action', '{"params": {"did":"%s", "siid":%s, "aiid":%s, "in":%s}}' % (
+            did or f'action-{siid}-{aiid}', siid, aiid, _in))
 
     async def device_list(self):
         result = await self.request('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
