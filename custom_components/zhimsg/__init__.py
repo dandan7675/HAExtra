@@ -59,7 +59,7 @@ def create_input_entity(hass, name, id):
         CONF_NAME: name,
         CONF_MIN: CONF_MIN_VALUE,
         CONF_MAX: CONF_MAX_VALUE,
-        # CONF_INITIAL: name,
+        CONF_INITIAL: '您好',
         CONF_ICON: 'mdi:account-tie-voice',
         CONF_MODE: MODE_TEXT
     }
@@ -75,11 +75,11 @@ async def async_input_changed(event):
     old_state = data.get('old_state')
     new_state = data.get('new_state')
     if old_state and new_state:
-        text = new_state.state
-        if text != old_state.state:
+        message = new_state.state
+        if message != old_state.state:
             entity_id = data['entity_id']
             service = entity_id[entity_id.find('.') + 1:]
-            await async_send_message(service, text)
+            await async_send(service, message)
 
 
 async def async_add_input_entities(hass, entities):

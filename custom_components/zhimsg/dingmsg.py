@@ -1,12 +1,11 @@
-import aiohttp
+import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-# Logging
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 # Config validation
-import voluptuous as vol
-import homeassistant.helpers.config_validation as cv
 
 SERVICE_SCHEMA = vol.Schema({
     vol.Required('message'): cv.string,
@@ -18,6 +17,7 @@ class dingmsg:
     def __init__(self, hass, conf):
         self._token = conf['token']
         self._secret = conf.get('secret')
+        self._session = async_get_clientsession(hass)
 
     async def async_send(self, message, data):
         url = "https://oapi.dingtalk.com/robot/send?access_token=" + self._token
@@ -34,11 +34,10 @@ class dingmsg:
             url += '&timestamp=' + str(timestamp) + '&sign=' + sign
 
         _LOGGER.debug("URL: %s", url)
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json={'msgtype': 'text', 'text': {'content': message}}) as response:
-                json = await response.json()
-                if json['errcode'] != 0:
-                    text = await response.text()
-                    error = f'错误：{text}'
-                    _LOGGER.error(error)
-                    return error
+        async with self._session.post(url, json={'msgtype': 'text', 'text': {'content': message}}) as response:
+            json = await response.json()
+            if json['errcode'] != 0:
+                text = await response.text()
+                error = f'错误：{text}'
+                _LOGGER.error(error)
+                return error

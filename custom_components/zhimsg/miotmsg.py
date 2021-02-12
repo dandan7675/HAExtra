@@ -1,7 +1,7 @@
 from .micloud import MiAuth, MiCloud
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -21,19 +21,11 @@ SERVICE_SCHEMA = vol.All(
 class miotmsg(MiCloud):
 
     def __init__(self, hass, conf):
-        session = aiohttp_client.async_get_clientsession(hass)
-        # from aiohttp import ClientSession
-        # session = ClientSession()
-        auth = MiAuth(session, str(conf['username']), str(conf['password']), hass.config.config_dir)
+        auth = MiAuth(async_get_clientsession(hass), str(conf['username']), str(conf['password']), hass.config.config_dir)
         super().__init__(auth, conf.get('region'))
         self.did = str(conf['did'])
+        self.siid = conf.get('siid', 5)
+        self.aiid = conf.get('aiid', 1)
 
     async def async_send(self, message, data):
-        # volume = data.get('volume')
-        params = {
-            'did': self.did,
-            'siid': 5,
-            'aiid': 1,
-            'in': [message],
-        }
-        await self.miot_action(params)
+        await self.miot_action({'did': self.did, 'siid': self.siid, 'aiid': self.aiid,'in': [message]})

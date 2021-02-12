@@ -168,9 +168,7 @@ class MiCloud:
         return None
 
     async def device_list(self):
-        uri = '/home/device_list'
-        params = {"getVirtualModel": False, "getHuamiDevices": 0}
-        result = await self.request(uri, params)
+        result = await self.request('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
         return result.get('list') if result else None
 
     async def miotspec(self, api, params=''):
