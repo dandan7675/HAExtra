@@ -1,7 +1,7 @@
 from custom_components.micloud.miaccount import MiAccount
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from miaccount import MiAccount
-from miiocloud import MiIOCloud
+from .miaccount import MiAccount
+from .miiocloud import MiIOCloud
 
 import logging
 _LOGGER = logging.getLogger(__name__)

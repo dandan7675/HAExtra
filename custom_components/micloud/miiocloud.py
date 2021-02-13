@@ -1,4 +1,4 @@
-from miaccount import MiAccount, USER_AGENT
+from .miaccount import MiAccount, USER_AGENT
 
 import json
 import logging
@@ -16,7 +16,7 @@ class MiIOCloud:
 
     async def request(self, uri, data='', relogin=True):
         if self.account.token is not None or await self.account.login():  # Ensure login
-            _LOGGER.debug(f"Request {uri} with {data}")
+            _LOGGER.debug(f"{uri} {data}")
             try:
                 r = await self.account.session.post(self.server + uri, cookies={
                     'userId': self.account.token['userId'],

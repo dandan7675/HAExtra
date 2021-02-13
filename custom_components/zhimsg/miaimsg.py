@@ -23,7 +23,7 @@ MODEL_SPECS = {
 }
 
 
-class miotmsg:
+class miaimsg:
 
     def __init__(self, hass, conf):
         self.did = conf['did']
