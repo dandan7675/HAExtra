@@ -5,12 +5,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-# Config validation
-
-SERVICE_SCHEMA = vol.Schema({
-    vol.Required('message'): cv.string,
-})
-
 
 class dingmsg:
 

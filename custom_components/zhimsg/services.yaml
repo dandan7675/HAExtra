@@ -11,9 +11,3 @@ miai:
     message:
       description: 消息内容
       example: '您好，我是小爱'
-    volume:
-      description: 指定音量（可选，默认不改变音量；指定音量时消息内容可以为空）
-      example: '50'
-    devno:
-      description: 指定音箱序号（可选，1～9，默认不配置或 0 表示第一个支持云端 TTS 的音箱，-1 表示全部音箱）
-      example: '0'

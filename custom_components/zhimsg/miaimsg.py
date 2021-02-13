@@ -6,15 +6,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-SERVICE_SCHEMA = vol.All(
-    vol.Schema({
-        vol.Optional('message'): cv.string,
-        vol.Optional('volume'): vol.Range(min=0, max=100),
-        vol.Optional('devno'): vol.Range(min=-1, max=9),
-        # vol.Optional('region'): cv.string,
-    }),
-    cv.has_at_least_one_key("message", "volume"),
-)
 
 MODEL_SPECS = {
     'lx01': {},
@@ -46,5 +37,5 @@ class miaimsg:
             else:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)
-            result = await miiocloud.miot_action(self.did, siid, aiid, message)
+            result = await miiocloud().miot_action(self.did, siid, aiid, message)
         return f"{result}" if type(result) == Exception else None

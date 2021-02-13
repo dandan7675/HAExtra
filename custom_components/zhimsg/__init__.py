@@ -12,15 +12,15 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = 'zhimsg'
 SERVICES = {}
 
+SERVICE_SCHEMA = vol.Schema({
+    vol.Required('message'): cv.string,
+})
+
 
 async def async_setup(hass, config):
-    _confs = config.get(DOMAIN)
-    if not _confs:
-        return True
-
-    entities = []
     global SERVICES
-    for conf in _confs:
+    entities = []
+    for conf in config.get(DOMAIN):
         name = conf.get('name')
         platform = conf['platform']
         if name:
@@ -32,7 +32,7 @@ async def async_setup(hass, config):
         handler = parts[0] + 'msg'
         mod = import_module('.' + handler, __package__)
         SERVICES[service] = getattr(mod, handler)(hass, conf)
-        SERVICE_SCHEMA = getattr(mod, 'SERVICE_SCHEMA')
+        #service_schema = getattr(mod, 'SERVICE_SCHEMA')
         hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
         _LOGGER.debug("Service as %s.%s", DOMAIN, service)
 
@@ -55,6 +55,7 @@ async def async_send(service, message, data={}):
         _LOGGER.error(error)
     return error
 
+
 def create_input_entity(hass, name, id):
     config = {
         CONF_ID: id,
@@ -65,11 +66,10 @@ def create_input_entity(hass, name, id):
         CONF_ICON: 'mdi:account-tie-voice',
         CONF_MODE: MODE_TEXT
     }
-    input_text = InputText(config)
-    input_text.entity_id = f"input_text.{id}"
-    input_text.editable = False
-    hass.helpers.event.async_track_state_change_event([input_text.entity_id], async_input_changed)
-    return input_text
+    entity = InputText(config)
+    entity.entity_id = f"input_text.{id}"
+    entity.editable = False
+    return entity
 
 
 async def async_input_changed(event):
@@ -89,3 +89,4 @@ async def async_add_input_entities(hass, entities):
     component = EntityComponent(_LOGGER, 'input_text', hass)
     await component.async_add_entities(entities)
     component.async_register_entity_service(SERVICE_SET_VALUE, {vol.Required(ATTR_VALUE): cv.string}, 'async_set_value')
+    hass.helpers.event.async_track_state_change_event([input_text.entity_id for input_text in entities], async_input_changed)

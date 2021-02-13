@@ -8,14 +8,17 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'micloud'
 
-miaccount = None
-miiocloud = None
+_miaccount = None
+_miiocloud = None
 
 async def async_setup(hass, config):
     conf = config.get(DOMAIN)
-    global miaccount, miiocloud
+    global _miaccount, _miiocloud
     # TODO: new aiohttp session?
     # TODO: Use session context?
-    miaccount = MiAccount(async_get_clientsession(hass), str(conf['username']), str(conf['password']), hass.config.path('.micloud'))
-    miiocloud = MiIOCloud(miaccount, conf.get('region'))
+    _miaccount = MiAccount(async_get_clientsession(hass), str(conf['username']), str(conf['password']), hass.config.path('.micloud'))
+    _miiocloud = MiIOCloud(_miaccount, conf.get('region'))
     return True
+
+def miiocloud():
+    return _miiocloud
