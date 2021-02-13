@@ -1,4 +1,4 @@
-from miaccount import MiAccount, UA
+from miaccount import MiAccount, USER_AGENT
 
 import json
 import logging
@@ -15,31 +15,31 @@ class MiIOCloud:
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
     async def request(self, uri, data='', relogin=True):
-        if self.account.token is None and not await self.account.login():  # Ensure login
-            return None
-
-        _LOGGER.debug(f"Request {uri} with {data}")
-        try:
-            r = await self.account.session.post(self.server + uri, cookies={
-                'userId': self.account.token[0],
-                'serviceToken': self.account.token[2],
-                # 'locale': 'en_US'
-            }, headers={
-                'User-Agent': UA,
-                'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2'
-            }, data=self.account.sign(uri, data), timeout=10)
-            resp = await r.json(content_type=None)
-            code = resp['code']
-            if code == 0:
-                result = resp['result']
-                if result is not None:
-                    return result
-            elif code == 2 and relogin:
-                _LOGGER.debug(f"Auth error on request {uri}, relogin...")
-                self.token = None  # Auth error, reset login
-                return self.request(uri, data, False)
-        except Exception as e:
-            resp = e
+        if self.account.token is not None or await self.account.login():  # Ensure login
+            _LOGGER.debug(f"Request {uri} with {data}")
+            try:
+                r = await self.account.session.post(self.server + uri, cookies={
+                    'userId': self.account.token['userId'],
+                    'serviceToken': self.account.token['serviceToken'],
+                    # 'locale': 'en_US'
+                }, headers={
+                    'User-Agent': USER_AGENT % self.account.token['deviceId'],
+                    'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2'
+                }, data=self.account.sign(uri, data), timeout=10)
+                resp = await r.json(content_type=None)
+                code = resp['code']
+                if code == 0:
+                    result = resp['result']
+                    if result is not None:
+                        return result
+                elif code == 2 and relogin:
+                    _LOGGER.debug(f"Auth error on request {uri}, relogin...")
+                    self.token = None  # Auth error, reset login
+                    return self.request(uri, data, False)
+            except Exception as e:
+                resp = e
+        else:
+            resp = "Login failed"
         error = f"Request {uri} error: {resp}"
         _LOGGER.error(error)
         return Exception(error)

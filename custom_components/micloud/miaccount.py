@@ -10,7 +10,7 @@ import time
 
 _LOGGER = logging.getLogger(__name__)
 
-UA = "Android-7.1.1-1.0.0-ONEPLUS A3010-136-%s APP/xiaomi.smarthome APPV/62830"
+USER_AGENT = "Android-7.1.1-1.0.0-ONEPLUS A3010-136-%s APP/xiaomi.smarthome APPV/62830"
 
 
 def get_random(length):
@@ -72,16 +72,16 @@ class MiAccount:
 
     async def login(self):
         try:
-            device_id = get_random(16)
-            payload = await self._login1(device_id)
+            deviceId = get_random(16)
+            payload = await self._login1(deviceId)
             # if payload['code'] != 0:
             #     return False
-            data = await self._login2(device_id, payload)
+            data = await self._login2(deviceId, payload)
             location = data['location']
             if not location:
                 return False
-            token = await self._login3(location)
-            self.token = (data['userId'], data['ssecurity'], token)
+            serviceToken = await self._login3(deviceId, location)
+            self.token = {'deviceId': deviceId, 'userId': data['userId'], 'ssecurity': data['ssecurity'], 'serviceToken': serviceToken}
 
         except Exception as e:
             _LOGGER.exception(f"Exception on login {self.username}: {e}")
@@ -90,39 +90,39 @@ class MiAccount:
         self.save_token()
         return self.token
 
-    async def _login1(self, device_id):
+    async def _login1(self, deviceId):
         r = await self.session.get('https://account.xiaomi.com/pass/serviceLogin',
-                                   cookies={'sdkVersion': '3.8.6', 'deviceId': device_id},
-                                   headers={'User-Agent': UA % device_id},
+                                   cookies={'sdkVersion': '3.8.6', 'deviceId': deviceId},
+                                   headers={'User-Agent': USER_AGENT % deviceId},
                                    params={'sid': 'xiaomiio', '_json': 'true'})
         raw = await r.read()
         resp = json.loads(raw[11:])
-        _LOGGER.debug(f"MiCloud step1: %s", resp)
+        #_LOGGER.debug(f"MiCloud step1: %s", resp)
         return {k: v for k, v in resp.items() if k in ('sid', 'qs', 'callback', '_sign')}
 
-    async def _login2(self, device_id, payload):
+    async def _login2(self, deviceId, payload):
         payload['user'] = self.username
         payload['hash'] = hashlib.md5(self.password.encode()).hexdigest().upper()
         r = await self.session.post('https://account.xiaomi.com/pass/serviceLoginAuth2',
-                                    cookies={'sdkVersion': '3.8.6', 'deviceId': device_id},
+                                    cookies={'sdkVersion': '3.8.6', 'deviceId': deviceId},
                                     data=payload,
-                                    headers={'User-Agent': UA % device_id},
+                                    headers={'User-Agent': USER_AGENT % deviceId},
                                     params={'_json': 'true'})
         raw = await r.read()
         resp = json.loads(raw[11:])
-        _LOGGER.debug(f"MiCloud step2: %s", resp)
+        #_LOGGER.debug(f"MiCloud step2: %s", resp)
         return resp
 
-    async def _login3(self, location):
-        r = await self.session.get(location, headers={'User-Agent': UA})
-        token = r.cookies['serviceToken'].value
-        _LOGGER.debug(f"MiCloud step3: %s", token)
-        return token
+    async def _login3(self, deviceId, location):
+        r = await self.session.get(location, headers={'User-Agent': USER_AGENT % deviceId})
+        serviceToken = r.cookies['serviceToken'].value
+        #_LOGGER.debug(f"MiCloud step3: %s", serviceToken)
+        return serviceToken
 
     def sign(self, uri, data):
         if type(data) != str:
             data = json.dumps(data)
         nonce = gen_nonce()
-        signed_nonce = gen_signed_nonce(self.token[1], nonce)
+        signed_nonce = gen_signed_nonce(self.token['ssecurity'], nonce)
         signature = gen_signature(uri, signed_nonce, nonce, data)
         return {'signature': signature, '_nonce': nonce, 'data': data}
