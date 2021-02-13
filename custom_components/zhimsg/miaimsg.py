@@ -20,6 +20,7 @@ INITIAL_TEXTS = [
     #"$今天天气怎么样？",
     "查询天气！",
     "执行关灯！",
+    "静默关灯！",
     #"%80%大声说话啦！",
     "音量80%大声说话啦！"
 ]
@@ -44,11 +45,12 @@ class miaimsg:
         else:
             result = Exception("空谈误国，实干兴邦！")
         if message:
-            if message[0] == '$' or message.startswith('执行') or message.startswith('查询'):
+            if message[0] == '$' or message.startswith('查询') or message.startswith('执行') or message.startswith('静默'):
                 siid = self.spec.get('execute_siid', 5)
                 aiid = self.spec.get('execute_aiid', 5)
                 start = 1 if message[0] == '$' else 2
-                message = f'["{message[start:]}",0]'
+                slient = 1 if message.startswith('静默') else 0
+                message = f'["{message[start:]}",{slient}]'
             else:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)

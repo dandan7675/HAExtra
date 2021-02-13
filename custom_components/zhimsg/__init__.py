@@ -6,7 +6,6 @@ from homeassistant.util import slugify
 from homeassistant.components.input_text import (InputText, CONF_MIN, CONF_MIN_VALUE, CONF_MAX, CONF_MAX_VALUE, CONF_INITIAL, MODE_TEXT, SERVICE_SET_VALUE, ATTR_VALUE)
 from homeassistant.const import (CONF_ID, CONF_NAME, CONF_ICON, CONF_MODE)
 
-# Logging
 import logging
 _LOGGER = logging.getLogger(__name__)
 
@@ -86,8 +85,7 @@ async def async_input_changed(event):
 
 async def async_add_input_entities(hass, config, entities):
     if 'input_text' not in config:
-        await _async_add_input_entities(hass, entities)
-        return
+        return await _async_add_input_entities(hass, entities)
 
     # 如果配置了文本输入，则必须延迟等待，并复用现有的组件来添加
     async def _delay_add_input_entities(timestamp=None):
