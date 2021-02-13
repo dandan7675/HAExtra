@@ -6,7 +6,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-# Config validation
 SERVICE_SCHEMA = vol.All(
     vol.Schema({
         vol.Optional('message'): cv.string,
@@ -17,6 +16,11 @@ SERVICE_SCHEMA = vol.All(
     cv.has_at_least_one_key("message", "volume"),
 )
 
+MODEL_SPECS = {
+    'lx01': {},
+    'lx04': {'execute_aiid': 4},
+    'lx08c': {'siid': 3, 'volume_siid': 4},
+}
 
 class miotmsg(MiCloud):
 
@@ -24,34 +28,24 @@ class miotmsg(MiCloud):
         auth = MiAuth(async_get_clientsession(hass), str(conf['username']), str(conf['password']), hass.config.config_dir)
         super().__init__(auth, conf.get('region'))
         self.did = conf['did']
-        self.siid = conf.get('siid', 5)
-        self.aiid = conf.get('aiid', 1)  # 4
-        self.template = conf.get('template', '["%s"]')
-        self.execute_siid = conf.get('execute_siid', self.siid)
-        self.execute_aiid = conf.get('execute_aiid', 4)
-        self.execute_template = conf.get('execute_template', '["%s",1]')
-        self.volume_siid = conf.get('volume_siid', 2)
-        self.volume_piid = conf.get('volume_piid', 1)
+        self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
 
     async def async_send(self, message, data):
         if message.startswith('音量'):
             pos = message.find('%')
             volume = message[2:None if pos == -1 else pos]
-            result = await self.miot_prop(self.did, [(self.volume_siid, self.volume_piid, volume, False)])
+            result = await self.miot_prop(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 2), volume, False)])
             message = None if pos == -1 else message[pos+1:]
         else:
-            result = Exception("少说空话")
+            result = Exception("空谈误国，实干兴邦！")
         if message:
             if message[0] == '$' or message.startswith('执行') or message.startswith('询问'):
-                siid = self.execute_siid
-                aiid = self.execute_aiid
-                template = self.execute_template
-                message = message[1 if message[0] == '$' else 2:]
+                siid = self.spec.get('execute_siid', 5)
+                aiid = self.spec.get('execute_aiid', 5)
+                pos = 1 if message[0] == '$' else 2
+                message = f'["{message[pos:]}",1]'
             else:
-                siid = self.siid
-                aiid = self.aiid
-                template = self.template
-            if message[0] != '[':
-                message = template % message
+                siid = self.spec.get('siid', 5)
+                aiid = self.spec.get('aiid', 1)
             result = await self.miot_action(self.did, siid, aiid, message)
         return f"{result}" if type(result) == Exception else None
