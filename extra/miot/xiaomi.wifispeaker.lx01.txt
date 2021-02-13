@@ -1,0 +1,64 @@
+序号	        model 	          urn
+1	xiaomi.wifispeaker.lx01	urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx01:1
+设备描述：Speaker
+设备属性：
+
+siid 1: Device Information
+
+   piid 1: Device Manufacturer 可读取 
+      数据类型：string
+   piid 2: Device Model 可读取 
+      数据类型：string
+   piid 3: Device Serial Number 可读取 
+      数据类型：string
+   piid 4: Current Firmware Version 可读取 
+      数据类型：string
+
+
+siid 2: Speaker
+
+   piid 1: Volume 可读取 可控制 
+      数据类型：uint8
+      取值范围：[1, 100, 1]
+   piid 2: Mute 可读取 可控制 
+      数据类型：bool
+
+
+siid 3: Microphone
+
+   piid 1: Mute 可读取 可控制 
+      数据类型：bool
+
+
+siid 4: Play Control
+
+   piid 1: Playing State 可读取 
+      数据类型：uint8
+      取值范围：
+         0: Idle
+         1: Playing
+   aiid 1: Pause 
+   aiid 2: Play 
+   aiid 3: Next 
+   aiid 4: Previous 
+
+
+siid 5: Intelligent Speaker
+
+   piid 1: Text Content 
+      数据类型：string
+   piid 2: Silent Execution 
+      数据类型：uint8
+      取值范围：
+         0: On
+         1: Off
+   aiid 1: Play Text 
+   aiid 2: Wake Up 
+   aiid 3: Play Radio 
+   aiid 4: Play Music 
+   aiid 5: Execute Text Directive 
+
+
+siid 6: Clock
+
+   aiid 1: Stop Alarm 

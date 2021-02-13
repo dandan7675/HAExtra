@@ -198,7 +198,13 @@ class MiCloud:
             params += '}'
         return await self.miotspec(api, '{"params": [' + params + ']}')
 
-    async def miot_action(self, siid, aiid, _in='[]', did=None):
+    async def miot_prop_get(self, did, siid, piid=1):
+        return await self.miot_prop(did, {(siid, piid)}) # TODO: Parse
+
+    async def miot_prop_set(self, did, siid, piid, value, quote=True):
+        return await self.miot_prop(did, {(siid, piid, value, quote)}) # TODO: Parse
+        
+    async def miot_action(self, did, siid, aiid, _in='[]'):
         if type(_in) != str:
             _in = json.dumps(_in)
         elif _in[0] != '[':

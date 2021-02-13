@@ -39,9 +39,19 @@ class miotmsg(MiCloud):
             volume = message[2:None if pos == -1 else pos]
             result = await self.miot_prop(self.did, [(self.volume_siid, self.volume_piid, volume, False)])
             message = None if pos == -1 else message[pos+1:]
+        else:
+            result = Exception("少说空话")
         if message:
-            if message.startswith('执行') or message.startswith('询问'):
-                result = await self.miot_action(self.execute_siid, self.execute_aiid, self.execute_template % message[2:], self.did)
+            if message[0] == '$' or message.startswith('执行') or message.startswith('询问'):
+                siid = self.execute_siid
+                aiid = self.execute_aiid
+                template = self.execute_template
+                message = message[1 if message[0] == '$' else 2:]
             else:
-                result = await self.miot_action(self.siid, self.aiid, self.template % message, self.did)
+                siid = self.siid
+                aiid = self.aiid
+                template = self.template
+            if message[0] != '[':
+                message = template % message
+            result = await self.miot_action(self.did, siid, aiid, message)
         return f"{result}" if type(result) == Exception else None
