@@ -70,19 +70,21 @@ class MiAccount:
             elif os.path.isfile(self.token_path):
                 os.remove(self.token_path)
 
+    @property
+    def user_agent(self):
+        return USER_AGENT % self.token['deviceId']
+
     async def login(self):
+        self.token = {'deviceId': get_random(16)}
         try:
-            deviceId = get_random(16)
-            payload = await self._login1(deviceId)
-            # if payload['code'] != 0:
-            #     return False
-            data = await self._login2(deviceId, payload)
+            payload = await self._login1()
+            data = await self._login2(payload)
             location = data['location']
             if not location:
                 return False
-            serviceToken = await self._login3(deviceId, location)
-            self.token = {'deviceId': deviceId, 'userId': data['userId'], 'ssecurity': data['ssecurity'], 'serviceToken': serviceToken}
-
+            self.token['userId'] = data['userId']
+            self.token['ssecurity'] = data['ssecurity']
+            self.token['serviceToken'] = await self._login3(location)
         except Exception as e:
             _LOGGER.exception(f"Exception on login {self.username}: {e}")
             self.token = None
@@ -90,31 +92,31 @@ class MiAccount:
         self.save_token()
         return self.token
 
-    async def _login1(self, deviceId):
+    async def _login1(self):
         r = await self.session.get('https://account.xiaomi.com/pass/serviceLogin',
-                                   cookies={'sdkVersion': '3.8.6', 'deviceId': deviceId},
-                                   headers={'User-Agent': USER_AGENT % deviceId},
+                                   cookies={'sdkVersion': '3.8.6', 'deviceId': self.token['deviceId']},
+                                   headers={'User-Agent': self.user_agent},
                                    params={'sid': 'xiaomiio', '_json': 'true'})
         raw = await r.read()
         resp = json.loads(raw[11:])
         #_LOGGER.debug(f"MiCloud step1: %s", resp)
         return {k: v for k, v in resp.items() if k in ('sid', 'qs', 'callback', '_sign')}
 
-    async def _login2(self, deviceId, payload):
+    async def _login2(self, payload):
         payload['user'] = self.username
         payload['hash'] = hashlib.md5(self.password.encode()).hexdigest().upper()
         r = await self.session.post('https://account.xiaomi.com/pass/serviceLoginAuth2',
-                                    cookies={'sdkVersion': '3.8.6', 'deviceId': deviceId},
+                                    cookies={'sdkVersion': '3.8.6', 'deviceId': self.token['deviceId']},
                                     data=payload,
-                                    headers={'User-Agent': USER_AGENT % deviceId},
+                                    headers={'User-Agent': self.user_agent},
                                     params={'_json': 'true'})
         raw = await r.read()
         resp = json.loads(raw[11:])
         #_LOGGER.debug(f"MiCloud step2: %s", resp)
         return resp
 
-    async def _login3(self, deviceId, location):
-        r = await self.session.get(location, headers={'User-Agent': USER_AGENT % deviceId})
+    async def _login3(self, location):
+        r = await self.session.get(location, headers={'User-Agent': self.user_agent})
         serviceToken = r.cookies['serviceToken'].value
         #_LOGGER.debug(f"MiCloud step3: %s", serviceToken)
         return serviceToken

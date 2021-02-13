@@ -1,5 +1,3 @@
-from .miaccount import MiAccount, USER_AGENT
-
 import json
 import logging
 
@@ -10,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class MiIOCloud:
 
-    def __init__(self, account: MiAccount, region=None):
+    def __init__(self, account, region=None):
         self.account = account
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
@@ -23,7 +21,7 @@ class MiIOCloud:
                     'serviceToken': self.account.token['serviceToken'],
                     # 'locale': 'en_US'
                 }, headers={
-                    'User-Agent': USER_AGENT % self.account.token['deviceId'],
+                    'User-Agent': self.account.user_agent,
                     'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2'
                 }, data=self.account.sign(uri, data), timeout=10)
                 resp = await r.json(content_type=None)

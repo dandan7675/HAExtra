@@ -6,8 +6,8 @@ import json
 import os
 import sys
 
-from .miiocloud import MiIOCloud, _LOGGER as _LOGGER2
-from .miaccount import MiAccount, _LOGGER as _LOGGER1
+from miaccount import MiAccount, _LOGGER as _LOGGER1
+from miiocloud import MiIOCloud, _LOGGER as _LOGGER2
 
 
 def usage(arg0):

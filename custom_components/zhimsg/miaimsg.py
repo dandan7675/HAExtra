@@ -3,7 +3,7 @@ from random import randint
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from ..micloud import miiocloud
+from ..xiaomi.micloud import miiocloud
 
 import logging
 _LOGGER = logging.getLogger(__name__)
