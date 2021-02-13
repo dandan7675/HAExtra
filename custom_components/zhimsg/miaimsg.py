@@ -49,8 +49,8 @@ class miaimsg:
                 siid = self.spec.get('execute_siid', 5)
                 aiid = self.spec.get('execute_aiid', 5)
                 start = 1 if message[0] == '$' else 2
-                slient = 1 if message.startswith('静默') else 0
-                message = f'["{message[start:]}",{slient}]'
+                echo = 0 if message.startswith('静默') else 1
+                message = f'["{message[start:]}",{echo}]'
             else:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)
