@@ -67,7 +67,7 @@ def create_input_entity(hass, name, service, initial_text):
     }
     entity = InputText(config)
     entity.entity_id = f"input_text.{service}"
-    entity.editable = False
+    #entity.editable = False
     return entity
 
 
@@ -86,6 +86,6 @@ async def async_input_changed(event):
 async def async_add_input_entities(hass, entities):
     from homeassistant.helpers.entity_component import EntityComponent
     component = EntityComponent(_LOGGER, 'input_text', hass)
-    await component.async_add_entities(entities)
     component.async_register_entity_service(SERVICE_SET_VALUE, {vol.Required(ATTR_VALUE): cv.string}, 'async_set_value')
-    hass.helpers.event.async_track_state_change_event([input_text.entity_id for input_text in entities], async_input_changed)
+    await component.async_add_entities(entities)
+    hass.helpers.event.async_track_state_change_event([entity.entity_id for entity in entities], async_input_changed)
