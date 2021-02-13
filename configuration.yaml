@@ -756,7 +756,7 @@ actuator:
 
 genie:
 
-mi:
+micom:
     username: !secret mi_username
     password: !secret mi_password
 
