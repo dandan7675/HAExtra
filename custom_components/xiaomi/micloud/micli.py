@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 from aiohttp import ClientSession
-from miaccount import MiAccount, _LOGGER as _LOGGER1
-from miiocloud import MiIOCloud, _LOGGER as _LOGGER2
-
 import asyncio
 import logging
 import json
 import os
 import sys
+
+from .miiocloud import MiIOCloud, _LOGGER as _LOGGER2
+from .miaccount import MiAccount, _LOGGER as _LOGGER1
 
 
 def usage(arg0):

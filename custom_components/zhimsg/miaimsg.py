@@ -1,7 +1,9 @@
-from ..micloud import miiocloud
+from random import randint
+
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from ..micloud import miiocloud
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -13,6 +15,14 @@ MODEL_SPECS = {
     'lx08c': {'siid': 3, 'volume_siid': 4},
 }
 
+INITIAL_TEXTS = [
+    "您好，我是小爱同学！",
+    #"$今天天气怎么样？",
+    "查询天气！",
+    "执行关灯！",
+    #"%80%大声说话啦！",
+    "音量80%大声说话啦！"
+]
 
 class miaimsg:
 
@@ -20,20 +30,25 @@ class miaimsg:
         self.did = conf['did']
         self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
 
+    @property
+    def initial_text(self):
+        return INITIAL_TEXTS[randint(0, len(INITIAL_TEXTS) - 1)]
+
     async def async_send(self, message, data):
-        if message.startswith('音量'):
+        if message[0] == '%' or message.startswith('音量'):
             pos = message.find('%')
-            volume = message[2:None if pos == -1 else pos]
-            result = await miiocloud.miot_prop(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 2), volume, False)])
+            start = 1 if message[0] == '%' else 2
+            volume = message[start:None if pos == -1 else pos]
+            result = await miiocloud().miot_prop(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 2), volume, False)])
             message = None if pos == -1 else message[pos+1:]
         else:
             result = Exception("空谈误国，实干兴邦！")
         if message:
-            if message[0] == '$' or message.startswith('执行') or message.startswith('询问'):
+            if message[0] == '$' or message.startswith('执行') or message.startswith('查询'):
                 siid = self.spec.get('execute_siid', 5)
                 aiid = self.spec.get('execute_aiid', 5)
-                pos = 1 if message[0] == '$' else 2
-                message = f'["{message[pos:]}",1]'
+                start = 1 if message[0] == '$' else 2
+                message = f'["{message[start:]}",1]'
             else:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)

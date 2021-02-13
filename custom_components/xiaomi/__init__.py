@@ -1,4 +1,3 @@
-from custom_components.xiaomi.micloud.miaccount import MiAccount
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .micloud.miaccount import MiAccount
 from .micloud.miiocloud import MiIOCloud

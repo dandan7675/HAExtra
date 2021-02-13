@@ -23,18 +23,17 @@ async def async_setup(hass, config):
     for conf in config.get(DOMAIN):
         name = conf.get('name')
         platform = conf['platform']
-        if name:
-            service = slugify(name)
-            entities.append(create_input_entity(hass, name, service))
-        else:
-            service = platform
+        service = slugify(name) if name else platform
         parts = platform.split('_')
         handler = parts[0] + 'msg'
         mod = import_module('.' + handler, __package__)
-        SERVICES[service] = getattr(mod, handler)(hass, conf)
+        SERVICES[service] = handler = getattr(mod, handler)(hass, conf)
         #service_schema = getattr(mod, 'SERVICE_SCHEMA')
         hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
         _LOGGER.debug("Service as %s.%s", DOMAIN, service)
+        if name:
+            initial_text = handler.initial_text if hasattr(handler, 'initial_text') else '您好！'
+            entities.append(create_input_entity(hass, name, service, initial_text))
 
     if len(entities):
         await async_add_input_entities(hass, entities)
@@ -56,18 +55,18 @@ async def async_send(service, message, data={}):
     return error
 
 
-def create_input_entity(hass, name, id):
+def create_input_entity(hass, name, service, initial_text):
     config = {
-        CONF_ID: id,
+        CONF_ID: service,
         CONF_NAME: name,
         CONF_MIN: CONF_MIN_VALUE,
         CONF_MAX: CONF_MAX_VALUE,
-        CONF_INITIAL: '您好',
+        CONF_INITIAL: initial_text,
         CONF_ICON: 'mdi:account-tie-voice',
         CONF_MODE: MODE_TEXT
     }
     entity = InputText(config)
-    entity.entity_id = f"input_text.{id}"
+    entity.entity_id = f"input_text.{service}"
     entity.editable = False
     return entity
 
