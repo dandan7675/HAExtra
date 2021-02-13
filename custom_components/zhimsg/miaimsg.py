@@ -48,7 +48,7 @@ class miaimsg:
                 siid = self.spec.get('execute_siid', 5)
                 aiid = self.spec.get('execute_aiid', 5)
                 start = 1 if message[0] == '$' else 2
-                message = f'["{message[start:]}",1]'
+                message = f'["{message[start:]}",0]'
             else:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)

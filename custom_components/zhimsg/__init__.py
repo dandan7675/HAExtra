@@ -1,4 +1,5 @@
 from importlib import import_module
+from homeassistant.core import HomeAssistant
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import slugify
@@ -36,7 +37,7 @@ async def async_setup(hass, config):
             entities.append(create_input_entity(hass, name, service, initial_text))
 
     if len(entities):
-        await async_add_input_entities(hass, entities)
+        await async_add_input_entities(hass, config, entities)
     return True
 
 
@@ -83,9 +84,20 @@ async def async_input_changed(event):
             await async_send(service, message)
 
 
-async def async_add_input_entities(hass, entities):
+async def async_add_input_entities(hass, config, entities):
+    if 'input_text' not in config:
+        await _async_add_input_entities(hass, entities)
+        return
+
+    # 如果配置了文本输入，则必须延迟等待，并复用现有的组件来添加
+    async def _delay_add_input_entities(timestamp=None):
+        await _async_add_input_entities(hass, entities)
+    hass.helpers.event.async_call_later(5, _delay_add_input_entities)
+
+
+async def _async_add_input_entities(hass, entities):
     from homeassistant.helpers.entity_component import EntityComponent
-    component = hass.data.get('entity_component', {}).get('input_text')
+    component = hass.data.get('entity_components', {}).get('input_text')
     if component is None:
         component = EntityComponent(_LOGGER, 'input_text', hass)
         component.async_register_entity_service(SERVICE_SET_VALUE, {vol.Required(ATTR_VALUE): cv.string}, 'async_set_value')
