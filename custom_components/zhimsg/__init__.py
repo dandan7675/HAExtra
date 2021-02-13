@@ -85,7 +85,9 @@ async def async_input_changed(event):
 
 async def async_add_input_entities(hass, entities):
     from homeassistant.helpers.entity_component import EntityComponent
-    component = EntityComponent(_LOGGER, 'input_text', hass)
-    component.async_register_entity_service(SERVICE_SET_VALUE, {vol.Required(ATTR_VALUE): cv.string}, 'async_set_value')
+    component = hass.data.get('entity_component', {}).get('input_text')
+    if component is None:
+        component = EntityComponent(_LOGGER, 'input_text', hass)
+        component.async_register_entity_service(SERVICE_SET_VALUE, {vol.Required(ATTR_VALUE): cv.string}, 'async_set_value')
     await component.async_add_entities(entities)
     hass.helpers.event.async_track_state_change_event([entity.entity_id for entity in entities], async_input_changed)
