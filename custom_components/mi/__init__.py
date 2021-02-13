@@ -5,7 +5,7 @@ from .micloud.miiocloud import MiIOCloud
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'micloud'
+DOMAIN = 'mi'
 
 _miaccount = None
 _miiocloud = None

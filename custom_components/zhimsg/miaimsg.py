@@ -3,7 +3,7 @@ from random import randint
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from ..xiaomi.micloud import miiocloud
+from ..mi import miiocloud
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class miaimsg:
             pos = message.find('%')
             start = 1 if message[0] == '%' else 2
             volume = message[start:None if pos == -1 else pos]
-            result = await miiocloud().miot_prop(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 2), volume, False)])
+            result = await miiocloud().miot_prop(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 1), volume, False)])
             message = None if pos == -1 else message[pos+1:]
         else:
             result = Exception("空谈误国，实干兴邦！")
