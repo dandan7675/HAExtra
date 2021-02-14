@@ -25,7 +25,7 @@ async def async_setup(hass, config):
         platform = conf['platform']
         Class = Classes.get(platform)
         if Class is None:
-            module = import_module('.' + platform + 'msg', __package__)
+            module = import_module('.' + platform, __package__)
             Class = getattr(module, platform + 'msg')
             Classes[platform] = Class
             SERVICES[platform] = []
