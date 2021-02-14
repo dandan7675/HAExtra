@@ -1,5 +1,6 @@
 from homeassistant.util import slugify
 from homeassistant.util.json import load_json, save_json
+from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.components.http import HomeAssistantView
 # from homeassistant.components.http import KEY_HASS
 
@@ -18,7 +19,7 @@ class basebot(HomeAssistantView):
 
         if self.password is None:  # Auth: config UI confirmation, intead of pre shared password
             self._configuring = None
-            self.conf = load_json(hass.config.path('.' + platform))
+            self.conf = load_json(hass.config.path(STORAGE_DIR, platform))
             if not self.conf:
                 self.conf = []
 

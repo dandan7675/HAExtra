@@ -1,9 +1,8 @@
 
 #
 from .deps.zhichat import zhiChat
-from .base import basebot
+from .basebot import basebot
 
-# Logging
 import logging
 _LOGGER = logging.getLogger(__name__)
 

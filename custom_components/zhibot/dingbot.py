@@ -1,15 +1,13 @@
 
 #
 from .deps.zhichat import zhiChat
-from .base import basebot
+from .basebot import basebot
 from ..zhimsg import async_send
 
-# Logging
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-#
 class dingbot(basebot):
 
     def config(self, data):

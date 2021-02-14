@@ -1,5 +1,4 @@
 from importlib import import_module
-from homeassistant.core import HomeAssistant
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import slugify
@@ -25,8 +24,9 @@ async def async_setup(hass, config):
         platform = conf['platform']
         Class = Classes.get(platform)
         if Class is None:
-            module = import_module('.' + platform, __package__)
-            Class = getattr(module, platform + 'msg')
+            attr = platform + 'msg'
+            module = import_module('.' + attr, __package__)
+            Class = getattr(module, attr)
             Classes[platform] = Class
             SERVICES[platform] = []
             hass.services.async_register(DOMAIN, platform, async_call, schema=SERVICE_SCHEMA)
