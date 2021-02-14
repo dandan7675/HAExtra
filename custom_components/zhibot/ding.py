@@ -1,7 +1,7 @@
 
 #
-from .zhichat import zhiChat
-from .basebot import basebotView
+from .deps.zhichat import zhiChat
+from .base import basebot
 from ..zhimsg import async_send
 
 # Logging
@@ -10,7 +10,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 #
-class dingbot(basebotView):
+class dingbot(basebot):
 
     def config(self, data):
         if data['chatbotUserId'] in self.conf:
