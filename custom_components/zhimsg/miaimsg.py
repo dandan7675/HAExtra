@@ -3,7 +3,7 @@ from random import randint
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from ..mi import miiocloud
+from ..micom import miiocloud
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -16,8 +16,8 @@ MODEL_SPECS = {
 }
 
 INITIAL_TEXTS = [
-    "您好，我是小爱同学！",
-    #"$今天天气怎么样？",
+    "今天天气怎么样？",
+    #"$您好，我是小爱？",
     "查询天气！",
     "执行关灯！",
     "静默关灯！",

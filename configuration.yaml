@@ -757,8 +757,8 @@ actuator:
 genie:
 
 micom:
-    username: !secret mi_username
-    password: !secret mi_password
+    username: !secret micom_username
+    password: !secret micom_password
 
 zhimsg:
   - platform: ding
