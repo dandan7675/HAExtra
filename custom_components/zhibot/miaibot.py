@@ -1,6 +1,6 @@
 
 #
-from .deps.zhichat import zhiChat
+from .zhichat import zhiChat
 from .basebot import basebot
 
 import logging
