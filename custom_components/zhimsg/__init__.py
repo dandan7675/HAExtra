@@ -21,7 +21,8 @@ async def async_setup(hass, config):
     entities = []
     Classes = {}
     for conf in config.get(DOMAIN):
-        platform = conf['platform']
+        service = conf['platform']
+        platform = service.split('_')[0]
         Class = Classes.get(platform)
         if Class is None:
             attr = platform + 'msg'
@@ -37,10 +38,11 @@ async def async_setup(hass, config):
         name = conf.get('name')
         if name:
             service = slugify(name)
-            SERVICES[service] = instance
-            hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
             initial_text = instance.initial_text if hasattr(instance, 'initial_text') else '您好！'
             entities.append(create_input_entity(hass, name, service, initial_text))
+        if service not in SERVICES:
+            SERVICES[service] = instance
+            hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
 
     if len(entities):
         await async_add_input_entities(hass, config, entities)
