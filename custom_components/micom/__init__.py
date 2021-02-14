@@ -1,5 +1,5 @@
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from .micloud.miaccount import MiAuth
+from .micloud.miauth import MiAuth
 from .micloud.miiocloud import MiIOCloud
 from homeassistant.helpers.storage import STORAGE_DIR
 

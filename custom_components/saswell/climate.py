@@ -22,10 +22,11 @@ from homeassistant.const import (
     ATTR_TEMPERATURE)
 from homeassistant.helpers.event import async_track_time_interval
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.storage import STORAGE_DIR
 
 _LOGGER = logging.getLogger(__name__)
 
-TOKEN_FILE = ".saswell"
+DOMAIN = "saswell"
 USER_AGENT = "Thermostat/3.1.0 (iPhone; iOS 11.3; Scale/3.00)"
 
 AUTH_URL = "http://api.scinan.com/oauth2/authorize?client_id=100002" \
@@ -184,7 +185,7 @@ class SaswellData():
         self._hass = hass
         self._username = username.replace('@', '%40')
         self._password = password
-        self._token_path = hass.config.path(TOKEN_FILE)
+        self._token_path = hass.config.path(STORAGE_DIR, DOMAIN)
         self.devs = None
 
         try:
