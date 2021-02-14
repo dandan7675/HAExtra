@@ -20,19 +20,26 @@ SERVICE_SCHEMA = vol.Schema({
 async def async_setup(hass, config):
     global SERVICES
     entities = []
+    Classes = {}
     for conf in config.get(DOMAIN):
-        name = conf.get('name')
         platform = conf['platform']
-        service = slugify(name) if name else platform
-        parts = platform.split('_')
-        handler = parts[0] + 'msg'
-        mod = import_module('.' + handler, __package__)
-        SERVICES[service] = handler = getattr(mod, handler)(hass, conf)
-        #service_schema = getattr(mod, 'SERVICE_SCHEMA')
-        hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
-        _LOGGER.debug("Service as %s.%s", DOMAIN, service)
+        Class = Classes.get(platform)
+        if Class is None:
+            module = import_module('.' + platform + 'msg', __package__)
+            Class = getattr(module, platform + 'msg')
+            Classes[platform] = Class
+            SERVICES[platform] = []
+            hass.services.async_register(DOMAIN, platform, async_call, schema=SERVICE_SCHEMA)
+            _LOGGER.debug("Platform Service as %s.%s", DOMAIN, platform)
+        instance = Class(hass, conf)
+        SERVICES[platform].append(instance)
+
+        name = conf.get('name')
         if name:
-            initial_text = handler.initial_text if hasattr(handler, 'initial_text') else '您好！'
+            service = slugify(name)
+            SERVICES[service] = instance
+            hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
+            initial_text = instance.initial_text if hasattr(instance, 'initial_text') else '您好！'
             entities.append(create_input_entity(hass, name, service, initial_text))
 
     if len(entities):
@@ -42,12 +49,20 @@ async def async_setup(hass, config):
 
 async def async_call(call):
     data = call.data
-    await async_send(call.service, data.get('message'), data)
+    message = data.get('message')
+    await async_send(call.service, message, data)
 
 
 async def async_send(service, message, data={}):
     try:
-        error = await SERVICES[service].async_send(message, data)
+        instance = SERVICES[service]
+        if type(instance) == list:
+            for inst in instance:
+                err = await inst.async_send(message, data)
+                if err:
+                    error = err
+        else:
+            error = await instance.async_send(message, data)
     except Exception as e:
         error = e
     if error:
