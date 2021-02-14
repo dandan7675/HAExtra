@@ -10,7 +10,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 #
-class dingbotView(basebotView):
+class dingbot(basebotView):
 
     def config(self, data):
         if data['chatbotUserId'] in self.conf:

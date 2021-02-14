@@ -7,7 +7,7 @@ import logging
 _LOGGER = logging.getLogger(__package__)
 
 
-class basebotView(HomeAssistantView):
+class basebot(HomeAssistantView):
     """View to handle Configuration requests."""
 
     def __init__(self, platform, hass, conf):

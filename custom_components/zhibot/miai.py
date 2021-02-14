@@ -8,7 +8,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class miaibotView(basebotView):
+class miaibot(basebotView):
 
     def config(self, data):
         if data['session']['application']['app_id'] in self.conf:
