@@ -41,9 +41,9 @@ def gen_signature(url, signed_nonce, nonce, data):
     return base64.b64encode(signature).decode()
 
 
-class MiAccount:
+class MiAuth:
 
-    def __init__(self, session, username, password, token_path='.micloud'):
+    def __init__(self, session, username, password, token_path='.miauth'):
         self.session = session
         self.username = username
         self.password = password

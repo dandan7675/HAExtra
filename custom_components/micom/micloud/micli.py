@@ -6,7 +6,7 @@ import json
 import os
 import sys
 
-from miaccount import MiAccount, _LOGGER as _LOGGER1
+from miauth import MiAuth, _LOGGER as _LOGGER1
 from miiocloud import MiIOCloud, _LOGGER as _LOGGER2
 
 
@@ -32,8 +32,8 @@ def usage(arg0):
 
 async def main(username, password, argv):
     async with ClientSession() as session:
-        account = MiAccount(session, username, password)
-        cloud = MiIOCloud(account)
+        auth = MiAuth(session, username, password)
+        cloud = MiIOCloud(auth)
         if len(argv) > 1:
             result = await miot(cloud, argv)
         else:

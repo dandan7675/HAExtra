@@ -8,22 +8,22 @@ _LOGGER = logging.getLogger(__name__)
 
 class MiIOCloud:
 
-    def __init__(self, account, region=None):
-        self.account = account
+    def __init__(self, auth, region=None):
+        self.auth = auth
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
     async def request(self, uri, data='', relogin=True):
-        if self.account.token is not None or await self.account.login():  # Ensure login
+        if self.auth.token is not None or await self.auth.login():  # Ensure login
             _LOGGER.debug(f"{uri} {data}")
             try:
-                r = await self.account.session.post(self.server + uri, cookies={
-                    'userId': self.account.token['userId'],
-                    'serviceToken': self.account.token['serviceToken'],
+                r = await self.auth.session.post(self.server + uri, cookies={
+                    'userId': self.auth.token['userId'],
+                    'serviceToken': self.auth.token['serviceToken'],
                     # 'locale': 'en_US'
                 }, headers={
-                    'User-Agent': self.account.user_agent,
+                    'User-Agent': self.auth.user_agent,
                     'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2'
-                }, data=self.account.sign(uri, data), timeout=10)
+                }, data=self.auth.sign(uri, data), timeout=10)
                 resp = await r.json(content_type=None)
                 code = resp['code']
                 if code == 0:
