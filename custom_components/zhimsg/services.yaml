@@ -10,4 +10,4 @@ miai:
   fields:
     message:
       description: 消息内容
-      example: '您好，我是小爱'
+      example: '音量50%，我是小爱'

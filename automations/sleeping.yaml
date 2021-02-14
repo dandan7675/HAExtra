@@ -35,7 +35,7 @@
   action:
     - service: zhimsg.miai
       data:
-        volume: 30
+        message: 音量30
     - service: shell_command.magic_off
     # - service: fan.set_speed
     #   data:
@@ -80,7 +80,7 @@
   action:
     - service: zhimsg.miai
       data:
-        volume: 60
+        message: 音量30
     # - service: climate.set_fan_mode
     #   data:
     #     entity_id: climate.zhu_wo_kong_diao
