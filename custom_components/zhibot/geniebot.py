@@ -12,10 +12,13 @@ class geniebot(basebot):
 
     async def async_handle(self, data):
         self.data = data
-        return await handleRequest(data)
+        return await handleRequest(self.hass, data)
 
     def error(self, err):
-        return errorResult('ACCESS_TOKEN_INVALIDATE' if type(err) == PermissionError else 'SERVICE_ERROR')
+        if type(err) == PermissionError:
+            return errorResult('ACCESS_TOKEN_INVALIDATE')
+        self.data = {}
+        return errorResult('SERVICE_ERROR')
 
     def response(self, answer):
         return self.json(makeResponse(self.data, answer))

@@ -36,7 +36,7 @@ def errorResult(code):
 
 
 def makeResponse(data, result):
-    header = data.get('header', {})
+    header = (data or {}).get('header', {})
     error = 'errorCode' in result
     header['name'] = ('Error' if error or 'name' not in header else header['name']) + 'Response'
 

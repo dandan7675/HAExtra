@@ -753,8 +753,6 @@ panel_iframe:
 
 actuator:
 
-genie:
-
 micom:
     username: !secret micom_username
     password: !secret micom_password
