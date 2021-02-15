@@ -1,4 +1,4 @@
-from .genie import handleRequest
+from .genie import handleRequest, makeResponse, errorResult
 from .basebot import basebot
 
 import logging
@@ -11,7 +11,14 @@ class geniebot(basebot):
         return data['payload']['accessToken']
 
     async def async_handle(self, data):
-        return await handleRequest(data)
+        self.data = data
+        return await handleRequest(self.hass, data)
+
+    def error(self, err):
+        if type(err) == PermissionError:
+            return errorResult('ACCESS_TOKEN_INVALIDATE')
+        self.data = {}
+        return errorResult('SERVICE_ERROR')
 
     def response(self, answer):
-        return self.json(answer)
+        return self.json(makeResponse(self.data, answer))
