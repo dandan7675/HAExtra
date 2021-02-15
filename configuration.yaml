@@ -761,6 +761,7 @@ micom:
 
 zhimsg:
   - platform: ding
+    name: 钉钉消息
     token: !secret dingbot_token
     secret: !secret dingbot_secret
   - platform: miai

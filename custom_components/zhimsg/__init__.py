@@ -60,6 +60,7 @@ async def async_send(service, message, data={}):
     try:
         instance = SERVICES[service]
         if type(instance) == list:
+            error = None
             for inst in instance:
                 err = await inst.async_send(message, data)
                 if err:

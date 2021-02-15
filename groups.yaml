@@ -14,6 +14,7 @@ default_view:
     - person.wai_gong
     - person.wai_po
     - person.a_yi
+    - input_text.ding_ding_xiao_xi
     - camera.can_ting_she_xiang_ji
     - camera.guo_dao_she_xiang_ji
     - camera.zhu_wo_she_xiang_ji
