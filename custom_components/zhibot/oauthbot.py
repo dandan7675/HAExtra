@@ -14,14 +14,8 @@ class oauthbot(basebot):
 
     def __init__(self, platform, hass, conf):
         super().__init__(platform, hass, conf)
+        # TODO: 这TMD到底是不是OAuth的最佳姿势？严重怀疑
         hass.auth._store.async_create_refresh_token = self.async_create_refresh_token
-
-    async def async_config(self, data):
-        access_token = self.get_access_token(data)
-        return access_token and await self.hass.auth.async_validate_access_token(access_token) is not None
-
-    def get_access_token(data):
-        return None
 
     async def async_create_refresh_token(self, user, client_id=None, client_name=None, client_icon=None, token_type=models.TOKEN_TYPE_NORMAL, access_token_expiration=ACCESS_TOKEN_EXPIRATION):
         if access_token_expiration == ACCESS_TOKEN_EXPIRATION:

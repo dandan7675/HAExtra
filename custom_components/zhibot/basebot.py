@@ -48,7 +48,13 @@ class basebot(HomeAssistantView):
         return "未能处理"
 
     async def async_check(self, request, data):
+        access_token = self.access_token(data)
+        if access_token is not None:
+            return await self.hass.auth.async_validate_access_token(access_token) is not None
         return await self.hass.async_add_executor_job(self.check, request, data)
+
+    def access_token(data):
+        return None
 
     def check(self, request, data):
         if self.password is not None:
