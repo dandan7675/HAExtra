@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# encoding: utf-8
 import json
 import logging
 
@@ -22,7 +20,7 @@ def hassRest(cmd, data=None):
     headers = {'Authorization': 'Bearer ' + _restToken,
                'Content-Type': 'application/json'} if _restToken else None
     result = requests.request(method, url, data=data,
-                              headers=headers, timeout=3).text
+                              headers=headers, timeout=3, verify=False).text
     #_LOGGER.info('REST RESPONSE: %s', result)
     return json.loads(result)
 
@@ -443,38 +441,3 @@ def guessPropertyAndAction(entity_id, attributes, state):
         if state != 'off':
             state = 'on'
     return ({'name': name.lower(), 'value': state}, 'Query' + name)
-
-
-async def main():
-    import os
-    import sys
-    try:
-        REQUEST_METHOD = os.getenv('REQUEST_METHOD')
-        if REQUEST_METHOD == 'POST':
-            data = json.load(sys.stdin)
-            _LOGGER.debug(json.dumps(_request, indent=2))
-        else:
-            data = {
-                'header': {'namespace': 'AliGenie.Iot.Device.Discovery', 'name': 'DiscoveryDevices', 'messageId': 'd0c17289-55df-4c8c-955f-b735e9bdd305'},
-                # 'header': {'namespace': 'AliGenie.Iot.Device.Control', 'name': 'TurnOn', 'messageId': 'd0c17289-55df-4c8c-955f-b735e9bdd305'},
-                # 'header': {'namespace': 'AliGenie.Iot.Device.Query', 'name': 'Query', 'messageId': 'd0c17289-55df-4c8c-955f-b735e9bdd305'},
-                'payload': {'accessToken': sys.argv[1] if len(sys.argv) > 1 else 'https_192.168.1.10_8123_token', 'deviceId': 'weather.caiyun', 'deviceType': 'sensor'}
-            }
-        response = await handleRequest(data)
-    except:
-        import traceback
-        _LOGGER.error(traceback.format_exc())
-        response = {'header': {'name': 'errorResult'},
-                    'payload': errorResult('SERVICE_ERROR', 'json error')}
-
-    print('Content-Type: application/json\r\n')
-    print(json.dumps(response, indent=2, ensure_ascii=False))
-
-
-if __name__ == '__main__':
-    import asyncio
-    _LOGGER.setLevel(logging.DEBUG)
-    _LOGGER.addHandler(logging.StreamHandler())
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.close()
