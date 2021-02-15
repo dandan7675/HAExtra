@@ -13,7 +13,7 @@ async def handleRequest(hass, request):
     _LOGGER.debug("Handle Request: %s", request)
     namespace = header['namespace']
     if namespace == 'AliGenie.Iot.Device.Discovery':
-        return discoveryDevice(hass)
+        return await discoveryDevice(hass)
     elif namespace == 'AliGenie.Iot.Device.Control':
         return await controlDevice(hass, header, payload)
     elif namespace == 'AliGenie.Iot.Device.Query':
@@ -57,15 +57,14 @@ def makeResponse(data, result):
     return response
 
 
-def discoveryDevice(hass):
-    # 因为天猫精灵不会经常调用发现协议，每次发现后释放以节约内存
-    from urllib.request import urlopen
-    places = json.loads(urlopen('https://open.bot.tmall.com/oauth/api/placelist').read().decode('utf-8'))['data']
-    if _CHECK_ALIAS:
-        aliases = json.loads(urlopen('https://open.bot.tmall.com/oauth/api/aliaslist').read().decode('utf-8'))['data']
-        aliases.append({'key': '电视', 'value': ['电视机']})
-    else:
-        aliases = None
+async def discoveryDevice(hass):
+    from aiohttp import ClientSession
+    async with ClientSession() as session:
+        async with session.get('https://open.bot.tmall.com/oauth/api/placelist') as resp:
+            places = (await resp.json())['data']
+        async with session.get('https://open.bot.tmall.com/oauth/api/aliaslist') as resp:
+            aliases = (await resp.json())['data']
+            aliases.append({'key': '电视', 'value': ['电视机']})
 
     states = hass.states.async_all()
     groups_ttributes = groupsAttributes(states)
@@ -78,24 +77,23 @@ def discoveryDevice(hass):
             continue
 
         friendly_name = attributes.get('friendly_name')
-        if friendly_name is None:
+        if not friendly_name:
             continue
 
         entity_id = state.entity_id
         deviceType = guessDeviceType(entity_id, attributes)
-        if deviceType is None:
+        if not deviceType:
             continue
 
-        deviceName = guessDeviceName(entity_id, attributes, places, aliases)
-        if deviceName is None:
+        deviceName = guessDeviceName(friendly_name, attributes, places)
+        if not checkAliasName(deviceName, entity_id, aliases):
             continue
 
         zone = guessZone(entity_id, attributes, groups_ttributes, places)
-        if zone is None:
+        if not zone:
             continue
 
-        prop, action = guessPropertyAndAction(
-            entity_id, attributes, state.state)
+        prop, action = guessPropertyAndAction(entity_id, attributes, state.state)
         if prop is None:
             continue
 
@@ -239,7 +237,7 @@ INCLUDE_DOMAINS = {
     'sensor': 'sensor',
     'light': 'light',
     'media_player': 'television',
-    'remote': 'telecontroller',
+    #'remote': 'telecontroller',
     'switch': 'switch',
     'vacuum': 'roboticvacuum',
     'cover': 'curtain',
@@ -268,27 +266,29 @@ def guessDeviceType(entity_id, attributes):
     return INCLUDE_DOMAINS[domain] if domain in INCLUDE_DOMAINS else None
 
 
-def guessDeviceName(entity_id, attributes, places, aliases):
+def guessDeviceName(friendly_name, attributes, places):
     if 'genie_deviceName' in attributes:
         return attributes['genie_deviceName']
 
     # Remove place prefix
-    name = attributes['friendly_name']
     for place in places:
-        if name.startswith(place):
-            name = name[len(place):]
-            break
+        if friendly_name.startswith(place):
+            return friendly_name[len(place):]
 
-    if aliases is None or entity_id.startswith('sensor'):
-        return name
+    return friendly_name
+
+
+def checkAliasName(deviceName, entity_id, aliases):
+    if entity_id.startswith('sensor'):
+        return True
 
     # Name validation
     for alias in aliases:
-        if name == alias['key'] or name in alias['value']:
-            return name
+        if deviceName == alias['key'] or deviceName in alias['value']:
+            return True
 
-    _LOGGER.error('%s is not a valid name in https://open.bot.tmall.com/oauth/api/aliaslist', name)
-    return None
+    _LOGGER.error('%s is not a valid name in https://open.bot.tmall.com/oauth/api/aliaslist', deviceName)
+    return False
 
 
 def groupsAttributes(states):

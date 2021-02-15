@@ -184,7 +184,7 @@ switch.yin_xiang:
   dash_extra: original_state
   dash_extra_click: 'callService(''mqtt'', ''publish'', {''topic'': ''NodeMCU3/relay/0/set'',
     ''payload'': ''toggle''})'
-  genie_deviceName: 机顶盒
+  genie_deviceName: 电视盒子
   genie_deviceType: STB
 vacuum.sao_di_ji:
   dash_extra_forced: 'eval:"${status}"=="Charging" ? "充电中" : ("${status}"=="Charger
