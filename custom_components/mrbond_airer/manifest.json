@@ -1,0 +1,12 @@
+{
+  "domain": "miio",
+  "name": "MrBond Airer M1/M1Pro",
+  "documentation": "https://github.com/Yonsm/HAExtra",
+  "requirements": [
+    "python-miio>=0.5.2.1"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@Yonsm"
+  ]
+}
