@@ -2,7 +2,6 @@ from homeassistant.util import slugify
 from homeassistant.util.json import load_json, save_json
 from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.components.http import HomeAssistantView
-# from homeassistant.components.http import KEY_HASS
 
 import logging
 _LOGGER = logging.getLogger(__package__)
@@ -29,23 +28,27 @@ class basebot(HomeAssistantView):
 
     async def post(self, request):
         try:
+            # from homeassistant.components.http import KEY_HASS
             # request[KEY_REAL_IP]
             # request.app[KEY_HASS]
             data = await request.json()
             _LOGGER.debug("REQUEST: %s", data)
-            answer = await self.async_handle(data) if await self.async_check(request, data) else "没有访问授权！"
-        except:
+            answer = await self.async_handle(data) if await self.async_check(request, data) else self.error(PermissionError("没有访问授权！"))
+        except Exception as e:
             import traceback
             _LOGGER.error(traceback.format_exc())
-            answer = "程序出错啦！"
+            answer = self.error(e)
         _LOGGER.debug("RESPONSE: %s", answer)
         return self.response(answer)
-
+    
     def response(self, answer):
         return answer
 
+    def error(self, err):
+        return str(err)
+
     async def async_handle(self, data):
-        return "未能处理"
+        return self.error(NotImplementedError('未能处理'))
 
     async def async_check(self, request, data):
         access_token = self.access_token(data)

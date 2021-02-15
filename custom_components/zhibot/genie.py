@@ -1,6 +1,8 @@
 import json
 import logging
 
+from requests.api import head
+
 _LOGGER = logging.getLogger(__name__)
 
 _hass = None
@@ -53,29 +55,44 @@ async def hassService(domain, service, data):
     return hassRest('services/' + domain + '/' + service, data)
 
 
-async def validateToken(payload):
-    """Validate access token or rest api information"""
-    accessToken = payload.get('accessToken')
+# async def validateToken(payload):
+#     """Validate access token or rest api information"""
+#     accessToken = payload.get('accessToken')
 
-    if _hass:
-        token = await _hass.auth.async_validate_access_token(accessToken)
-        return token is not None
+#     if _hass:
+#         token = await _hass.auth.async_validate_access_token(accessToken)
+#         return token is not None
 
-    if accessToken.startswith('http'):
-        global _restApi
-        global _restToken
-        global _CHECK_ALIAS
-        parts = accessToken.split('_')
-        _CHECK_ALIAS = parts[1][-1:].isupper()   # Trick
-        _restApi = parts[0] + '://' + parts[1] + ':' + parts[2] + '/api/'
-        _restToken = parts[3]
-        _LOGGER.debug('REST URL: %s, TOKEN: %s', _restApi, _restToken)
-        return True
+#     if accessToken.startswith('http'):
+#         global _restApi
+#         global _restToken
+#         global _CHECK_ALIAS
+#         parts = accessToken.split('_')
+#         _CHECK_ALIAS = parts[1][-1:].isupper()   # Trick
+#         _restApi = parts[0] + '://' + parts[1] + ':' + parts[2] + '/api/'
+#         _restToken = parts[3]
+#         _LOGGER.debug('REST URL: %s, TOKEN: %s', _restApi, _restToken)
+#         return True
 
-    return False
+#     return False
 
 
-def errorResult(errorCode, messsage=None):
+async def handleRequest(request):
+    """Handle request"""
+    header = request['header']
+    payload = request['payload']
+    _LOGGER.debug("Handle Request: %s", request)
+    namespace = header['namespace']
+    if namespace == 'AliGenie.Iot.Device.Discovery':
+        return discoveryDevice()
+    elif namespace == 'AliGenie.Iot.Device.Control':
+        return await controlDevice(header, payload)
+    elif namespace == 'AliGenie.Iot.Device.Query':
+        return queryDevice(payload)
+    return errorResult('SERVICE_ERROR')
+
+
+def errorResult(code):
     """Generate error result"""
     messages = {
         'INVALIDATE_CONTROL_ORDER':    'invalidate control order',
@@ -86,51 +103,27 @@ def errorResult(errorCode, messsage=None):
         'IOT_DEVICE_OFFLINE': 'device is offline',
         'ACCESS_TOKEN_INVALIDATE': ' access_token is invalidate'
     }
-    return {'errorCode': errorCode, 'message': messsage if messsage else messages[errorCode]}
+    return {'errorCode': code, 'message': messages[code]}
 
 
-async def handleRequest(data):
-    """Handle request"""
-    try:
-        header = data['header']
-        payload = data['payload']
-        properties = None
-        name = header['name']
-        _LOGGER.debug("Handle Request: %s", data)
+def makeResponse(data, result):
+    header = data.get('header', {})
+    error = 'errorCode' in result
+    header['name'] = ('Error' if error or 'name' not in header else header['name']) + 'Response'
 
-        if await validateToken(payload):
-            namespace = header['namespace']
-            if namespace == 'AliGenie.Iot.Device.Discovery':
-                result = discoveryDevice()
-            elif namespace == 'AliGenie.Iot.Device.Control':
-                result = await controlDevice(name, payload)
-            elif namespace == 'AliGenie.Iot.Device.Query':
-                result = queryDevice(name, payload)
-                if not 'errorCode' in result:
-                    properties = result
-                    result = {}
-            else:
-                result = errorResult('SERVICE_ERROR')
-        else:
-            result = errorResult('ACCESS_TOKEN_INVALIDATE')
+    if header.get('namespace') == 'AliGenie.Iot.Device.Query' and not error:
+        properties = result
+        result = {}
 
-        # Check error and fill response name
-        header['name'] = (
-            'Error' if 'errorCode' in result else name) + 'Response'
+    payload = data.get('payload', {})
+    if 'deviceId' in payload:
+        result['deviceId'] = payload['deviceId']
 
-        # Fill response deviceId
-        if 'deviceId' in payload:
-            result['deviceId'] = payload['deviceId']
-
-        response = {'header': header, 'payload': result}
-        if properties:
-            response['properties'] = properties
-        #_LOGGER.info("Respnose: %s", response)
-        return response
-    except:
-        import traceback
-        _LOGGER.error(traceback.format_exc())
-        return {'header': {'name': 'errorResult'}, 'payload': errorResult('SERVICE_ERROR', 'service exception')}
+    response = {'header': header, 'payload': result}
+    if properties:
+        response['properties'] = properties
+    #_LOGGER.info("Respnose: %s", response)
+    return response
 
 
 def discoveryDevice():
@@ -216,29 +209,25 @@ def discoveryDevice():
         # if sensor['deviceType'] == 'sensor':
         # _LOGGER.info(json.dumps(sensor, indent=2, ensure_ascii=False))
 
-    return {'devices': devices}
+    return m{'devices': devices}
 
 
-async def controlDevice(name, payload):
+async def controlDevice(header, payload):
     entity_id = payload['deviceId']
-    service = getControlService(name)
+    service = getControlService(header['name'])
     domain = entity_id[:entity_id.find('.')]
     data = {"entity_id": entity_id}
     if domain == 'cover':
         service = 'close_cover' if service == 'turn_off' else 'open_cover'
 
     result = await hassService(domain, service, data)
-
     return {} if result else errorResult('IOT_DEVICE_OFFLINE')
 
 
-def queryDevice(name, payload):
+def queryDevice(payload):
     deviceId = payload['deviceId']
-
     if payload['deviceType'] == 'sensor':
-
         states = hassStates()
-
         entity_ids = []
         for state in states:
             attributes = state.attributes
@@ -251,17 +240,16 @@ def queryDevice(name, payload):
             entity_id = state.entity_id
             attributes = state.attributes
             if entity_id.startswith('sensor.') and (entity_id in entity_ids or attributes['friendly_name'].startswith(deviceId) or attributes.get('genie_zone') == deviceId):
-                prop, action = guessPropertyAndAction(
-                    entity_id, attributes, state.state)
+                prop, action = guessPropertyAndAction(entity_id, attributes, state.state)
                 if prop is None:
                     continue
                 properties.append(prop)
         return properties
-    else:
-        state = hassState(deviceId)
-        if state is not None or state.state != 'unavailable':
-            return {'name': 'powerstate', 'value': 'off' if state.state == 'off' else 'on'}
-    return errorResult('IOT_DEVICE_OFFLINE')
+
+    state = hassState(deviceId)
+    if state is None or state.state == 'unavailable':
+        return errorResult('IOT_DEVICE_OFFLINE')
+    return {'name': 'powerstate', 'value': 'off' if state.state == 'off' else 'on'}
 
 
 def getControlService(action):

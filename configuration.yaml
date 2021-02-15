@@ -778,6 +778,7 @@ zhimsg:
     model: lx04
 
 zhibot:
+  - platform: genie
   - platform: miai
     password: !secret zhibot_password
   - platform: ding
