@@ -26,6 +26,7 @@ binary_sensor.switch_158d000201a73f:
   friendly_name: 书房按钮
   hidden: true
 binary_sensor.switch_158d00054e98b0:
+  friendly_name: 主卧按钮
   hidden: true
 camera.can_ting_she_xiang_ji:
   dash_click: mihome://device?did=79750727&uid=8816080&server=cn

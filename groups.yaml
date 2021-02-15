@@ -33,6 +33,7 @@ default_view:
     - climate.ke_ting_kong_diao
     - climate.ke_ting_di_nuan
     - remote.hong_wai_yao_kong
+    - input_text.ke_ting_yin_xiang
 
 餐厅:
   icon: mdi:silverware-fork-knife
@@ -70,7 +71,7 @@ default_view:
     - binary_sensor.door_window_sensor_158d0003cf4735
     - light.xi_shou_jian_deng
     - switch.xi_shou_jian_pai_qi_shan
-    - input_text.yu_yin_bo_bao
+    - input_text.guo_dao_yin_xiang
 
 主卧:
   icon: mdi:bed-king
@@ -81,6 +82,8 @@ default_view:
     - sensor.zhu_wo_er_yang_hua_tan
     - sensor.zhu_wo_liang_du
     - binary_sensor.door_window_sensor_158d0004611461
+    - binary_sensor.switch_158d00054e98b0
+    - binary_sensor.switch_158d0001e59b33
     - light.zhu_wo_deng
     #- switch.zhu_wo_dian_shi
     #- switch.yi_gui_chu_shi_ji
@@ -116,6 +119,7 @@ default_view:
     - fan.er_tong_fang_jing_hua_qi
     # - fan.er_tong_fang_feng_shan
     - climate.er_tong_fang_kong_diao
+    - input_text.er_tong_fang_yin_xiang
 
 书房:
   icon: mdi:bookshelf
@@ -125,6 +129,7 @@ default_view:
     - sensor.shu_fang_er_yang_hua_tan
     - sensor.shu_fang_liang_du
     - binary_sensor.motion_sensor_158d0003d0d46e
+    - binary_sensor.switch_158d000201a73f
     - light.shu_fang_tai_deng
     - light.liang_yi_jia_deng
     - media_player.tou_ying_yi

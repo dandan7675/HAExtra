@@ -42,6 +42,7 @@ async def async_setup(hass, config):
             entities.append(create_input_entity(hass, name, service, initial_text))
         if service not in SERVICES:
             SERVICES[service] = instance
+            _LOGGER.debug("Service as %s.%s", DOMAIN, platform)
             hass.services.async_register(DOMAIN, service, async_call, schema=SERVICE_SCHEMA)
 
     if len(entities):
