@@ -59,7 +59,7 @@ automation: !include_dir_merge_list automations
 #scene: !include scenes.yaml
 
 mqtt:
-  broker: localhost
+  broker: Hass
 
 modbus:
   type: rtuovertcp

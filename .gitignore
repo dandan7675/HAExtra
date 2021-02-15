@@ -1,9 +1,12 @@
+/deps
+/blueprints
+/secrets.yaml
+/known_devices.yaml
+/www/*.jpg
 __pycache__
-.*
 *.crt
 *.key
-secrets.yaml
-known_devices.yaml
-www/*.jpg
-bravia.conf
 *.pem
+*.log
+*.db
+.*
