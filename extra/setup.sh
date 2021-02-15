@@ -177,3 +177,19 @@ pip3 install wheel homeassistant
 systemctl mask kodi
 systemctl start kodi
 systemctl stop kodi
+
+# Python 3.9
+apt install build-essential checkinstall
+apt install libreadline-gplv2-dev libncursesw5-dev libssl-dev \
+    libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+cd /opt
+wget -o Python.tgz https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz
+tar xzf Python.tgz
+cd Python
+./configure --prefix=/usr --enable-optimizations
+make build_all
+#make install
+make altinstall
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+cd /opt && rm -rf Python*
