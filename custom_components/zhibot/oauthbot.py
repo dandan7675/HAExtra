@@ -1,14 +1,13 @@
-from datetime import timedelta
 from typing import Optional
+from datetime import timedelta
 import homeassistant.auth.models as models
 from homeassistant.auth.const import ACCESS_TOKEN_EXPIRATION
-from .genie import handleRequest
 from .basebot import basebot
 
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-EXPIRE_HOURS = 8760  # 365天过期
+EXPIRE_HOURS = 8760  # 365*24
 
 
 class oauthbot(basebot):
@@ -24,16 +23,9 @@ class oauthbot(basebot):
     def get_access_token(data):
         return None
 
-    async def async_create_refresh_token(self,
-                                         user: models.User, client_id: Optional[str] = None,
-                                         client_name: Optional[str] = None,
-                                         client_icon: Optional[str] = None,
-                                         token_type: str = models.TOKEN_TYPE_NORMAL,
-                                         access_token_expiration: timedelta = ACCESS_TOKEN_EXPIRATION) -> models.RefreshToken:
+    async def async_create_refresh_token(self, user, client_id=None, client_name=None, client_icon=None, token_type=models.TOKEN_TYPE_NORMAL, access_token_expiration=ACCESS_TOKEN_EXPIRATION):
         if access_token_expiration == ACCESS_TOKEN_EXPIRATION:
             access_token_expiration = timedelta(hours=EXPIRE_HOURS)
-        _LOGGER.info('Access token expiration: %d hours', EXPIRE_HOURS)
-        """Create a new token for a user."""
         kwargs = {
             'user': user,
             'client_id': client_id,
@@ -50,15 +42,3 @@ class oauthbot(basebot):
 
         self.hass.auth._store._async_schedule_save()
         return refresh_token
-
-
-class geniebot(oauthbot):
-
-    def get_access_token(self, data):
-        return data['payload']['accessToken']
-
-    async def async_handle(self, data):
-        return 'TODO'
-
-    def response(self, answer):
-        return self.json(answer)
