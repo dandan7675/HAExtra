@@ -27,8 +27,8 @@ frontend:
 config:
 
 http:
-  ssl_key: ~/.homeassistant/fullchain.pem
-  ssl_certificate: ~/.homeassistant/privkey.pem
+  ssl_key: ~/.homeassistant/ssl.key
+  ssl_certificate: ~/.homeassistant/ssl.crt
 
 history:
   exclude:
