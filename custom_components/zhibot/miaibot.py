@@ -9,10 +9,10 @@ _LOGGER = logging.getLogger(__name__)
 
 class miaibot(basebot):
 
-    def config(self, data):
+    def check(self, request, data):
         if data['session']['application']['app_id'] in self.conf:
             return True
-        return super().config(data)
+        return super().check(request, data)
 
     def config_done(self, data):
         self.conf.append(data['session']['application']['app_id'])
@@ -24,7 +24,7 @@ class miaibot(basebot):
         self._open_mic = False
         return await super().post(request)
 
-    async def handle(self, data):
+    async def async_handle(self, data):
 
         request = data['request']
 

@@ -33,7 +33,7 @@ class basebot(HomeAssistantView):
             # request.app[KEY_HASS]
             data = await request.json()
             _LOGGER.debug("REQUEST: %s", data)
-            answer = await self.handle(data) if self.check(request, data) else "没有访问授权！"
+            answer = await self.async_handle(data) if await self.async_check(request, data) else "没有访问授权！"
         except:
             import traceback
             _LOGGER.error(traceback.format_exc())
@@ -44,8 +44,11 @@ class basebot(HomeAssistantView):
     def response(self, answer):
         return answer
 
-    async def handle(self, data):
+    async def async_handle(self, data):
         return "未能处理"
+
+    async def async_check(self, request, data):
+        return await self.hass.async_add_executor_job(self.check, request, data)
 
     def check(self, request, data):
         if self.password is not None:
