@@ -28,8 +28,8 @@ frontend:
 config:
 
 http:
-  ssl_key: ~/.homeassistant/h.yonsm.tk.key
-  ssl_certificate: ~/.homeassistant/h.yonsm.tk.crt
+  ssl_key: ~/.homeassistant/fullchain.pem
+  ssl_certificate: ~/.homeassistant/privkey.pem
 
 history:
   exclude:
