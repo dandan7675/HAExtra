@@ -1,94 +1,23 @@
 import json
 import logging
 
-from requests.api import head
-
 _LOGGER = logging.getLogger(__name__)
-
-_hass = None
-_restApi = None
-_restToken = None
 
 _CHECK_ALIAS = False  # 仅显示有效的天猫精灵设备名称（初次为了验证名称是否正确，请打开此开关）
 
 
-def hassRest(cmd, data=None):
-    import requests
-
-    url = _restApi + cmd
-    method = 'POST' if data else 'GET'
-    _LOGGER.debug('REST %s %s %s', method, url, data or '')
-
-    headers = {'Authorization': 'Bearer ' + _restToken,
-               'Content-Type': 'application/json'} if _restToken else None
-    result = requests.request(method, url, data=data,
-                              headers=headers, timeout=3, verify=False).text
-    #_LOGGER.info('REST RESPONSE: %s', result)
-    return json.loads(result)
-
-
-def hassStates():
-    if _hass:
-        return _hass.states.async_all()
-
-    states = []
-    from collections import namedtuple
-    for d in hassRest('states'):
-        states.append(namedtuple('EntityState', d.keys())(*d.values()))
-    return states
-
-
-def hassState(entity_id):
-    if _hass:
-        return _hass.states.get(entity_id)
-
-    from collections import namedtuple
-    d = hassRest('states/' + entity_id)
-    return namedtuple('EntityState', d.keys())(*d.values())
-
-
-async def hassService(domain, service, data):
-    if _hass:
-        with AsyncTrackStates(_hass) as changed_states:
-            return await _hass.services.async_call(domain, service, data, True)
-
-    return hassRest('services/' + domain + '/' + service, data)
-
-
-# async def validateToken(payload):
-#     """Validate access token or rest api information"""
-#     accessToken = payload.get('accessToken')
-
-#     if _hass:
-#         token = await _hass.auth.async_validate_access_token(accessToken)
-#         return token is not None
-
-#     if accessToken.startswith('http'):
-#         global _restApi
-#         global _restToken
-#         global _CHECK_ALIAS
-#         parts = accessToken.split('_')
-#         _CHECK_ALIAS = parts[1][-1:].isupper()   # Trick
-#         _restApi = parts[0] + '://' + parts[1] + ':' + parts[2] + '/api/'
-#         _restToken = parts[3]
-#         _LOGGER.debug('REST URL: %s, TOKEN: %s', _restApi, _restToken)
-#         return True
-
-#     return False
-
-
-async def handleRequest(request):
+async def handleRequest(hass, request):
     """Handle request"""
     header = request['header']
     payload = request['payload']
     _LOGGER.debug("Handle Request: %s", request)
     namespace = header['namespace']
     if namespace == 'AliGenie.Iot.Device.Discovery':
-        return discoveryDevice()
+        return discoveryDevice(hass)
     elif namespace == 'AliGenie.Iot.Device.Control':
-        return await controlDevice(header, payload)
+        return await controlDevice(hass, header, payload)
     elif namespace == 'AliGenie.Iot.Device.Query':
-        return queryDevice(payload)
+        return queryDevice(hass, payload)
     return errorResult('SERVICE_ERROR')
 
 
@@ -114,6 +43,8 @@ def makeResponse(data, result):
     if header.get('namespace') == 'AliGenie.Iot.Device.Query' and not error:
         properties = result
         result = {}
+    else:
+        properties = None
 
     payload = data.get('payload', {})
     if 'deviceId' in payload:
@@ -126,20 +57,17 @@ def makeResponse(data, result):
     return response
 
 
-def discoveryDevice():
+def discoveryDevice(hass):
     # 因为天猫精灵不会经常调用发现协议，每次发现后释放以节约内存
     from urllib.request import urlopen
-    places = json.loads(urlopen(
-        'https://open.bot.tmall.com/oauth/api/placelist').read().decode('utf-8'))['data']
+    places = json.loads(urlopen('https://open.bot.tmall.com/oauth/api/placelist').read().decode('utf-8'))['data']
     if _CHECK_ALIAS:
-        aliases = json.loads(urlopen(
-            'https://open.bot.tmall.com/oauth/api/aliaslist').read().decode('utf-8'))['data']
+        aliases = json.loads(urlopen('https://open.bot.tmall.com/oauth/api/aliaslist').read().decode('utf-8'))['data']
         aliases.append({'key': '电视', 'value': ['电视机']})
     else:
         aliases = None
 
-    states = hassStates()
-
+    states = hass.states.async_all()
     groups_ttributes = groupsAttributes(states)
 
     devices = []
@@ -209,10 +137,10 @@ def discoveryDevice():
         # if sensor['deviceType'] == 'sensor':
         # _LOGGER.info(json.dumps(sensor, indent=2, ensure_ascii=False))
 
-    return m{'devices': devices}
+    return {'devices': devices}
 
 
-async def controlDevice(header, payload):
+async def controlDevice(hass, header, payload):
     entity_id = payload['deviceId']
     service = getControlService(header['name'])
     domain = entity_id[:entity_id.find('.')]
@@ -220,14 +148,14 @@ async def controlDevice(header, payload):
     if domain == 'cover':
         service = 'close_cover' if service == 'turn_off' else 'open_cover'
 
-    result = await hassService(domain, service, data)
+    result = await hass.services.async_call(domain, service, data, True)
     return {} if result else errorResult('IOT_DEVICE_OFFLINE')
 
 
-def queryDevice(payload):
+def queryDevice(hass, payload):
     deviceId = payload['deviceId']
     if payload['deviceType'] == 'sensor':
-        states = hassStates()
+        states = hass.states.async_all()
         entity_ids = []
         for state in states:
             attributes = state.attributes
@@ -246,7 +174,7 @@ def queryDevice(payload):
                 properties.append(prop)
         return properties
 
-    state = hassState(deviceId)
+    state = hass.states.get(deviceId)
     if state is None or state.state == 'unavailable':
         return errorResult('IOT_DEVICE_OFFLINE')
     return {'name': 'powerstate', 'value': 'off' if state.state == 'off' else 'on'}
@@ -328,7 +256,6 @@ EXCLUDE_DOMAINS = [
 
 def guessDeviceType(entity_id, attributes):
     # http://doc-bot.tmall.com/docs/doc.htm?treeId=393&articleId=108271&docType=1
-
     if 'genie_deviceType' in attributes:
         return attributes['genie_deviceType']
 
@@ -360,8 +287,7 @@ def guessDeviceName(entity_id, attributes, places, aliases):
         if name == alias['key'] or name in alias['value']:
             return name
 
-    _LOGGER.error(
-        '%s is not a valid name in https://open.bot.tmall.com/oauth/api/aliaslist', name)
+    _LOGGER.error('%s is not a valid name in https://open.bot.tmall.com/oauth/api/aliaslist', name)
     return None
 
 
@@ -376,10 +302,9 @@ def groupsAttributes(states):
                 groups_attributes.append(group_attributes)
     return groups_attributes
 
-# https://open.bot.tmall.com/oauth/api/placelist
-
 
 def guessZone(entity_id, attributes, groups_attributes, places):
+    # https://open.bot.tmall.com/oauth/api/placelist
     if 'genie_zone' in attributes:
         return attributes['genie_zone']
 
