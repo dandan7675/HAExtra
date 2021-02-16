@@ -24,4 +24,4 @@ class dingbot(basebot):
             return await zhiChat(self.hass, query)
 
     def response(self, result):
-        return {'msgtype': 'text', 'text': {'content': str(result)}}
+        return {'msgtype': 'text', 'text': {'content': result}}

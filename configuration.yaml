@@ -10,6 +10,7 @@ homeassistant:
 logger:
   default: warning
   logs:
+    custom_components.micom: debug
     custom_components.zhimsg: debug
     custom_components.zhibot: debug
 

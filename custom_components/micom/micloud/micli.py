@@ -75,14 +75,14 @@ async def miot_prop(cloud, did, argv):
             else:
                 if value[0] == '=':
                     value = value[1:]
-                elif value == 'none':
-                    value = None
-                elif value == 'false':
-                    value = False
-                elif value == 'true':
-                    value = True
-                else:
-                    value = int(value)
+                    if value == 'none':
+                        value = None
+                    elif value == 'false':
+                        value = False
+                    elif value == 'true':
+                        value = True
+                    else:
+                        value = int(value)
                 prop.append(value)
         props.append(prop)
     return await (cloud.miot_get_props if get else cloud.miot_set_props)(did, props)

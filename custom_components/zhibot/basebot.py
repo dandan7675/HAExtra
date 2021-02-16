@@ -38,7 +38,7 @@ class basebot(HomeAssistantView):
             result = e
             import traceback
             _LOGGER.error(traceback.format_exc())
-        return self.json(self.response(result))
+        return self.json(self.response(str(result) if isinstance(result, Exception) else result))
 
     def response(self, result):
         raise NotImplementedError()

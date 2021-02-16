@@ -51,7 +51,7 @@ class miaibot(basebot):
             'is_session_end': not self._open_mic,
             'response': {
                 'open_mic': self._open_mic,
-                'to_speak': {'type': 0, 'text': str(result)},
+                'to_speak': {'type': 0, 'text': result},
                 # 'to_display': {'type': 0,'text': text}
             }
         }
