@@ -221,7 +221,7 @@ class SaswellData():
                 json = await self.request(LIST_URL)
             devs = []
             for dev in json:
-                if type(dev) != dict:
+                if not isinstance(dev, dict):
                     raise TypeError(f"{json}")
                 status = dev['status'].split(',')
                 devs.append({ATTR_HVAC_MODE: HVAC_MODE_HEAT if status[1] == '1' else HVAC_MODE_OFF,

@@ -19,7 +19,7 @@ def errorPayload(errorCode):
 
 
 def makeResponse(payload, header={}, properties=None):
-    if type(payload) == str:
+    if isinstance(payload, str):
         payload = errorPayload(payload)
     error = 'errorCode' in payload or 'name' not in header
     header['name'] = ('Error' if error else header['name']) + 'Response'

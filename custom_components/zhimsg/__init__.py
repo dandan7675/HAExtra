@@ -64,7 +64,7 @@ async def async_call(call):
 async def async_send(service, message, data={}):
     try:
         instance = SERVICES[service]
-        if type(instance) == list:
+        if isinstance(instance, list):
             error = None
             for inst in instance:
                 err = await inst.async_send(message, data)

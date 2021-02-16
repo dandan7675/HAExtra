@@ -62,10 +62,9 @@ class MiIOCloud:
             if (len(prop) > 2):
                 api = 'prop/set'
                 value = prop[2]
-                value_type = type(value)
-                if value_type == bool or value is None:
+                if isinstance(value, bool) or value is None:
                     value = str(value).lower()
-                elif value_type == str and (len(prop) == 3 or prop[3]):
+                elif isinstance(value, str) and (len(prop) == 3 or prop[3]):
                     value = ('"' + value + '"')
                 params += ', "value":%s' % value
             params += '}'
@@ -78,7 +77,7 @@ class MiIOCloud:
         return await self.miot_prop(did, {(siid, piid, value, quote)})  # TODO: Parse
 
     async def miot_action(self, did, siid, aiid, _in='[]'):
-        if type(_in) != str:
+        if not isinstance(_in, str):
             _in = json.dumps(_in)
         elif _in[0] != '[':
             _in = f'["{_in}"]'
@@ -87,4 +86,4 @@ class MiIOCloud:
 
     async def device_list(self):
         result = await self.request('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
-        return result.get('list') if type(result) != Exception else None
+        return None if isinstance(result, Exception) else result.get('list') 

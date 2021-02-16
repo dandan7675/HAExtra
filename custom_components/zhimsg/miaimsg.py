@@ -37,4 +37,4 @@ class miaimsg:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)
             result = await miiocloud().miot_action(self.did, siid, aiid, message)
-        return f"{result}" if type(result) == Exception else None
+        return f"{result}" if isinstance(result, Exception) else None
