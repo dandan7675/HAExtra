@@ -16,11 +16,14 @@ class basebot(HomeAssistantView):
 
         self.url = '/' + (self.name or platform)
         self.requires_auth = False
-        _LOGGER.debug(f"Serving on {self.url}")
 
         self.password = conf.get('password')
-        if self.password is None:  # Auth: config UI confirmation, intead of pre shared password
+        info = "Serving on " + self.url
+        if self.password:
+            info += '?password=' + self.password
+        else:
             self.init_auth(platform)
+        _LOGGER.info(info)
 
     async def post(self, request):
         try:
@@ -48,7 +51,7 @@ class basebot(HomeAssistantView):
         return self.error(NotImplementedError(f"未能处理：{data}"))
 
     async def async_check(self, request, data):
-        if self.password is not None:
+        if self.password:
             return self.password == request.query.get('password') or self.password == '*'
         return await self.async_check_auth(data)
 
