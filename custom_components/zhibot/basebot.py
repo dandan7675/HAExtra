@@ -41,7 +41,7 @@ class basebot(HomeAssistantView):
         return self.json(resp)
 
     def response(self, result):
-        return result
+        return [result]
 
     def error(self, err):
         return str(err)
@@ -50,11 +50,12 @@ class basebot(HomeAssistantView):
         return self.error(NotImplementedError('未能处理'))
 
     async def async_check(self, request, data):
-        if self.password is not None:
-            return self.password == request.query.get('password') or self.password == ''
-        return await self.hass.async_add_executor_job(self.config, data)
+        return self.check_password(request) if self.password is not None else self.check_config(data)
 
-    def config(self, data, desc="授权访问"):
+    def check_password(self, request):
+        return self.password == request.query.get('password') or self.password == '*'
+
+    def check_config(self, data, desc="授权访问"):
         configurator = self.hass.components.configurator
         if self.config_id:
             configurator.async_request_done(self.config_id)

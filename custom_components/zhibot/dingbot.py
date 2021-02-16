@@ -10,10 +10,10 @@ _LOGGER = logging.getLogger(__name__)
 
 class dingbot(basebot):
 
-    def config(self, data):
+    def check_config(self, data):
         if data['chatbotUserId'] in self.config_users:
             return True
-        return super().config(data, "钉钉群“%s”的“%s”正在试图访问“%s”。\n\nchatbotUserId: %s" % (data['conversationTitle'], data['senderNick'], data['text']['content'], data['chatbotUserId']))
+        return super().check_config(data, "钉钉群“%s”的“%s”正在试图访问“%s”。\n\nchatbotUserId: %s" % (data['conversationTitle'], data['senderNick'], data['text']['content'], data['chatbotUserId']))
 
     def config_ok(self, data):
         self.config_users.append(data['chatbotUserId'])
