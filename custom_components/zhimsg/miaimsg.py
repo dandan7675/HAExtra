@@ -22,7 +22,7 @@ class miaimsg:
             pos = message.find('%')
             start = 1 if message[0] == '%' else 2
             volume = message[start:None if pos == -1 else pos]
-            result = await miiocloud().miot_prop(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 1), volume, False)])
+            result = await miiocloud().miot_set_props(self.did, [(self.spec.get('volume_siid', 2), self.spec.get('volume_piid', 1), int(volume))])
             message = None if pos == -1 else message[pos+1:]
         else:
             result = Exception("空谈误国，实干兴邦！")
@@ -36,5 +36,5 @@ class miaimsg:
             else:
                 siid = self.spec.get('siid', 5)
                 aiid = self.spec.get('aiid', 1)
-            result = await miiocloud().miot_action(self.did, siid, aiid, message)
+            result = await miiocloud().miot_action_text(self.did, siid, aiid, message)
         return f"{result}" if isinstance(result, Exception) else None

@@ -50,35 +50,47 @@ async def miot(cloud, argv):
         return await cloud.miotspec(argv[2] if argc > 2 else 'action', arg1)
 
     if argc == 2:
-        return await cloud.miot_prop(arg1, [(1, 1), (1, 2), (1, 3), (1, 4)])
+        return await cloud.miot_get_props(arg1, [(1, 1), (1, 2), (1, 3), (1, 4)])
 
     if argc > 3:
-        _in = argv[3]
-        if _in[0] < '0' or _in[0] > '9':
+        text = argv[3]
+        if text[0] < '0' or text[0] > '9':
             siid, aiid = twins_split(argv[2], '/', 1)
-            return await cloud.miot_action(siid, aiid, _in, arg1)
+            return await cloud.miot_action_text(arg1, int(siid), int(aiid), text)
 
     return await miot_prop(cloud, arg1, argv)
 
 
 async def miot_prop(cloud, did, argv):
     props = []
+    get = False
     for i in range(2, len(argv)):
         arg = argv[i]
         key, value = twins_split(arg, '=')
-        prop = twins_split(key, '/', 1)
-        if value is not None:
-            keep = value[0] == '='
-            prop.append(value[1:] if keep else value)
-            if keep:
-                prop.append(False)
+        siid, piid = twins_split(key, '/', 1)
+        prop = [int(siid), int(piid)]
+        if not get:
+            if value is None:
+                get = True
+            else:
+                if value[0] == '=':
+                    value = value[1:]
+                elif value == 'none':
+                    value = None
+                elif value == 'false':
+                    value = False
+                elif value == 'true':
+                    value = True
+                else:
+                    value = int(value)
+                prop.append(value)
         props.append(prop)
-    return await cloud.miot_prop(did, props)
+    return await (cloud.miot_get_props if get else cloud.miot_set_props)(did, props)
 
 
 def twins_split(string, sep='/', default=None):
     pos = string.find(sep)
-    return [string, default] if pos == -1 else [string[0:pos], string[pos + 1:]]
+    return (string, default) if pos == -1 else (string[0:pos], string[pos + 1:])
 
 
 if __name__ == '__main__':

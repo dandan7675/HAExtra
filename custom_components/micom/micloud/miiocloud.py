@@ -12,10 +12,11 @@ class MiIOCloud:
         self.auth = auth
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
-    async def request(self, uri, data='', relogin=True):
+    async def request(self, uri, obj, relogin=True):
         if self.auth.token is not None or await self.auth.login():  # Ensure login
-            _LOGGER.debug(f"{uri} {data}")
             try:
+                data = json.dumps(obj)
+                _LOGGER.debug(f"{uri} {data}")
                 r = await self.auth.session.post(self.server + uri, cookies={
                     'userId': self.auth.token['userId'],
                     'serviceToken': self.auth.token['serviceToken'],
@@ -33,7 +34,7 @@ class MiIOCloud:
                 elif code == 2 and relogin:
                     _LOGGER.debug(f"Auth error on request {uri}, relogin...")
                     self.token = None  # Auth error, reset login
-                    return self.request(uri, data, False)
+                    return self.request(uri, obj, False)
             except Exception as e:
                 resp = e
         else:
@@ -42,48 +43,37 @@ class MiIOCloud:
         _LOGGER.error(error)
         return Exception(error)
 
-    async def miotspec(self, api, data='{}'):
-        return await self.request('/miotspec/' + api, data)
+    async def miotspec(self, api, params):
+        return await self.request('/miotspec/' + api, {'params': params})
 
-    async def miot_prop(self, did, props=[]):
-        prop_set = False
-        params = ''
-        for prop in props:
-            if params:
-                params += ', '
-            params += '{"did":"%s", "siid":%s, "piid":%s' % (did, prop[0], prop[1])
-            if (len(prop) > 2):
-                prop_set = True
-                value = prop[2]
-                if isinstance(value, bool) or value is None:
-                    value = str(value).lower()
-                elif isinstance(value, str) and (len(prop) == 3 or prop[3]):
-                    value = ('"' + value + '"')
-                params += ', "value":%s' % value
-            params += '}'
-        result = await self.miotspec('prop/' + 'set' if prop_set else 'get', '{"params": [' + params + ']}')
+    async def miot_get_props(self, did, props):
+        params = [{'did': did, 'siid': prop[0], 'piid': prop[1]} for prop in props]
+        result = await self.miotspec('prop/get', params)
         if isinstance(result, list):
-            if prop_set:
-                return [it.get('code') == 0 for it in result]
             return [it.get('value') if it.get('code') == 0 else None for it in result]
         return result
 
-    async def miot_prop_get(self, did, siid, piid=1):
-        result = await self.miot_prop(did, {(siid, piid)})
+    async def miot_set_props(self, did, props):
+        params = [{'did': did, 'siid': prop[0], 'piid': prop[1], 'value': prop[2]} for prop in props]
+        result = await self.miotspec('prop/set', params)
+        if isinstance(result, list):
+            return [it.get('code') == 0 for it in result]
+        return result
+
+    async def miot_get_prop(self, did, siid, piid):
+        result = await self.miot_get_props(did, [(siid, piid)])
         return result[0] if isinstance(result, list) else None
 
-    async def miot_prop_set(self, did, siid, piid, value, quote=True):
-        result = await self.miot_prop(did, {(siid, piid, value, quote)})
+    async def miot_set_prop(self, did, siid, piid, value):
+        result = await self.miot_set_props(did, [(siid, piid, value)])
         return result[0] if isinstance(result, list) else False
 
-    async def miot_action(self, did, siid, aiid, _in='[]'):
-        if not isinstance(_in, str):
-            _in = json.dumps(_in)
-        elif _in[0] != '[':
-            _in = f'["{_in}"]'
-        return await self.miotspec('action', '{"params": {"did":"%s", "siid":%s, "aiid":%s, "in":%s}}' % (
-            did or f'action-{siid}-{aiid}', siid, aiid, _in))
+    async def miot_action(self, did, siid, aiid, args):
+        return await self.miotspec('action', {'did': did or f'action-{siid}-{aiid}', 'siid': siid, 'aiid': aiid, 'in': args})
+
+    async def miot_action_text(self, did, siid, aiid, text):
+        return await self.miot_action(did, siid, aiid, json.loads(text) if text[0] == '[' else [text])
 
     async def device_list(self):
-        result = await self.request('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
-        return None if isinstance(result, Exception) else result.get('list') 
+        result = await self.request('/home/device_list', {'getVirtualModel': False, 'getHuamiDevices': 0})
+        return None if isinstance(result, Exception) else result.get('list')
