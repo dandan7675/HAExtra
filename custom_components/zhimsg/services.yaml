@@ -6,8 +6,8 @@ ding:
       example: '您好，我是钉钉信使'
 
 miai:
-  description: 用小爱音箱播报或执行消息
+  description: 用小爱音箱播报、查询或执行
   fields:
     message:
       description: 消息内容
-      example: '今天天气怎么样|查询天气|执行关灯|静默关灯|音量70%大声说话啦'
+      example: '您好，我是小爱同学|查询天气|执行关灯|静默关灯|音量40|音量70%大声说您好'
