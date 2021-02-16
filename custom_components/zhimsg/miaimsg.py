@@ -1,4 +1,3 @@
-from random import randint
 from ..micom import miiocloud
 
 import logging
@@ -11,25 +10,12 @@ MODEL_SPECS = {
     'lx08c': {'siid': 3, 'volume_siid': 4},
 }
 
-INITIAL_TEXTS = [
-    "今天天气怎么样？",
-    #"$您好，我是小爱？",
-    "查询天气！",
-    "执行关灯！",
-    "静默关灯！",
-    #"%70%大声说话啦！",
-    "音量70%大声说话啦！"
-]
 
 class miaimsg:
 
     def __init__(self, hass, conf):
         self.did = conf['did']
         self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
-
-    @property
-    def initial_text(self):
-        return INITIAL_TEXTS[randint(0, len(INITIAL_TEXTS) - 1)]
 
     async def async_send(self, message, data):
         if message[0] == '%' or message.startswith('音量'):

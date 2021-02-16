@@ -1,7 +1,10 @@
-from importlib import import_module
+from homeassistant.core import HomeAssistant
 import voluptuous as vol
+from random import randint
+from importlib import import_module
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import slugify
+from homeassistant.util.yaml import load_yaml
 from homeassistant.components.input_text import (InputText, CONF_MIN, CONF_MIN_VALUE, CONF_MAX, CONF_MAX_VALUE, CONF_INITIAL, MODE_TEXT, SERVICE_SET_VALUE, ATTR_VALUE)
 from homeassistant.const import (CONF_ID, CONF_NAME, CONF_ICON, CONF_MODE)
 
@@ -16,10 +19,11 @@ SERVICE_SCHEMA = vol.Schema({
 })
 
 
-async def async_setup(hass, config):
+async def async_setup(hass: HomeAssistant, config):
     global SERVICES
     entities = []
     Classes = {}
+    descriptions = load_yaml(hass.config.path('custom_components/zhimsg/services.yaml'))
     for conf in config.get(DOMAIN):
         service = conf['platform']
         platform = service.split('_')[0]
@@ -38,7 +42,8 @@ async def async_setup(hass, config):
         name = conf.get('name')
         if name:
             service = slugify(name)
-            initial_text = instance.initial_text if hasattr(instance, 'initial_text') else '您好！'
+            examples = descriptions.get(platform, {}).get('fields', {}).get('message', {}).get('example', '您好').split('|')
+            initial_text = examples[randint(0, len(examples) - 1)]
             entities.append(create_input_entity(hass, name, service, initial_text))
         if service not in SERVICES:
             SERVICES[service] = instance
