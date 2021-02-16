@@ -2,7 +2,7 @@
 <html>
 
 	<head>
-		<title>智能物联</title>
+		<title>智家面板</title>
 		<meta charset="utf-8" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -411,6 +411,8 @@
 							else high = mid
 						}
 						entities.splice(low, 0, entity)
+					} else if (entity.entity_id == 'zone.home') {
+						document.title = entity.attributes.friendly_name
 					}
 				}
 				//console.timeEnd('Purify')
