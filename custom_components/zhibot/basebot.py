@@ -31,17 +31,17 @@ class basebot(HomeAssistantView):
             # request.app[KEY_HASS]
             data = await request.json()
             _LOGGER.debug("REQUEST: %s", data)
-            answer = await self.async_handle(data) if await self.async_check(request, data) else self.error(PermissionError("没有访问授权！"))
+            result = await self.async_handle(data) if await self.async_check(request, data) else self.error(PermissionError("没有访问授权！"))
         except Exception as e:
             import traceback
             _LOGGER.error(traceback.format_exc())
-            answer = self.error(e)
-        resp = self.response(answer)
+            result = self.error(e)
+        resp = self.response(result)
         _LOGGER.debug("RESPONSE: %s", resp)
-        return resp
+        return self.json(resp)
 
-    def response(self, answer):
-        return answer
+    def response(self, result):
+        return result
 
     def error(self, err):
         return str(err)

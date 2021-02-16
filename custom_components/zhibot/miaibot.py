@@ -47,13 +47,13 @@ class miaibot(basebot):
         self._open_mic = answer == "未找到设备"
         return answer
 
-    def response(self, answer):
-        return self.json({
+    def response(self, result):
+        return {
             'version': '1.0',
             'is_session_end': not self._open_mic,
             'response': {
                 'open_mic': self._open_mic,
-                'to_speak': {'type': 0, 'text': answer},
+                'to_speak': {'type': 0, 'text': result},
                 # 'to_display': {'type': 0,'text': text}
             }
-        })
+        }

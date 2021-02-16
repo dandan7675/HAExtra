@@ -1,4 +1,4 @@
-from .genie import handleRequest, makeResponse, errorResult
+from .genie import handleRequest, errorResult, makeResponse
 from .basebot import basebot
 
 import logging
@@ -21,5 +21,5 @@ class geniebot(basebot):
         self.data = {}
         return errorResult('SERVICE_ERROR')
 
-    def response(self, answer):
-        return self.json(makeResponse(self.data, answer))
+    def response(self, result):
+        return makeResponse(self.data, result)
