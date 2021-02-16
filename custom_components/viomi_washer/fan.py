@@ -93,7 +93,7 @@ class VioMiWasher(FanEntity, RestoreEntity):
         _LOGGER.debug("async_added_to_hass: %s", last_state)
         if last_state:
             self._appoint_time = int(last_state.attributes.get('direction') == 'reverse')
-            self._dry_mode = int(last_state.attributes.get('oscillating'))
+            self._dry_mode = int(last_state.attributes.get('oscillating', 0))
             _LOGGER.debug("Restore state: dry_mode=%s, appoint_time=%s", self._dry_mode, self._appoint_time)
 
     @property
