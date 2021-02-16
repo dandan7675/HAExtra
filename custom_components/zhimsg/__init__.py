@@ -62,21 +62,15 @@ async def async_call(call):
 
 
 async def async_send(service, message, data={}):
-    try:
-        instance = SERVICES[service]
-        if isinstance(instance, list):
-            error = None
-            for inst in instance:
-                err = await inst.async_send(message, data)
-                if err:
-                    error = err
-        else:
-            error = await instance.async_send(message, data)
-    except Exception as e:
-        error = e
-    if error:
-        _LOGGER.error(error)
-    return error
+    instance = SERVICES[service]
+    if isinstance(instance, list):
+        error = None
+        for inst in instance:
+            err = await inst.async_send(message, data)
+            if err:
+                error = err
+        return error
+    return await instance.async_send(message, data)
 
 
 def create_input_entity(hass, name, service, initial_text):
