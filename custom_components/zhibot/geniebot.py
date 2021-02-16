@@ -7,8 +7,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class geniebot(basebot):
 
-    def access_token(self, data):
-        return data['payload']['accessToken']
+    async def async_check(self, request, data):
+        token = data['payload']['accessToken']
+        return await self.hass.auth.async_validate_access_token(token) is not None
 
     async def async_handle(self, data):
         self.data = data

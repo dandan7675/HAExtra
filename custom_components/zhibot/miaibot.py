@@ -9,16 +9,13 @@ _LOGGER = logging.getLogger(__name__)
 
 class miaibot(basebot):
 
-    def check(self, request, data):
-        if data['session']['application']['app_id'] in self.conf:
+    def config(self, data):
+        if data['session']['application']['app_id'] in self.config_users:
             return True
-        return super().check(request, data)
+        return super().config(data, "小爱同学正在试图访问“%s”。\n\napp_id: %s”\nuser_id: %s" % (data['query'], data['session']['application']['app_id'], data['session']['user']['user_id']))
 
-    def config_done(self, data):
-        self.conf.append(data['session']['application']['app_id'])
-
-    def config_desc(self, data):
-        return "小爱同学正在试图访问“%s”。\n\napp_id: %s”\nuser_id: %s" % (data['query'], data['session']['application']['app_id'], data['session']['user']['user_id'])
+    def config_ok(self, data):
+        self.config_users.append(data['session']['application']['app_id'])
 
     async def post(self, request):
         self._open_mic = False
