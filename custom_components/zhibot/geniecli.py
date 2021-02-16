@@ -4,7 +4,7 @@ import json
 import asyncio
 import requests
 import logging
-from genie import handleRequest, makeResponse, errorResult, _LOGGER
+from genie import handleRequest, makeResponse, _LOGGER
 
 
 class RemoteHass:
@@ -42,31 +42,37 @@ class RemoteHass:
 
 
 async def main():
-    if len(sys.argv) < 3:
-        print(f'Usage: {sys.argv[0]} <https://192.168.1.x:8123> <token> [action] [mode]')
+    argv = sys.argv
+    if len(argv) < 3:
+        print(f'Usage: {argv[0]} <https://192.168.1.x:8123> <token> [[-]<1|2|3|4>] [deviceId]')
         exit(0)
 
     headers = [
-        {'namespace': 'AliGenie.Iot.Device.Discovery', 'name': 'DiscoveryDevices', 'messageId': 'd0c17289-55df-4c8c-955f-b735e9bdd305'},
-        {'namespace': 'AliGenie.Iot.Device.Control', 'name': 'TurnOn', 'messageId': 'd0c17289-55df-4c8c-955f-b735e9bdd305'},
-        {'namespace': 'AliGenie.Iot.Device.Query', 'name': 'Query', 'messageId': 'd0c17289-55df-4c8c-955f-b735e9bdd305'},
+        {'namespace': 'AliGenie.Iot.Device.Discovery', 'name': 'DiscoveryDevices'},
+        {'namespace': 'AliGenie.Iot.Device.Query', 'name': 'Query'},
+        {'namespace': 'AliGenie.Iot.Device.Control', 'name': 'TurnOn'},
+        {'namespace': 'AliGenie.Iot.Device.Control', 'name': 'TurnOff'},
     ]
+    action = abs(int(argv[3])) - 1 if len(argv) > 3 else 0
+    mode = argv[3][0] == '-' if len(argv) > 3 else 0
+    deviceId = argv[4] if len(argv) > 4 else 'light.er_tong_fang_tai_deng'
     data = {
-        'header': headers[int(sys.argv[3]) if len(sys.argv) > 3 else 0],
-        'payload': {'accessToken': sys.argv[2], 'deviceId': sys.argv[4] if len(sys.argv) > 4 else 'light.er_tong_fang_tai_deng', 'deviceType': 'light'}
+        'header': headers[action],
+        'payload': {'accessToken': argv[2], 'deviceId': deviceId, 'deviceType': deviceId.split('.')[0]}
     }
 
+    requests.packages.urllib3.disable_warnings()
     try:
-        if len(sys.argv) > 4 and int(sys.argv[4]):
-            text = requests.request('POST', sys.argv[1] + '/geniebot', json=data, verify=False).text
-            result = json.loads(text)
+        if mode:
+            text = requests.request('POST', argv[1] + '/geniebot', json=data, verify=False).text
+            response = json.loads(text)
         else:
-            result = await handleRequest(RemoteHass(sys.argv[1], sys.argv[2]), data)
+            response = await handleRequest(RemoteHass(argv[1], argv[2]), data)
     except:
         import traceback
         print(traceback.format_exc())
-        result = errorResult('SERVICE_ERROR')
-    print(json.dumps(makeResponse(data, result), indent=2, ensure_ascii=False))
+        response = makeResponse('SERVICE_ERROR')
+    print(json.dumps(response, indent=2, ensure_ascii=False))
 
 
 if __name__ == '__main__':

@@ -20,18 +20,16 @@ class basebot(HomeAssistantView):
 
         self.password = conf.get('password')
         if self.password is None:  # Auth: config UI confirmation, intead of pre shared password
-            self.config_id = None
-            self.config_path = hass.config.path(STORAGE_DIR, platform)
-            self.config_users = load_json(self.config_path) or []
+            self.init_auth(platform)
 
     async def post(self, request):
         try:
-            # from homeassistant.components.http import KEY_HASS
-            # request[KEY_REAL_IP]
-            # request.app[KEY_HASS]
             data = await request.json()
-            _LOGGER.debug("REQUEST: %s", data)
-            result = await self.async_handle(data) if await self.async_check(request, data) else self.error(PermissionError("没有访问授权！"))
+            _LOGGER.debug(f"REQUEST: %s", data)
+            if await self.async_check(request, data):
+                result = await self.async_handle(data)
+            else:
+                result = self.error(PermissionError("没有访问授权！"))
         except Exception as e:
             import traceback
             _LOGGER.error(traceback.format_exc())
@@ -41,41 +39,57 @@ class basebot(HomeAssistantView):
         return self.json(resp)
 
     def response(self, result):
-        return [result]
+        return result
 
     def error(self, err):
         return str(err)
 
     async def async_handle(self, data):
-        return self.error(NotImplementedError('未能处理'))
+        return self.error(NotImplementedError(f"未能处理：{data}"))
 
     async def async_check(self, request, data):
-        return self.check_password(request) if self.password is not None else self.check_config(data)
+        if self.password is not None:
+            return self.password == request.query.get('password') or self.password == '*'
+        return await self.async_check_auth(data)
 
-    def check_password(self, request):
-        return self.password == request.query.get('password') or self.password == '*'
+    def init_auth(self, platform):
+        self._auth_ui = None
+        self._auth_path = self.hass.config.path(STORAGE_DIR, platform)
+        self._auth_users = load_json(self._auth_path) or []
 
-    def check_config(self, data, desc="授权访问"):
+    async def async_check_auth(self, data):
+        return self.check_auth(data)
+
+    def check_auth(self, data):
+        user = self.get_auth_user(data)
+        if not user:
+            return False
+        if user in self._auth_users:
+            return True
+
         configurator = self.hass.components.configurator
-        if self.config_id:
-            configurator.async_request_done(self.config_id)
+        if self._auth_ui:
+            configurator.async_request_done(self._auth_ui)
 
         def config_callback(fields):
-            configurator.request_done(self.config_id)
-            self.config_id = None
+            configurator.request_done(self._auth_ui)
+            self._auth_ui = None
 
             _LOGGER.debug(fields)
             if fields.get('agree') == 'ok':
-                self.config_ok(data)
-                save_json(self.config_path, self.config_users)
+                self.auth_users.append(user)
+                save_json(self._auth_path, self.auth_users)
 
-        self.config_id = configurator.async_request_config(
+        self._auth_ui = configurator.async_request_config(
             '智加加', config_callback,
-            description=desc,
+            description=self.get_auth_desc(data),
             submit_caption='完成',
             fields=[{'id': 'agree', 'name': '如果允许访问，请输入“ok”'}],
         )
         return False
 
-    def config_ok(self, data):
-        pass
+    def get_auth_desc(self, data):
+        return f"授权访问：{data}"
+
+    def get_auth_user(self, data):
+        return None

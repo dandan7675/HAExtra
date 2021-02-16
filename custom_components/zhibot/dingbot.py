@@ -10,13 +10,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class dingbot(basebot):
 
-    def check_config(self, data):
-        if data['chatbotUserId'] in self.config_users:
-            return True
-        return super().check_config(data, "钉钉群“%s”的“%s”正在试图访问“%s”。\n\nchatbotUserId: %s" % (data['conversationTitle'], data['senderNick'], data['text']['content'], data['chatbotUserId']))
+    def get_auth_user(self, data):
+        return data['chatbotUserId']
 
-    def config_ok(self, data):
-        self.config_users.append(data['chatbotUserId'])
+    def get_auth_desc(self, data):
+        return "钉钉群“%s”的“%s”正在试图访问“%s”。\n\nchatbotUserId: %s" % (data['conversationTitle'], data['senderNick'], data['text']['content'], data['chatbotUserId'])
 
     async def async_handle(self, data):
         query = data['text']['content'].strip()

@@ -3,25 +3,8 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-_CHECK_ALIAS = False  # 仅显示有效的天猫精灵设备名称（初次为了验证名称是否正确，请打开此开关）
 
-
-async def handleRequest(hass, request):
-    """Handle request"""
-    header = request['header']
-    payload = request['payload']
-    _LOGGER.debug("Handle Request: %s", request)
-    namespace = header['namespace']
-    if namespace == 'AliGenie.Iot.Device.Discovery':
-        return await discoveryDevice(hass)
-    elif namespace == 'AliGenie.Iot.Device.Control':
-        return await controlDevice(hass, header, payload)
-    elif namespace == 'AliGenie.Iot.Device.Query':
-        return queryDevice(hass, payload)
-    return errorResult('SERVICE_ERROR')
-
-
-def errorResult(code):
+def errorPayload(errorCode):
     """Generate error result"""
     messages = {
         'INVALIDATE_CONTROL_ORDER':    'invalidate control order',
@@ -32,29 +15,42 @@ def errorResult(code):
         'IOT_DEVICE_OFFLINE': 'device is offline',
         'ACCESS_TOKEN_INVALIDATE': ' access_token is invalidate'
     }
-    return {'errorCode': code, 'message': messages[code]}
+    return {'errorCode': errorCode, 'message': messages[errorCode]}
 
 
-def makeResponse(data, result):
-    header = (data or {}).get('header', {})
-    error = 'errorCode' in result
-    header['name'] = ('Error' if error or 'name' not in header else header['name']) + 'Response'
-
-    if header.get('namespace') == 'AliGenie.Iot.Device.Query' and not error:
-        properties = result
-        result = {}
-    else:
-        properties = None
-
-    payload = data.get('payload', {})
-    if 'deviceId' in payload:
-        result['deviceId'] = payload['deviceId']
-
-    response = {'header': header, 'payload': result}
+def makeResponse(payload, header={}, properties=None):
+    if type(payload) == str:
+        payload = errorPayload(payload)
+    error = 'errorCode' in payload or 'name' not in header
+    header['name'] = ('Error' if error else header['name']) + 'Response'
+    response = {'header': header, 'payload': payload}
     if properties:
         response['properties'] = properties
-    #_LOGGER.info("Respnose: %s", response)
     return response
+
+
+async def handleRequest(hass, request):
+    """Handle request"""
+    header = request['header']
+    payload = request['payload']
+    _LOGGER.debug("Handle Request: %s", request)
+
+    properties = None
+    name = header['name']
+    namespace = header['namespace']
+    if namespace == 'AliGenie.Iot.Device.Discovery':
+        _payload = await discoveryDevice(hass)
+    elif namespace == 'AliGenie.Iot.Device.Control':
+        _payload = await controlDevice(hass, header, payload)
+    elif namespace == 'AliGenie.Iot.Device.Query':
+        properties = queryDevice(hass, payload)
+        _payload = errorPayload('IOT_DEVICE_OFFLINE') if properties is None else {} 
+    else:
+        _payload = errorPayload('SERVICE_ERROR')
+
+    if 'deviceId' in payload:
+        _payload['deviceId'] = payload['deviceId']
+    return makeResponse(_payload, header, properties)
 
 
 async def discoveryDevice(hass):
@@ -147,7 +143,7 @@ async def controlDevice(hass, header, payload):
         service = 'close_cover' if service == 'turn_off' else 'open_cover'
 
     result = await hass.services.async_call(domain, service, data, True)
-    return {} if result else errorResult('IOT_DEVICE_OFFLINE')
+    return {} if result is not None else errorPayload('IOT_DEVICE_OFFLINE')
 
 
 def queryDevice(hass, payload):
@@ -174,7 +170,7 @@ def queryDevice(hass, payload):
 
     state = hass.states.get(deviceId)
     if state is None or state.state == 'unavailable':
-        return errorResult('IOT_DEVICE_OFFLINE')
+        return None
     return {'name': 'powerstate', 'value': 'off' if state.state == 'off' else 'on'}
 
 
@@ -237,7 +233,7 @@ INCLUDE_DOMAINS = {
     'sensor': 'sensor',
     'light': 'light',
     'media_player': 'television',
-    #'remote': 'telecontroller',
+    # 'remote': 'telecontroller',
     'switch': 'switch',
     'vacuum': 'roboticvacuum',
     'cover': 'curtain',

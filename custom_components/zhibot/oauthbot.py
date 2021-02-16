@@ -10,15 +10,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class oauthbot(basebot):
 
-    def __init__(self, platform, hass, conf):
-        super().__init__(platform, hass, conf)
+    def init_auth(self, platform):
         # TODO: 这TMD到底是不是 OAuth 的最佳姿势？严重怀疑，我也不知道哪里抄来的姿势
-        store = hass.auth._store
+        store = self.hass.auth._store
         self._async_create_refresh_token = store.async_create_refresh_token
         store.async_create_refresh_token = self.async_create_refresh_token
-
-    async def async_check_token(self, token):
-        return await self.hass.auth.async_validate_access_token(token) is not None
 
     async def async_create_refresh_token(
         self,
@@ -31,4 +27,7 @@ class oauthbot(basebot):
     ) -> models.RefreshToken:
         if access_token_expiration == ACCESS_TOKEN_EXPIRATION:
             access_token_expiration = timedelta(days=365)
-        return self._async_create_refresh_token(user, client_id, client_name, client_icon, token_type, access_token_expiration)
+        return await self._async_create_refresh_token(user, client_id, client_name, client_icon, token_type, access_token_expiration)
+
+    async def async_check_token(self, token):
+        return await self.hass.auth.async_validate_access_token(token) is not None

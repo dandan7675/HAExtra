@@ -1,25 +1,18 @@
-from .genie import handleRequest, errorResult, makeResponse
-from .basebot import basebot
+from custom_components.zhibot.oauthbot import oauthbot
+from .genie import handleRequest, makeResponse
+from .oauthbot import oauthbot
 
 import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class geniebot(basebot):
+class geniebot(oauthbot):
 
-    async def async_check(self, request, data):
-        self.data = data
-        token = data['payload']['accessToken']
-        return await self.hass.auth.async_validate_access_token(token) is not None
+    async def async_check_auth(self, data):
+        return await self.async_check_token(data['payload']['accessToken'])
 
     async def async_handle(self, data):
         return await handleRequest(self.hass, data)
 
     def error(self, err):
-        if type(err) == PermissionError:
-            return errorResult('ACCESS_TOKEN_INVALIDATE')
-        self.data = {}
-        return errorResult('SERVICE_ERROR')
-
-    def response(self, result):
-        return makeResponse(self.data, result)
+        return makeResponse('ACCESS_TOKEN_INVALIDATE' if type(err) == PermissionError else 'SERVICE_ERROR')
