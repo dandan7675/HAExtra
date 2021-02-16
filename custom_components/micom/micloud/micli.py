@@ -38,8 +38,7 @@ async def main(username, password, argv):
             result = await miot(cloud, argv)
         else:
             result = await cloud.device_list()
-        if not isinstance(result, Exception):
-            print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
 async def miot(cloud, argv):

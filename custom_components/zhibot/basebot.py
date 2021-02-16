@@ -32,13 +32,13 @@ class basebot(HomeAssistantView):
             if await self.async_check(request, data):
                 result = await self.async_handle(data)
             else:
-                result = PermissionError("没有访问授权！")
+                result = "没有访问授权！"
             _LOGGER.debug("RESPONSE: %s", result)
         except Exception as e:
-            result = e
+            result = str(e)
             import traceback
             _LOGGER.error(traceback.format_exc())
-        return self.json(self.response(str(result) if isinstance(result, Exception) else result))
+        return self.json(self.response(result))
 
     def response(self, result):
         raise NotImplementedError()
