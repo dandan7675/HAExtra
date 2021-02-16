@@ -32,23 +32,19 @@ class basebot(HomeAssistantView):
             if await self.async_check(request, data):
                 result = await self.async_handle(data)
             else:
-                result = self.error(PermissionError("没有访问授权！"))
+                result = PermissionError("没有访问授权！")
+            _LOGGER.debug("RESPONSE: %s", result)
         except Exception as e:
+            result = e
             import traceback
             _LOGGER.error(traceback.format_exc())
-            result = self.error(e)
-        resp = self.response(result)
-        _LOGGER.debug("RESPONSE: %s", resp)
-        return self.json(resp)
+        return self.json(self.response(result))
 
     def response(self, result):
-        return result
-
-    def error(self, err):
-        return str(err)
+        raise NotImplementedError()
 
     async def async_handle(self, data):
-        return self.error(NotImplementedError(f"未能处理：{data}"))
+        raise NotImplementedError()
 
     async def async_check(self, request, data):
         if self.password:
@@ -92,7 +88,7 @@ class basebot(HomeAssistantView):
         return False
 
     def get_auth_desc(self, data):
-        return f"授权访问：{data}"
+        raise NotImplementedError()
 
     def get_auth_user(self, data):
-        return None
+        raise NotImplementedError()

@@ -14,5 +14,7 @@ class geniebot(oauthbot):
     async def async_handle(self, data):
         return await handleRequest(self.hass, data)
 
-    def error(self, err):
-        return makeResponse('ACCESS_TOKEN_INVALIDATE' if type(err) == PermissionError else 'SERVICE_ERROR')
+    def response(self, result):
+        if isinstance(result, Exception):
+            return makeResponse('ACCESS_TOKEN_INVALIDATE' if isinstance(result, PermissionError) else 'SERVICE_ERROR')
+        return result
