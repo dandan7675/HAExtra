@@ -7,32 +7,28 @@ from .basebot import basebot
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-EXPIRE_HOURS = 8760  # 365*24
-
 
 class oauthbot(basebot):
 
     def __init__(self, platform, hass, conf):
         super().__init__(platform, hass, conf)
-        # TODO: 这TMD到底是不是OAuth的最佳姿势？严重怀疑
-        hass.auth._store.async_create_refresh_token = self.async_create_refresh_token
+        # TODO: 这TMD到底是不是 OAuth 的最佳姿势？严重怀疑，我也不知道哪里抄来的姿势
+        store = hass.auth._store
+        self._async_create_refresh_token = store.async_create_refresh_token
+        store.async_create_refresh_token = self.async_create_refresh_token
 
-    async def async_create_refresh_token(self, user, client_id=None, client_name=None, client_icon=None, token_type=models.TOKEN_TYPE_NORMAL, access_token_expiration=ACCESS_TOKEN_EXPIRATION):
+    async def async_check_token(self, token):
+        return await self.hass.auth.async_validate_access_token(token) is not None
+
+    async def async_create_refresh_token(
+        self,
+        user: models.User,
+        client_id: Optional[str] = None,
+        client_name: Optional[str] = None,
+        client_icon: Optional[str] = None,
+        token_type: str = models.TOKEN_TYPE_NORMAL,
+        access_token_expiration: timedelta = ACCESS_TOKEN_EXPIRATION,
+    ) -> models.RefreshToken:
         if access_token_expiration == ACCESS_TOKEN_EXPIRATION:
-            access_token_expiration = timedelta(hours=EXPIRE_HOURS)
-        kwargs = {
-            'user': user,
-            'client_id': client_id,
-            'token_type': token_type,
-            'access_token_expiration': access_token_expiration
-        }
-        if client_name:
-            kwargs['client_name'] = client_name
-        if client_icon:
-            kwargs['client_icon'] = client_icon
-
-        refresh_token = models.RefreshToken(**kwargs)
-        user.refresh_tokens[refresh_token.id] = refresh_token
-
-        self.hass.auth._store._async_schedule_save()
-        return refresh_token
+            access_token_expiration = timedelta(days=365)
+        return self._async_create_refresh_token(user, client_id, client_name, client_icon, token_type, access_token_expiration)
