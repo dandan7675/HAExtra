@@ -50,7 +50,7 @@ async def miot(cloud, argv):
         return await cloud.miotspec(argv[2] if argc > 2 else 'action', arg1)
 
     if argc == 2:
-        return arg1  # TODO: info
+        return await cloud.miot_prop(arg1, [(1, 1), (1, 2), (1, 3), (1, 4)])
 
     if argc > 3:
         _in = argv[3]

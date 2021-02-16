@@ -45,22 +45,15 @@ class MiIOCloud:
     async def miotspec(self, api, data='{}'):
         return await self.request('/miotspec/' + api, data)
 
-    async def miot_prop_get(self, did, props=[]):
-        data = '{"datasource":1, "params": ['
-        for prop in props:
-            data += '{"did":"%s", "siid":%s, "piid":%s}' % (did, prop[0], prop[1])
-        data += ']}'
-        return await self.miotspec('prop/get',  data)
-
     async def miot_prop(self, did, props=[]):
-        api = 'prop/get'
+        prop_set = False
         params = ''
         for prop in props:
             if params:
                 params += ', '
             params += '{"did":"%s", "siid":%s, "piid":%s' % (did, prop[0], prop[1])
             if (len(prop) > 2):
-                api = 'prop/set'
+                prop_set = True
                 value = prop[2]
                 if isinstance(value, bool) or value is None:
                     value = str(value).lower()
@@ -68,13 +61,20 @@ class MiIOCloud:
                     value = ('"' + value + '"')
                 params += ', "value":%s' % value
             params += '}'
-        return await self.miotspec(api, '{"params": [' + params + ']}')
+        result = await self.miotspec('prop/' + 'set' if prop_set else 'get', '{"params": [' + params + ']}')
+        if isinstance(result, list):
+            if prop_set:
+                return [it.get('code') == 0 for it in result]
+            return [it.get('value') if it.get('code') == 0 else None for it in result]
+        return result
 
     async def miot_prop_get(self, did, siid, piid=1):
-        return await self.miot_prop(did, {(siid, piid)})  # TODO: Parse
+        result = await self.miot_prop(did, {(siid, piid)})
+        return result[0] if isinstance(result, list) else None
 
     async def miot_prop_set(self, did, siid, piid, value, quote=True):
-        return await self.miot_prop(did, {(siid, piid, value, quote)})  # TODO: Parse
+        result = await self.miot_prop(did, {(siid, piid, value, quote)})
+        return result[0] if isinstance(result, list) else False
 
     async def miot_action(self, did, siid, aiid, _in='[]'):
         if not isinstance(_in, str):
