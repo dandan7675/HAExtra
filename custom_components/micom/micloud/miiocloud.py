@@ -3,7 +3,7 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-#REGIONS = ['cn', 'de', 'i2', 'ru', 'sg', 'us']
+# REGIONS = ['cn', 'de', 'i2', 'ru', 'sg', 'us']
 
 
 class MiIOCloud:
@@ -40,10 +40,10 @@ class MiIOCloud:
         _LOGGER.error(error)
         raise Exception(error)
 
-    async def miot_spec(self, api, params):
+    async def miot_spec(self, cmd, params):
         if not isinstance(params, str):
             params = json.dumps(params)
-        return await self.miio('/miotspec/' + api, '{"params": ' + params + '}')
+        return await self.miio('/miotspec/' + cmd, '{"params": ' + params + '}')
 
     async def miot_get_props(self, did, props):
         params = [{'did': did, 'siid': prop[0], 'piid': prop[1]} for prop in props]

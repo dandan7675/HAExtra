@@ -1,4 +1,5 @@
 from ..micom import miiocloud
+from ..micom.micloud.miiocmd import miio_cmd
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -20,18 +21,11 @@ class miaimsg:
 
     async def async_send(self, message, data):
 
-        if message.startswith('/'):
-            pos = message.find('{')
-            if pos != -1:
-                return await miiocloud().miio(message[0:pos+1], message[pos:])
+        result = await miio_cmd(miiocloud(), message, self.did)
+        if result != 'Invalid command':
+            return result
 
-        elif message.startswith('{') or message.startswith('['):
-            pos = message.rfind('}' if message.startswith('{') else ']')
-            if pos != -1:
-                api = message[pos+1:] or ('action' if message.startswith('{') else 'prop/get')
-                return await miiocloud().miot_spec(api, message[0:pos+1])
-
-        elif message.startswith('音量'):
+        if message.startswith('音量'):
             pos = message.find('%')
             if pos == -1:
                 volume = message[2:]
