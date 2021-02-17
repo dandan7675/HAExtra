@@ -48,11 +48,11 @@ class miaimsg:
             aiid = self.spec.get('execute_aiid', 5)
             echo = 0 if message.startswith('静默') else 1
             message = message[2:].strip()
-            args = f'["{message}", {echo}]'
+            args = [message, echo]
         else:
             siid = self.spec.get('siid', 5)
             aiid = self.spec.get('aiid', 1)
-            args = f'["{message}"]'
+            args = [message]
 
         if not message:
             return "空谈误国，实干兴邦！"

@@ -41,9 +41,7 @@ class MiIOCloud:
         raise Exception(error)
 
     async def miot_spec(self, cmd, params):
-        if not isinstance(params, str):
-            params = json.dumps(params)
-        return await self.miio('/miotspec/' + cmd, '{"params": ' + params + '}')
+        return await self.miio('/miotspec/' + cmd, {'params': params})
 
     async def miot_get_props(self, did, props):
         params = [{'did': did, 'siid': prop[0], 'piid': prop[1]} for prop in props]
@@ -62,15 +60,11 @@ class MiIOCloud:
         return (await self.miot_set_props(did, [(siid, piid, value)]))[0]
 
     async def miot_action(self, did, siid, aiid, args):
-        if not isinstance(args, str):
-            args = json.dumps(args)
-        # elif not args.startswith('['):
-        #     args = '["' + args + '"]'
         if not did:
             did = f'action-{siid}-{aiid}'
-        result = await self.miot_spec('action', f'{{"did": "{did}", "siid": {siid}, "aiid": {aiid}, "in": {args}}}')
+        result = await self.miot_spec('action', {'did': did, 'siid': siid, 'aiid': aiid, 'in': args})
         return result
 
     async def device_list(self):
-        result = await self.miio('/home/device_list', '{"getVirtualModel": false, "getHuamiDevices": 0}')
+        result = await self.miio('/home/device_list', {'getVirtualModel': False, 'getHuamiDevices': 0})
         return result.get('list')

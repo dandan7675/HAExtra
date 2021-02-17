@@ -1,4 +1,6 @@
 
+import json
+
 
 def twins_split(twins, sep, default=None):
     pos = twins.find(sep)
@@ -42,7 +44,7 @@ async def miio_cmd(cloud, cmd, did=None):
             uri = cmd[pos+1:].strip()
             if uri.startswith('/'):
                 return await cloud.miio(uri, data)
-            return await cloud.miot_spec(uri, data)
+            return await cloud.miot_spec(uri, json.loads(data))
 
     elif cmd.startswith('['):
         pos = cmd.rfind(']')
@@ -55,7 +57,7 @@ async def miio_cmd(cloud, cmd, did=None):
                     aiid = int(aiid)
                 except:
                     return 'IID not a number'
-                return await cloud.miot_action(did, siid, aiid, cmd[0:pos+1])
+                return await cloud.miot_action(did, siid, aiid, json.loads(cmd[0:pos+1]))
 
     elif cmd.startswith('#'):
         items, did = twins_split(cmd[1:], '@', did)
