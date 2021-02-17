@@ -78,12 +78,7 @@
   action:
     - service: zhimsg.miai
       data_template:
-        message: >
-          {% if now().hour >= 21 %}
-            晚上请关好阳台门
-          {% else %}
-            阳台PM2.5为{% set PM25 = states("sensor.yang_tai_ke_li_wu") | int %}{{ PM25 }}，{% if PM25 < 20 %}空气很好{% elif PM25 < 40 %}空气不错{% elif PM25 < 60 %}空气一般{% elif PM25 < 80 %}空气不好，请关好阳台门{% else %}空气污染，请关好阳台门和其它门窗{% endif %}
-          {% endif %}
+        message: '{% if now().hour >= 21 %}晚上请关好阳台门{% else %}阳台PM2.5为{% set PM25 = states("sensor.yang_tai_ke_li_wu") | int %}{{ PM25 }}，{% if PM25 < 20 %}空气很好{% elif PM25 < 40 %}空气不错{% elif PM25 < 60 %}空气一般{% elif PM25 < 80 %}空气不好，请关好阳台门{% else %}空气污染，请关好阳台门和其它门窗{% endif %}{% endif %}'
     - delay: 120
     - condition: state
       entity_id: binary_sensor.door_window_sensor_158d000228a52b
