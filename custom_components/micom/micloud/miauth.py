@@ -122,6 +122,8 @@ class MiAuth:
         return serviceToken
 
     def sign(self, uri, data):
+        if not isinstance(data, str):
+            data = json.dumps(data)
         nonce = gen_nonce()
         signed_nonce = gen_signed_nonce(self.token['ssecurity'], nonce)
         signature = gen_signature(uri, signed_nonce, nonce, data)

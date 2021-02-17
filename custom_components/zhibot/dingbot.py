@@ -4,6 +4,7 @@ from .zhichat import zhiChat
 from .basebot import basebot
 from ..zhimsg import async_send
 
+import json
 import logging
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +20,10 @@ class dingbot(basebot):
     async def async_handle(self, data):
         query = data['text']['content'].strip()
         if self.name:
-            return await async_send(self.name, query)
+            result = await async_send(self.name, query)
+            if result is None or isinstance(result, str):
+                return result
+            return json.dumps(result, indent=2, ensure_ascii=False)
         else:
             return await zhiChat(self.hass, query)
 

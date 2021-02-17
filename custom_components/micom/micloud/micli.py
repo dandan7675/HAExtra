@@ -27,7 +27,8 @@ def usage(arg0):
     print(f"  Set Props: {arg0} 267090026 2==60 2/2==false 3=test")
     print(f"  Do Action: {arg0} 267090026 5 您好")
     print(f"  Do Action: {arg0} 267090026 5/4 '[\"天气\",1]'")
-    print(f'  Call MIoT: {arg0} \'{{"params":{{"did":"267090026","siid":5,"aiid":1,"in":["您好"]}}}}\' action')
+    print(f'  Call MIoT: {arg0} \'{{"did":"267090026","siid":5,"aiid":1,"in":["您好"]}}\' action')
+    print(f'  Call MiIO: {arg0} \'{{"getVirtualModel": false, "getHuamiDevices": 1}}\' /home/device_list')
 
 
 async def main(username, password, argv):
@@ -35,18 +36,24 @@ async def main(username, password, argv):
         auth = MiAuth(session, username, password)
         cloud = MiIOCloud(auth)
         if len(argv) > 1:
-            result = await miot(cloud, argv)
+            result = await miot_spec(cloud, argv)
         else:
             result = await cloud.device_list()
         print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
-async def miot(cloud, argv):
+async def miot_spec(cloud, argv):
     argc = len(argv)
     arg1 = argv[1]
 
     if arg1[0] == '{':
-        return await cloud.miotspec(argv[2] if argc > 2 else 'action', arg1)
+        if argc > 2:
+            if argv[2].startswith('/'):
+                return await cloud.miio(argv[2], arg1)
+            api = argv[2]
+        else:
+            api = 'action'
+        return await cloud.miot_spec(api, arg1)
 
     if argc == 2:
         return await cloud.miot_get_props(arg1, [(1, 1), (1, 2), (1, 3), (1, 4)])
@@ -55,7 +62,7 @@ async def miot(cloud, argv):
         text = argv[3]
         if text[0] < '0' or text[0] > '9':
             siid, aiid = twins_split(argv[2], '/', 1)
-            return await cloud.miot_action_text(arg1, int(siid), int(aiid), text)
+            return await cloud.miot_action(arg1, int(siid), int(aiid), text if text.startswith('[') else [text])
 
     return await miot_prop(cloud, arg1, argv)
 

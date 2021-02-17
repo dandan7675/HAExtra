@@ -1,5 +1,4 @@
-
-#
+# curl -k -H "Authorization: Bearer $HA_TOKEN" -d '{"conversationId": "conversationId", "atUsers": [{"dingtalkId": "dingtalkId"}], "chatbotUserId": "chatbotUserId", "msgId": "msgId", "senderNick": "Yonsm", "isAdmin": false, "sessionWebhookExpiredTime": 1613505952713, "createAt": 1613500552475, "conversationType": "2", "senderId": "senderId", "conversationTitle": "智能家庭", "isInAtList": true, "sessionWebhook": "sessionWebhook", "text": {"content": "您好"}, "msgtype": "text"}' "https://localhost:8123/er_tong_fang_yin_xiang?password=$ZHIBOT_PASS"
 from .zhichat import zhiChat
 from .basebot import basebot
 

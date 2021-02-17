@@ -64,12 +64,12 @@ async def async_call(call):
 async def async_send(service, message, data={}):
     instance = SERVICES[service]
     if isinstance(instance, list):
-        error = None
+        result = None
         for inst in instance:
-            err = await inst.async_send(message, data)
-            if err:
-                error = err
-        return error
+            ret = await inst.async_send(message, data)
+            if ret:
+                result = ret
+        return result
     return await instance.async_send(message, data)
 
 
