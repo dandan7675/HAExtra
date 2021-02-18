@@ -52,7 +52,7 @@ class basebot(HomeAssistantView):
                 result = "没有访问授权！"
             _LOGGER.debug("RESPONSE: %s", result)
         except Exception as e:
-            result = str(e)
+            result = repr(e)
             import traceback
             _LOGGER.error(traceback.format_exc())
         return self.json(self.response(result))
