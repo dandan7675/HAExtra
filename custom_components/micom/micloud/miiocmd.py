@@ -31,7 +31,6 @@ def miio_cmd_help(arg0, did=None):
         did_sufix = '@' + did
     quote = '' if arg0 == '?' else "'"
     return f'\
-Help Info: {arg0}help\n\
 Devs List: {arg0}list\n\
 Get Props: {arg0}1,1-2,1-3,1-4,2,3{did_sufix}\n\
 Set Props: {arg0}2==60,2-2==false,3=test{did_sufix}\n\
@@ -47,7 +46,8 @@ async def miio_cmd(cloud, cmd, arg0, did=None):
         return miio_cmd_help(arg0, did)
 
     elif cmd.startswith('list'):
-        return await cloud.device_list()
+        getVirtualModel, getHuamiDevices = twins_split(cmd[4:].strip(), ',', 0)
+        return await cloud.device_list(bool(getVirtualModel and string_value(getVirtualModel)), int(getHuamiDevices))
 
     elif cmd.startswith('{'):
         data, uri = pause_split(cmd, '}')
