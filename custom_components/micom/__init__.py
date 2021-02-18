@@ -14,11 +14,11 @@ _miio_cloud = None
 
 async def async_setup(hass, config):
     conf = config.get(DOMAIN)
-    global _miaccount, _miiocloud
+    global _mi_account, _miio_cloud
     # TODO: new aiohttp session?
     # TODO: Use session context?
     _mi_account = MiAuth(async_get_clientsession(hass), conf['username'], conf['password'], hass.config.path(STORAGE_DIR, DOMAIN))
-    _miio_cloud = MiIOCloud(_miaccount, conf.get('region'))
+    _miio_cloud = MiIOCloud(_mi_account, conf.get('region'))
     return True
 
 
