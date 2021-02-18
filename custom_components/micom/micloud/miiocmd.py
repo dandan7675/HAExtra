@@ -18,7 +18,7 @@ def string_value(value):
         return int(value)
 
 
-def miio_cmd_help(arg0='?', did=None):
+def miio_cmd_help(arg0, did=None):
     if did:
         did_sufix = ''
     else:
@@ -36,12 +36,19 @@ Call MIoT: {arg0}{quote}{{"did":"{did}","siid":5,"aiid":1,"in":["您好"]}}actio
 Call MiIO: {arg0}{quote}{{"getVirtualModel":false,"getHuamiDevices":1}}/home/device_list{quote}'
 
 
-async def miio_cmd(cloud, cmd, did=None):
-    if cmd.startswith('{'):
+async def miio_cmd(cloud, cmd, arg0, did=None):
+
+    if cmd == 'help' or cmd == '-h' or cmd == '--help':
+        return miio_cmd_help(arg0, did)
+
+    elif cmd.startswith('list'):
+        return await cloud.device_list()
+    
+    elif cmd.startswith('{'):
         pos = cmd.rfind('}')
         if pos != -1:
             data = cmd[0:pos+1]
-            uri = cmd[pos+1:]
+            uri = cmd[pos+1:].strip()
             if uri.startswith('/'):
                 return await cloud.miio(uri, data)
             return await cloud.miot_spec(uri, json.loads(data))
@@ -53,12 +60,6 @@ async def miio_cmd(cloud, cmd, did=None):
             if did:
                 siid, aiid = twins_split(iid, '-', 1)
                 return await cloud.miot_action(did, int(siid), int(aiid), json.loads(cmd[0:pos+1]))
-
-    elif cmd.startswith('list'):
-        return await cloud.device_list()
-
-    elif cmd == 'help' or cmd == '-h' or cmd == '--help':
-        return miio_cmd_help()
 
     else:
         items, did = twins_split(cmd, '@', did)
