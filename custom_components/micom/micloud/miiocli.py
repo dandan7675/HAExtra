@@ -12,10 +12,10 @@ from miiocmd import miio_cmd, miio_cmd_help
 
 
 def usage():
-    print(f"Usage:     {sys.argv[0]} [username] [password] <cmd>\n")
-    print(f"Username:  export MI_USER=<username>")
-    print(f"Password:  export MI_PASS=<password>\n")
-    print(miio_cmd_help().replace(": ", f": {sys.argv[0]} '").replace("\n", "'\n"))
+    print("Usage:     %s [username] [password] <cmd>\n" % sys.argv[0])
+    print("Username:  export MI_USER=<username>")
+    print("Password:  export MI_PASS=<password>\n")
+    print(miio_cmd_help(arg0=sys.argv[0] + ' ') + '\n')
 
 
 async def main(username, password, cmd):

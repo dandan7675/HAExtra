@@ -23,12 +23,12 @@ class miaimsg:
 
     async def async_send(self, message, data):
 
-        result = await miio_cmd(miio_cloud(), message, self.did, '#')
-        if result != 'Invalid command':
-            return result
-
         if message == '?':
             return get_examples(self.hass, 'miai')
+
+        result = await miio_cmd(miio_cloud(), message, self.did, '?')
+        if result != 'Invalid command':
+            return result
 
         if message.startswith('音量'):
             pos = message.find('%')

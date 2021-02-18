@@ -21,23 +21,28 @@ def string_value(value):
     return value
 
 
-def miio_cmd_help(did=None, prop_prefix=''):
+def miio_cmd_help(did=None, prop_prefix='', arg0=''):
     if did:
-        end = '\n'
+        did_sufix = ''
     else:
         did = '267090026'
-        end = '@' + did + '\n'
-    return \
-        'Get Props: ' + prop_prefix + '1,1-2,1-3,1-4,2,3' + end + \
-        'Set Props: ' + prop_prefix + '2==60,2-2==false,3=test' + end + \
-        'Do Action: ["您好"]5' + end + \
-        'Do Action: ["天气",1]5-4' + end + \
-        'Call MIoT: {"did":"' + did + '","siid":5,"aiid":1,"in":["您好"]}action\n' + \
-        'Call MiIO: {"getVirtualModel":false,"getHuamiDevices":1}/home/device_list\n'
+        did_sufix = '@' + did
+    quote = "'" if arg0 else ''
+    return f'\
+Help Info: {arg0}-help\n\
+Devs List: {arg0}-list\n\
+Get Props: {arg0}{prop_prefix}1,1-2,1-3,1-4,2,3{did_sufix}\n\
+Set Props: {arg0}{prop_prefix}2==60,2-2==false,3=test{did_sufix}\n\
+Do Action: {arg0}{quote}["您好"]5{did_sufix}{quote}\n\
+Do Action: {arg0}{quote}["天气",1]5-4{did_sufix}{quote}\n\
+Call MIoT: {arg0}{quote}{{"did":"{did}","siid":5,"aiid":1,"in":["您好"]}}action{quote}\n\
+Call MiIO: {arg0}{quote}{{"getVirtualModel":false,"getHuamiDevices":1}}/home/device_list{quote}'
 
 
 async def miio_cmd(cloud, cmd, did=None, prop_prefix=''):
-    if cmd == '-h' or cmd == '--help':
+    if cmd.startswith('-'):
+        if cmd == 'list':
+            return cloud.device_list()
         return miio_cmd_help(did, prop_prefix)
 
     elif cmd.startswith('{'):

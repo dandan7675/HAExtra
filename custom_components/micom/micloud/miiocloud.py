@@ -64,6 +64,6 @@ class MiIOCloud:
         result = await self.miot_spec('action', {'did': did, 'siid': siid, 'aiid': aiid, 'in': args})
         return result
 
-    async def device_list(self):
-        result = await self.miio('/home/device_list', {'getVirtualModel': False, 'getHuamiDevices': 0})
+    async def device_list(self, getVirtualModel=False, getHuamiDevices=0):
+        result = await self.miio('/home/device_list', {'getVirtualModel': getVirtualModel, 'getHuamiDevices': getHuamiDevices})
         return result.get('list')
