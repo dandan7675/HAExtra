@@ -1,6 +1,6 @@
+from . import get_examples
 from ..micom import miio_cloud
 from ..micom.micloud.miiocmd import miio_cmd
-from . import load_descriptions, get_example
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class miaimsg:
             return result
 
         if message == '?':
-            return get_example(load_descriptions(self.hass), 'miai').replace('|', '\n')
+            return get_examples(self.hass, 'miai')
 
         if message.startswith('音量'):
             pos = message.find('%')

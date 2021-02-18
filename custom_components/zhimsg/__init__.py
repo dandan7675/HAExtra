@@ -18,19 +18,23 @@ SERVICE_SCHEMA = vol.Schema({
 })
 
 
-def load_descriptions(hass):
+def load_desc(hass):
     return load_yaml(hass.config.path(f'custom_components/{DOMAIN}/services.yaml'))
 
 
-def get_example(descriptions, platform, default='您好'):
-    return descriptions.get(platform, {}).get('fields', {}).get('message', {}).get('example', default)
+def get_example(desc, platform):
+    return desc.get(platform, {}).get('fields', {}).get('message', {}).get('example', '您好')
+
+
+def get_examples(hass, platform):
+    return get_example(load_desc(hass), platform).replace('|', '\n')
 
 
 async def async_setup(hass, config):
     global SERVICES
     entities = []
     Classes = {}
-    descriptions = load_descriptions(hass)
+    desc = load_desc(hass)
     for conf in config.get(DOMAIN):
         service = conf['platform']
         platform = service.split('_')[0]
@@ -49,7 +53,7 @@ async def async_setup(hass, config):
         name = conf.get('name')
         if name:
             service = slugify(name)
-            examples = get_example(descriptions, platform).split('|')
+            examples = get_example(desc, platform).split('|')
             initial_text = examples[randint(0, len(examples) - 1)]
             entities.append(create_input_entity(hass, name, service, initial_text))
         if service not in SERVICES:
