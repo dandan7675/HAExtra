@@ -37,7 +37,7 @@ def miio_cmd_help(did=None, prop_prefix=''):
 
 
 async def miio_cmd(cloud, cmd, did=None, prop_prefix=''):
-    if cmd == '?' or cmd == '-h' or cmd == '--help':
+    if cmd == '-h' or cmd == '--help':
         return miio_cmd_help(did, prop_prefix)
 
     elif cmd.startswith('{'):

@@ -1,4 +1,3 @@
-from homeassistant.core import HomeAssistant
 import voluptuous as vol
 from random import randint
 from importlib import import_module
@@ -19,11 +18,19 @@ SERVICE_SCHEMA = vol.Schema({
 })
 
 
-async def async_setup(hass: HomeAssistant, config):
+def load_descriptions(hass):
+    return load_yaml(hass.config.path(f'custom_components/{DOMAIN}/services.yaml'))
+
+
+def get_example(descriptions, platform, default='您好'):
+    return descriptions.get(platform, {}).get('fields', {}).get('message', {}).get('example', default)
+
+
+async def async_setup(hass, config):
     global SERVICES
     entities = []
     Classes = {}
-    descriptions = load_yaml(hass.config.path('custom_components/zhimsg/services.yaml'))
+    descriptions = load_descriptions(hass)
     for conf in config.get(DOMAIN):
         service = conf['platform']
         platform = service.split('_')[0]
@@ -42,7 +49,7 @@ async def async_setup(hass: HomeAssistant, config):
         name = conf.get('name')
         if name:
             service = slugify(name)
-            examples = descriptions.get(platform, {}).get('fields', {}).get('message', {}).get('example', '您好').split('|')
+            examples = get_example(descriptions, platform).split('|')
             initial_text = examples[randint(0, len(examples) - 1)]
             entities.append(create_input_entity(hass, name, service, initial_text))
         if service not in SERVICES:

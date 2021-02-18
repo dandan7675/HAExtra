@@ -1,5 +1,6 @@
-from ..micom import miiocloud
+from ..micom import miio_cloud
 from ..micom.micloud.miiocmd import miio_cmd
+from . import load_descriptions, get_example
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -16,6 +17,7 @@ MODEL_SPECS = {
 class miaimsg:
 
     def __init__(self, hass, conf):
+        self.hass = hass
         self.did = str(conf['did'])
         self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
 
@@ -25,7 +27,8 @@ class miaimsg:
         if result != 'Invalid command':
             return result
 
-        # TODO: ? list ...
+        if message == '?':
+            return get_example(load_descriptions(self.hass), 'miai').replace('|', '\n')
 
         if message.startswith('音量'):
             pos = message.find('%')
