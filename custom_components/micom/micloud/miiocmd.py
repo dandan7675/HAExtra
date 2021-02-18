@@ -2,9 +2,14 @@
 import json
 
 
-def twins_split(twins, sep, default=None):
-    pos = twins.find(sep)
-    return (twins, default) if pos == -1 else (twins[0:pos], twins[pos + 1:])
+def twins_split(string, sep, default=None):
+    pos = string.find(sep)
+    return (string, default) if pos == -1 else (string[0:pos], string[pos+1:])
+
+
+def pause_split(string, sep, default=None):
+    pos = string.rfind(sep)
+    return (string, default) if pos == -1 else (string[0:pos+1], string[pos+1:].strip())
 
 
 def string_value(value):
@@ -43,23 +48,21 @@ async def miio_cmd(cloud, cmd, arg0, did=None):
 
     elif cmd.startswith('list'):
         return await cloud.device_list()
-    
+
     elif cmd.startswith('{'):
-        pos = cmd.rfind('}')
-        if pos != -1:
-            data = cmd[0:pos+1]
-            uri = cmd[pos+1:].strip()
+        data, uri = pause_split(cmd, '}')
+        if uri:
             if uri.startswith('/'):
                 return await cloud.miio(uri, data)
             return await cloud.miot_spec(uri, json.loads(data))
 
     elif cmd.startswith('['):
-        pos = cmd.rfind(']')
-        if pos != -1:
-            iid, did = twins_split(cmd[pos+1:], '@', did)
+        data, args = pause_split(cmd, ']')
+        if args:
+            iid, did = twins_split(args, '@', did)
             if did:
                 siid, aiid = twins_split(iid, '-', 1)
-                return await cloud.miot_action(did, int(siid), int(aiid), json.loads(cmd[0:pos+1]))
+                return await cloud.miot_action(did, int(siid), int(aiid), json.loads(data))
 
     else:
         items, did = twins_split(cmd, '@', did)
