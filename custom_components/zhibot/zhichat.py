@@ -1,10 +1,6 @@
-from homeassistant.helpers.state import AsyncTrackStates
-
-# Logging
 import logging
-_LOGGER = logging.getLogger(__name__)
 
-#
+_LOGGER = logging.getLogger(__name__)
 
 
 async def zhiChat(hass, query):

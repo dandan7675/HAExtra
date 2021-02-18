@@ -1,7 +1,5 @@
-
-#
+from . import basebot
 from .zhichat import zhiChat
-from .basebot import basebot
 from ..zhimsg import async_send
 
 import json

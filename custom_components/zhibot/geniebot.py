@@ -1,6 +1,5 @@
-from custom_components.zhibot.oauthbot import oauthbot
+from . import oauthbot
 from .genie import handleRequest, makeResponse
-from .oauthbot import oauthbot
 
 import logging
 _LOGGER = logging.getLogger(__name__)
