@@ -15,14 +15,14 @@ def usage():
     print("Usage:     %s [username] [password] <cmd>\n" % sys.argv[0])
     print("Username:  export MI_USER=<username>")
     print("Password:  export MI_PASS=<password>\n")
-    print(miio_cmd_help(arg0=sys.argv[0] + ' ') + '\n')
+    print(miio_cmd_help(sys.argv[0] + ' ') + '\n')
 
 
 async def main(username, password, cmd):
     async with ClientSession() as session:
         auth = MiAuth(session, username, password)
         cloud = MiIOCloud(auth)
-        result = await miio_cmd(cloud, cmd)
+        result = await miio_cmd(cloud, cmd, sys.argv[0] + ' ')
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
         print(result)
