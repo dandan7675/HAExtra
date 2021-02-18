@@ -22,7 +22,7 @@ async def main(username, password, cmd):
     async with ClientSession() as session:
         auth = MiAuth(session, username, password)
         cloud = MiIOCloud(auth)
-        result = await miio_cmd(cloud, cmd, sys.argv[0] + ' ')
+        result = await miio_cmd(cloud, cmd)
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
         print(result)

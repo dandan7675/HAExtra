@@ -36,7 +36,7 @@ Call MIoT: {arg0}{quote}{{"did":"{did}","siid":5,"aiid":1,"in":["您好"]}}actio
 Call MiIO: {arg0}{quote}{{"getVirtualModel":false,"getHuamiDevices":1}}/home/device_list{quote}'
 
 
-async def miio_cmd(cloud, cmd, arg0='?', did=None):
+async def miio_cmd(cloud, cmd, did=None):
     if cmd.startswith('{'):
         pos = cmd.rfind('}')
         if pos != -1:
@@ -54,11 +54,11 @@ async def miio_cmd(cloud, cmd, arg0='?', did=None):
                 siid, aiid = twins_split(iid, '-', 1)
                 return await cloud.miot_action(did, int(siid), int(aiid), json.loads(cmd[0:pos+1]))
 
-    elif cmd == 'help':
-        return miio_cmd_help(arg0, did)
-
     elif cmd.startswith('list'):
-        return cloud.device_list()
+        return await cloud.device_list()
+
+    elif cmd == 'help' or cmd == '-h' or cmd == '--help':
+        return miio_cmd_help()
 
     else:
         items, did = twins_split(cmd, '@', did)
