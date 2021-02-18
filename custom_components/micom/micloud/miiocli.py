@@ -16,7 +16,7 @@ def usage(did):
     print("           export MI_USER=<username>")
     print("           export MI_PASS=<password>")
     print("           export MIIO_DID=<deviceId>\n")
-    print(miio_cmd_help(did, sys.argv[0] + ' ') + '\n')
+    print(miio_cmd_help(did, sys.argv[0] + ' '))
 
 
 async def main(username, password, did, text):
@@ -26,7 +26,7 @@ async def main(username, password, did, text):
         result = await miio_cmd(cloud, did, text, sys.argv[0] + ' ')
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
-        print(result + '\n')
+        print(result)
 
 
 if __name__ == '__main__':

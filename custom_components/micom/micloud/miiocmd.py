@@ -7,11 +7,6 @@ def twins_split(string, sep, default=None):
     return (string, default) if pos == -1 else (string[0:pos], string[pos+1:])
 
 
-def pause_split(string, sep, default=None):
-    pos = string.rfind(sep)
-    return (string, default) if pos == -1 else (string[0:pos+1], string[pos+1:].strip())
-
-
 def string_to_value(string):
     if string == 'null' or string == 'none':
         return None
@@ -48,8 +43,6 @@ Devs List: {prefix}list [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
 async def miio_cmd(cloud, did, text, prefix='?'):
 
     cmd, arg = twins_split(text, ' ')
-    if not cmd or cmd == 'help' or cmd == '-h' or cmd == '--help':
-        return miio_cmd_help(did, prefix)
 
     if cmd.startswith('/'):
         return await cloud.miio(cmd, arg)
@@ -62,8 +55,8 @@ async def miio_cmd(cloud, did, text, prefix='?'):
     if cmd == 'list':
         return await cloud.device_list(bool(argc > 0 and string_to_value(argv[0])), int(argv[1]) if argc > 1 else 0)
 
-    if not did:
-        return "Empty Device ID"
+    if not did or not cmd or cmd == 'help' or cmd == '-h' or cmd == '--help':
+        return miio_cmd_help(did, prefix)
 
     if argc > 0:
         siid, aiid = twins_split(cmd, '-', 1)
