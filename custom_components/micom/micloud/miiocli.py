@@ -23,9 +23,11 @@ async def main(username, password, did, text):
     async with ClientSession() as session:
         auth = MiAuth(session, username, password)
         cloud = MiIOCloud(auth)
-        result = await miio_cmd(cloud, did, text, sys.argv[0] + ' ')
+        result = await miio_cmd(cloud, did, text)
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
+        elif result == 'HELP':
+            return usage(did)
         print(result)
 
 

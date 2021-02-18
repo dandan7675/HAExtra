@@ -40,7 +40,7 @@ Devs List: {prefix}list [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
            {prefix}list true 1'
 
 
-async def miio_cmd(cloud, did, text, prefix='?'):
+async def miio_cmd(cloud, did, text):
 
     cmd, arg = twins_split(text, ' ')
 
@@ -56,7 +56,7 @@ async def miio_cmd(cloud, did, text, prefix='?'):
         return await cloud.device_list(bool(argc > 0 and string_to_value(argv[0])), int(argv[1]) if argc > 1 else 0)
 
     if not did or not cmd or cmd == 'help' or cmd == '-h' or cmd == '--help':
-        return miio_cmd_help(did, prefix)
+        return "HELP"
 
     if argc > 0:
         siid, aiid = twins_split(cmd, '-', 1)

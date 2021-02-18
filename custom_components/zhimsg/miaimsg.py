@@ -24,9 +24,8 @@ class miaimsg:
     async def async_send(self, message, data):
 
         if message.startswith('?'):
-            if len(message) > 1:
-                return await miio_cmd(miio_cloud(), self.did, message[1:])
-            return get_examples(self.hass, 'miai') + '\n' + miio_cmd_help(self.did)
+            result = await miio_cmd(miio_cloud(), self.did, message[1:])
+            return get_examples(self.hass, 'miai') + '\n' + miio_cmd_help(self.did) if result == 'HELP' else result
     
         if message.startswith('音量'):
             pos = message.find('%')
