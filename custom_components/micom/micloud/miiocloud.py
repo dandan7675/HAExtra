@@ -59,8 +59,8 @@ class MiIOCloud:
         return (await self.miot_set_props(did, [(siid, piid, value)]))[0]
 
     async def miot_action(self, did, siid, aiid, args):
-        if not did:
-            did = f'action-{siid}-{aiid}'
+        # if not did:
+        #     did = f'action-{siid}-{aiid}'
         result = await self.miot_spec('action', {'did': did, 'siid': siid, 'aiid': aiid, 'in': args})
         return result
 

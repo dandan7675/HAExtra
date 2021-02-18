@@ -11,35 +11,37 @@ from miiocloud import MiIOCloud, _LOGGER as _LOGGER2
 from miiocmd import miio_cmd, miio_cmd_help
 
 
-def usage():
-    print("Usage:     %s [username] [password] <cmd>\n" % sys.argv[0])
-    print("Username:  export MI_USER=<username>")
-    print("Password:  export MI_PASS=<password>\n")
-    print(miio_cmd_help(sys.argv[0] + ' ') + '\n')
+def usage(did):
+    print("Usage: The following variables must be set:")
+    print("           export MI_USER=<username>")
+    print("           export MI_PASS=<password>")
+    print("           export MIIO_DID=<deviceId>\n")
+    print(miio_cmd_help(did, sys.argv[0] + ' ') + '\n')
 
 
-async def main(username, password, cmd):
+async def main(username, password, did, text):
     async with ClientSession() as session:
         auth = MiAuth(session, username, password)
         cloud = MiIOCloud(auth)
-        result = await miio_cmd(cloud, cmd, sys.argv[0] + ' ')
+        result = await miio_cmd(cloud, did, text, sys.argv[0] + ' ')
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
-        print(result)
+        print(result + '\n')
 
 
 if __name__ == '__main__':
     argv = sys.argv
     argc = len(argv)
-    username = argv[argc - 3] if argc > 3 else os.environ.get('MI_USER')
-    password = argv[argc - 2] if argc > 2 else os.environ.get('MI_PASS')
+    username = os.environ.get('MI_USER')
+    password = os.environ.get('MI_PASS')
+    did = os.environ.get('MIIO_DID')
     if argc > 1 and username and password:
         _LOGGER1.setLevel(logging.DEBUG)
         _LOGGER1.addHandler(logging.StreamHandler())
         _LOGGER2.setLevel(logging.DEBUG)
         _LOGGER2.addHandler(logging.StreamHandler())
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(username, password, argv[argc - 1]))
+        loop.run_until_complete(main(username, password, did, ' '.join(argv[1:])))
         loop.close()
     else:
-        usage()
+        usage(did)

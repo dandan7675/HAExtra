@@ -25,8 +25,8 @@ class miaimsg:
 
         if message.startswith('?'):
             if len(message) > 1:
-                return await miio_cmd(miio_cloud(), message[1:], '?', self.did)
-            return get_examples(self.hass, 'miai') + '\n' + miio_cmd_help('?', self.did)
+                return await miio_cmd(miio_cloud(), self.did, message[1:])
+            return get_examples(self.hass, 'miai') + '\n' + miio_cmd_help(self.did)
     
         if message.startswith('音量'):
             pos = message.find('%')
