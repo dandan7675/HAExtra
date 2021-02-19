@@ -54,7 +54,7 @@ apt update && apt upgrade -y
 #apt clean
 #apt autoremove -y
 
-apt install mosquitto mosquitto-clients libavahi-compat-libdnssd-dev adb
+apt install mosquitto mosquitto-clients libavahi-compat-libdnssd-dev libturbojpeg0 adb
 
 # Armbian
 apt install python3-pip python3-dev python3-setuptools libffi-dev
