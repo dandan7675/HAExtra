@@ -19,7 +19,7 @@ class miaimsg:
     def __init__(self, hass, conf):
         self.hass = hass
         self.did = conf.get('did')
-        if self.did and isinstance(self.did, str):
+        if self.did and not isinstance(self.did, str):
             self.did = str(self.did)
         self.name = conf.get('name')
         self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
