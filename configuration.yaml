@@ -694,7 +694,7 @@ climate:
     temperature_sensor: sensor.shu_fang_wen_du
     humidity_sensor: sensor.aircat2_humidity
 
-mrbond_airer:
+zhibond:
   name: 晾衣架
   host: Airer
   token: !secret airer_token
