@@ -45,15 +45,18 @@ async def miio_cmd(cloud, did, text):
     cmd, arg = twins_split(text, ' ')
 
     if cmd.startswith('/'):
-        return await cloud.miio(cmd, arg)
+        return await cloud.request(cmd, arg)
 
     if cmd.startswith('prop') or cmd == 'action':
-        return await cloud.miot_spec(cmd, json.loads(arg) if arg else None)
+        return await cloud.miot_request(cmd, json.loads(arg) if arg else None)
 
     argv = arg.split(' ') if arg else []
     argc = len(argv)
     if cmd == 'list':
         return await cloud.device_list(bool(argc > 0 and string_to_value(argv[0])), int(argv[1]) if argc > 1 else 0)
+
+    if cmd == 'spec':
+        return await cloud.miot_spec(argv[0] if argc > 0 else None)
 
     if not did or not cmd or cmd == 'help' or cmd == '-h' or cmd == '--help':
         return "HELP"

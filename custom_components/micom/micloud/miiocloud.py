@@ -11,7 +11,7 @@ class MiIOCloud:
         self.auth = auth
         self.server = 'https://' + ('' if region is None or region == 'cn' else region + '.') + 'api.io.mi.com/app'
 
-    async def miio(self, uri, data, relogin=True):
+    async def request(self, uri, data, relogin=True):
         if self.auth.token is not None or await self.auth.login():  # Ensure login
             _LOGGER.debug(f"{uri} {data}")
             r = await self.auth.session.post(self.server + uri, cookies={
@@ -32,24 +32,24 @@ class MiIOCloud:
             elif code == 2 and relogin:
                 _LOGGER.debug(f"Auth error on request {uri}, relogin...")
                 self.token = None  # Auth error, reset login
-                return self.miio(uri, data, False)
+                return self.request(uri, data, False)
         else:
             resp = "Login failed"
         error = f"Request {uri} error: {resp}"
         _LOGGER.error(error)
         raise Exception(error)
 
-    async def miot_spec(self, cmd, params):
-        return await self.miio('/miotspec/' + cmd, {'params': params})
+    async def miot_request(self, cmd, params):
+        return await self.request('/miotspec/' + cmd, {'params': params})
 
     async def miot_get_props(self, did, props):
         params = [{'did': did, 'siid': prop[0], 'piid': prop[1]} for prop in props]
-        result = await self.miot_spec('prop/get', params)
+        result = await self.miot_request('prop/get', params)
         return [it.get('value') if it.get('code') == 0 else None for it in result]
 
     async def miot_set_props(self, did, props):
         params = [{'did': did, 'siid': prop[0], 'piid': prop[1], 'value': prop[2]} for prop in props]
-        result = await self.miot_spec('prop/set', params)
+        result = await self.miot_request('prop/set', params)
         return [it.get('code', -1) for it in result]
 
     async def miot_get_prop(self, did, siid, piid):
@@ -61,9 +61,20 @@ class MiIOCloud:
     async def miot_action(self, did, siid, aiid, args):
         # if not did:
         #     did = f'action-{siid}-{aiid}'
-        result = await self.miot_spec('action', {'did': did, 'siid': siid, 'aiid': aiid, 'in': args})
+        result = await self.miot_request('action', {'did': did, 'siid': siid, 'aiid': aiid, 'in': args})
         return result
 
+    async def miot_spec(self, type=None):
+        if not type or not type.startswith('urn'):
+            async with self.auth.session.get('http://miot-spec.org/miot-spec-v2/instances?status=all') as r:
+                result = await r.json()
+            result = {i['model']: i['type'] for i in result['instances'] if not type or type in i['model']}
+            if len(result) != 1:
+                return result
+            type = list(result.values())[0]
+        async with self.auth.session.get('http://miot-spec.org/miot-spec-v2/instance?type=' + type) as r:
+            return await r.json()
+
     async def device_list(self, getVirtualModel=False, getHuamiDevices=0):
-        result = await self.miio('/home/device_list', {'getVirtualModel': getVirtualModel, 'getHuamiDevices': getHuamiDevices})
+        result = await self.request('/home/device_list', {'getVirtualModel': getVirtualModel, 'getHuamiDevices': getHuamiDevices})
         return result.get('list')
