@@ -766,7 +766,7 @@ zhimsg:
   - platform: miai
     name: 客厅音箱
     did: 380205692
-    model: lx08c
+    model: x08c
   - platform: miai
     name: 过道音箱
     did: 89463074

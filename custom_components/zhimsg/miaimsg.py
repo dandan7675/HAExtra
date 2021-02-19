@@ -9,8 +9,9 @@ _LOGGER = logging.getLogger(__name__)
 MODEL_SPECS = {
     # 'default': {'siid': 5, 'aiid': 1, 'execute_siid': 5, 'execute_aiid': 5, 'volume_siid': 2, 'volume_piid': 1},
     'lx01': {},
+    'lx5a': {},
     'lx04': {'execute_aiid': 4},
-    'lx08c': {'siid': 3, 'volume_siid': 4},
+    'x08c': {'siid': 3, 'execute_siid': 3, 'volume_siid': 4},
 }
 
 
