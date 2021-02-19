@@ -23,7 +23,10 @@ async def main(username, password, did, text):
     async with ClientSession() as session:
         auth = MiAuth(session, username, password)
         cloud = MiIOCloud(auth)
-        result = await miio_cmd(cloud, did, text)
+        try:
+            result = await miio_cmd(cloud, did, text)
+        except Exception as e:
+            return
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
         elif result == 'HELP':
@@ -37,11 +40,18 @@ if __name__ == '__main__':
     username = os.environ.get('MI_USER')
     password = os.environ.get('MI_PASS')
     did = os.environ.get('MIIO_DID')
+    if argc > 1 and argv[1].startswith('-v'):
+        index = int(argv[1][2]) if len(argv[1]) > 2 else 4
+        level = [logging.NOTSET, logging.FATAL, logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG][index]
+        argv = argv[1:]
+    else:
+        level = logging.WARNING
     if argc > 1 and username and password:
-        _LOGGER1.setLevel(logging.DEBUG)
-        _LOGGER1.addHandler(logging.StreamHandler())
-        _LOGGER2.setLevel(logging.DEBUG)
-        _LOGGER2.addHandler(logging.StreamHandler())
+        if level != logging.NOTSET:
+            _LOGGER1.setLevel(level)
+            _LOGGER2.setLevel(level)
+            _LOGGER1.addHandler(logging.StreamHandler())
+            _LOGGER2.addHandler(logging.StreamHandler())
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(username, password, did, ' '.join(argv[1:])))
         loop.close()

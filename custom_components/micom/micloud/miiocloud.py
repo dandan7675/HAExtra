@@ -13,7 +13,7 @@ class MiIOCloud:
 
     async def request(self, uri, data, relogin=True):
         if self.auth.token is not None or await self.auth.login():  # Ensure login
-            _LOGGER.debug(f"{uri} {data}")
+            _LOGGER.info(f"{uri} {data}")
             r = await self.auth.session.post(self.server + uri, cookies={
                 'userId': self.auth.token['userId'],
                 'serviceToken': self.auth.token['serviceToken'],
@@ -35,7 +35,7 @@ class MiIOCloud:
                 return self.request(uri, data, False)
         else:
             resp = "Login failed"
-        error = f"Request {uri} error: {resp}"
+        error = f"Error {uri}: {resp}"
         _LOGGER.error(error)
         raise Exception(error)
 

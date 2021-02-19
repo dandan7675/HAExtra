@@ -99,7 +99,7 @@ class MiAuth:
                                    params={'sid': 'xiaomiio', '_json': 'true'})
         raw = await r.read()
         resp = json.loads(raw[11:])
-        #_LOGGER.debug(f"MiCloud step1: %s", resp)
+        _LOGGER.debug(f"MiAuth step1: %s", resp)
         return {k: v for k, v in resp.items() if k in ('sid', 'qs', 'callback', '_sign')}
 
     async def _login2(self, payload):
@@ -112,13 +112,13 @@ class MiAuth:
                                     params={'_json': 'true'})
         raw = await r.read()
         resp = json.loads(raw[11:])
-        #_LOGGER.debug(f"MiCloud step2: %s", resp)
+        _LOGGER.debug(f"MiAuth step2: %s", resp)
         return resp
 
     async def _login3(self, location):
         r = await self.session.get(location, headers={'User-Agent': self.user_agent})
         serviceToken = r.cookies['serviceToken'].value
-        #_LOGGER.debug(f"MiCloud step3: %s", serviceToken)
+        _LOGGER.info(f"MiAuth step3: %s", serviceToken)
         return serviceToken
 
     def sign(self, uri, data):
