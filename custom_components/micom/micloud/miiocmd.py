@@ -31,7 +31,7 @@ Set Props: {prefix}<siid[-piid]=[#]value>[,...]\n\
            {prefix}2=#60,2-2=#false,3=test\n\
 Do Action: {prefix}<siid[-piid]> <arg1> [...] \n\
            {prefix}5 您好\n\
-           {prefix}5-4 天气 =1\n\n\
+           {prefix}5-4 天气 #1\n\n\
 Call MIoT: {prefix}<cmd=prop/get|/prop/set|action> <params>\n\
            {prefix}action {quote}{{"did":"{did or "267090026"}","siid":5,"aiid":1,"in":["您好"]}}{quote}\n\n\
 Call MiIO: {prefix}/<uri> <data>\n\
