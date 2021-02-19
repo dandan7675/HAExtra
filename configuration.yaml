@@ -755,8 +755,8 @@ panel_iframe:
 actuator:
 
 zhimi:
-    username: !secret micom_username
-    password: !secret micom_password
+    username: !secret zhimi_username
+    password: !secret zhimi_password
 
 zhimsg:
   - platform: ding
@@ -779,15 +779,15 @@ zhimsg:
 zhibot:
   - platform: genie
   - platform: miai
-    token: !secret zhi_token
+    token: !secret zhibot_token
   - platform: ding
-    token: !secret zhi_token
+    token: !secret zhibot_token
   - platform: ding
     name: 客厅音箱
-    token: !secret zhi_token
+    token: !secret zhibot_token
   - platform: ding
     name: 过道音箱
-    token: !secret zhi_token
+    token: !secret zhibot_token
   - platform: ding
     name: 儿童房音箱
-    token: !secret zhi_token
+    token: !secret zhibot_token

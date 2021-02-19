@@ -91,7 +91,5 @@ async def zhiState(hass, entity_id, state, query):
         return '为' + (STATE_NAMES[state] if state in STATE_NAMES else state)
 
     data = {'entity_id': entity_id}
-    with hass.helpers.state.AsyncTrackStates() as changed_states:
-        result = await hass.services.async_call(domain, service, data, True)
-
+    result = await hass.services.async_call(domain, service, data, True)
     return action + ("成功" if result else "不成功")
