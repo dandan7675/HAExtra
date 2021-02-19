@@ -37,8 +37,13 @@ Call MIoT: {prefix}<cmd=prop/get|/prop/set|action> <params>\n\
 Call MiIO: {prefix}/<uri> <data>\n\
            {prefix}/home/device_list {quote}{{"getVirtualModel":false,"getHuamiDevices":1}}{quote}\n\n\
 Devs List: {prefix}list [full=0|1|false|true|full] [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
-           {prefix}list true 1'
-
+           {prefix}list full true 1\n\n\
+MiIO Spec: {prefix}spec [model_keyword|type_urn]\n\
+           {prefix}spec\n\
+           {prefix}spec speaker\n\
+           {prefix}spec xiaomi.wifispeaker.lx04\n\
+           {prefix}spec urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx04:1\n\
+'
 
 async def miio_cmd(cloud, did, text):
 
