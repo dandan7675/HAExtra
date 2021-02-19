@@ -537,21 +537,21 @@ class DeviceTracker:
         )
 
         # update known_devices.yaml
-        # self.hass.async_create_task(
-        #     self.async_update_config(
-        #         self.hass.config.path(YAML_DEVICES), dev_id, device
-        #     )
-        # )
+        self.hass.async_create_task(
+            self.async_update_config(
+                self.hass.config.path(YAML_DEVICES), dev_id, device
+            )
+        )
 
-    # async def async_update_config(self, path, dev_id, device):
-    #     """Add device to YAML configuration file.
+    async def async_update_config(self, path, dev_id, device):
+        """Add device to YAML configuration file.
 
-    #     This method is a coroutine.
-    #     """
-    #     async with self._is_updating:
-    #         await self.hass.async_add_executor_job(
-    #             update_config, self.hass.config.path(YAML_DEVICES), dev_id, device
-    #         )
+        This method is a coroutine.
+        """
+        async with self._is_updating:
+            await self.hass.async_add_executor_job(
+                update_config, self.hass.config.path(YAML_DEVICES), dev_id, device
+            )
 
     @callback
     def async_update_stale(self, now: dt_util.dt.datetime):
@@ -856,21 +856,21 @@ async def async_load_config(
     return result
 
 
-# def update_config(path: str, dev_id: str, device: Device):
-#     """Add device to YAML configuration file."""
-#     return
-#     with open(path, "a") as out:
-#         device = {
-#             device.dev_id: {
-#                 ATTR_NAME: device.name,
-#                 ATTR_MAC: device.mac,
-#                 ATTR_ICON: device.icon,
-#                 "picture": device.config_picture,
-#                 "track": device.track,
-#             }
-#         }
-#         out.write("\n")
-#         out.write(dump(device))
+def update_config(path: str, dev_id: str, device: Device):
+    """Add device to YAML configuration file."""
+    return
+    with open(path, "a") as out:
+        device = {
+            device.dev_id: {
+                ATTR_NAME: device.name,
+                ATTR_MAC: device.mac,
+                ATTR_ICON: device.icon,
+                "picture": device.config_picture,
+                "track": device.track,
+            }
+        }
+        out.write("\n")
+        out.write(dump(device))
 
 
 def get_gravatar_for_email(email: str):
