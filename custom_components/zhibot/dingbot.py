@@ -9,6 +9,14 @@ _LOGGER = logging.getLogger(__name__)
 
 class dingbot(basebot):
 
+    async def async_check(self, request, data):
+        if self.password:
+            token = request.headers.get('token')
+            if token == self.password:
+                return True
+            _LOGGER.warn('Token mismatch: %s <> %s', token, self.password)
+        return await super().async_check(request, data)
+
     def get_auth_user(self, data):
         return data['chatbotUserId']
 
@@ -26,4 +34,4 @@ class dingbot(basebot):
             return await zhiChat(self.hass, query)
 
     def response(self, result):
-        return {'msgtype': 'text', 'text': {'content': result}}
+        return {'msgtype': 'text', 'text': {'content': result}} if result else {'msgtype': 'empty'}
