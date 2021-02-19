@@ -29,7 +29,7 @@ class miaimsg:
         if not self.did:
             devs = await miio_cloud().device_list(self.name)
             for dev in devs:
-                model = dev['model']
+                model = dev['model'].split('.')[-1]
                 if model in MODEL_SPECS:
                     self.did = dev['did']
                     self.spec = MODEL_SPECS[model]
