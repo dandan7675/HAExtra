@@ -90,7 +90,7 @@ HVAC_ACTIONS = {
     HVAC_MODE_FAN_ONLY: CURRENT_HVAC_FAN,
 }
 
-DEFAULT_NAME = 'Modbus'
+DEFAULT_NAME = 'ZhiBus'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_HUB, default=DEFAULT_HUB): cv.string,

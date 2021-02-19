@@ -60,7 +60,7 @@ panel_iframe:
 
 **注意：部分命名为 2.py 是因为和 HA 官方的插件命名冲突或者派生而来**
 
-# 1. [modbus2/climate](custom_components/modbus2/climate.py)
+# 1. [zhibus/climate](custom_components/zhibus/climate.py)
 
 通用 ModBus 空调插件，比 HA 官方做的更通用、更好，详情请参考 [https://yonsm.github.io/modbus](https://yonsm.github.io/modbus)
 
