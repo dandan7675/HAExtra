@@ -140,7 +140,7 @@ person:
       - device_tracker.cphone
 
 weather:
-  - platform: caiyun
+  - platform: zhicai
     name: 天气
 
 # binary_sensor:

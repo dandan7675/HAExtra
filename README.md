@@ -50,8 +50,8 @@ panel_iframe:
 - 直接输入文字如，如 `我的设备`
 - 插入 state 宏，如 `状态 ${sate}`
 - 插入 attributes 宏，如 `温度 ${temperature}℃`
-- 插入其它设备的 state 宏，如 `气温 ${sensor.caiyun_temperature}℃`
-- 插入其它设备的 attributes 宏，如 `气温 ${sensor.caiyun_weather.temperature}℃`
+- 插入其它设备的 state 宏，如 `气温 ${sensor.zhicai_temperature}℃`
+- 插入其它设备的 attributes 宏，如 `气温 ${sensor.zhicai_weather.temperature}℃`
 - 使用 JavaScript eval 运算，如`eval:"${status}"=="Charging" ? "充电中" : "${status}"`
 
 更多个性化配置案例可以在我的 [customize.yaml](customize.yaml) 中搜索 `dash`，以上几种用法基本上都能找到案例。
@@ -77,9 +77,9 @@ SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.i
 -   依赖库升级到 `broadlink==0.9.0`，解决 N1 armbian HA 0.8x 下面 segment fault 的问题；
 -   `self._travel == 0` 改成 `self._travel <= 0` 避免相关 BUG。
 
-# 4. [caiyun/weather](custom_components/caiyun/weather.py)
+# 4. [zhicai/weather](custom_components/zhicai/weather.py)
 
-彩云天气的标准天气插件，支持15天预报。另外，[旧版 sensror](extra/sensor/caiyun.py) 已不再使用，详情请参考[https://yonsm.github.io/caiyun](https://yonsm.github.io/caiyun)
+彩云天气的标准天气插件，支持15天预报。另外，[旧版 sensror](extra/sensor/zhicai.py) 已不再使用，详情请参考[https://yonsm.github.io/zhicai](https://yonsm.github.io/caiyun)
 
 # 5. [aircat/sensor](custom_components/aircat/sensor.py)
 
