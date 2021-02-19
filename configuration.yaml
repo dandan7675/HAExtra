@@ -752,7 +752,7 @@ panel_iframe:
     icon: mdi:microsoft
     url: /local/dash.html
 
-actuator:
+zhiact:
 
 zhimi:
     username: !secret zhimi_username

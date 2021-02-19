@@ -8,7 +8,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-DOMAIN = 'actuator'
+DOMAIN = 'zhiact'
 
 ACTUATE_SCHEMA = vol.Schema({
     vol.Required('sensor_id'): cv.string,

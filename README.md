@@ -106,7 +106,7 @@ SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.i
 
 小爱同学 TTS 播报插件，可以参考 automation.yaml 中大量使用到相关功能；还可以 [在HomeAssistant中输入文本，让小爱音TTS箱朗读出来](https://bbs.hassbian.com/thread-4184-1-1.html)；我并非原创者，源自 [https://bbs.hassbian.com/thread-3669-1-1.html](https://bbs.hassbian.com/thread-3669-1-1.html)
 
-# 9. [actuator](custom_components/actuator/__init__.py)
+# 9. [zhiact](custom_components/zhiact/__init__.py)
 
 根据传感器数值区间来自动控制设备，详情请参考 [https://bbs.hassbian.com/thread-7876-1-1.html](https://bbs.hassbian.com/thread-7876-1-1.html)
 
