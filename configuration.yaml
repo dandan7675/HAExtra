@@ -558,7 +558,7 @@ vacuum:
     token: !secret vacuum_token
 
 fan:
-  - platform: viomi_washer
+  - platform: zhiviomi
     name: 洗衣机
     host: Washer
     token: !secret washer_token
