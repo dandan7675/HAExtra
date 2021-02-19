@@ -34,10 +34,10 @@ class basebot(HomeAssistantView):
         self.url = '/' + (self.name or platform)
         self.requires_auth = False
 
-        self.password = conf.get('password')
+        self.token = conf.get('token')
         info = "Serving on " + self.url
-        if self.password:
-            info += '?password=' + self.password
+        if self.token:
+            info += '?token=' + self.token
         else:
             self.init_auth(platform)
         _LOGGER.info(info)
@@ -64,8 +64,8 @@ class basebot(HomeAssistantView):
         raise NotImplementedError()
 
     async def async_check(self, request, data):
-        if self.password:
-            return self.password == request.query.get('password') or self.password == '*'
+        if self.token:
+            return self.token == '*' or self.token == request.query.get('token') or self.token == request.headers.get('token')
         return await self.async_check_auth(data)
 
     def init_auth(self, platform):

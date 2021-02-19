@@ -779,15 +779,15 @@ zhimsg:
 zhibot:
   - platform: genie
   - platform: miai
-    password: !secret zhibot_password
+    token: !secret zhi_token
   - platform: ding
-    password: !secret zhibot_password
+    token: !secret zhi_token
   - platform: ding
     name: 客厅音箱
-    password: !secret zhibot_password
+    token: !secret zhi_token
   - platform: ding
     name: 过道音箱
-    password: !secret zhibot_password
+    token: !secret zhi_token
   - platform: ding
     name: 儿童房音箱
-    password: !secret zhibot_password
+    token: !secret zhi_token
