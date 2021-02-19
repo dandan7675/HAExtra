@@ -31,4 +31,4 @@ class dingmsg:
             resp = await response.json()
             if resp['errcode'] != 0:
                 return resp
-        return None
+        return '消息发送成功'

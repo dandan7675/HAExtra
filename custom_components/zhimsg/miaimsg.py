@@ -37,8 +37,8 @@ class miaimsg:
             if not self.did:
                 raise Exception('已支持的音箱列表中找不到：' + self.name)
 
-        if message.startswith('?'):
-            if message == '?':
+        if message.startswith('?') or message.startswith('？'):
+            if message == '?' or message == '？':
                 return get_examples(self.hass, 'miai')
             return await miio_cmd(get_miiocom(), self.did, message[1:])
     
@@ -67,8 +67,7 @@ class miaimsg:
             siid = self.spec.get('execute_siid', 5)
             aiid = self.spec.get('execute_aiid', 5)
             echo = 0 if message.startswith('静默') else 1
-            message = message[2:].strip()
-            args = [message, echo]
+            args = [message[2:].strip(), echo]
         else:
             siid = self.spec.get('siid', 5)
             aiid = self.spec.get('aiid', 1)
@@ -78,4 +77,4 @@ class miaimsg:
             return "空谈误国，实干兴邦！"
 
         result = await get_miiocom().miot_action(self.did, siid, aiid, args)
-        return None if result.get('code') == 0 else result
+        return ((message[:2] if len(args) == 2 else "播报") + '成功') if result.get('code') == 0 else result

@@ -63,7 +63,7 @@ async def miio_cmd(miiocom, did, text, prefix='?'):
     if cmd == 'spec':
         return await miiocom.miot_spec(argv[0] if argc > 0 else None)
 
-    if not did or not cmd or cmd == '?' or cmd == 'help' or cmd == '-h' or cmd == '--help':
+    if not did or not cmd or cmd == '?' or cmd == '？' or cmd == 'help' or cmd == '-h' or cmd == '--help':
         return miio_cmd_help(did, prefix)
 
     props = []
