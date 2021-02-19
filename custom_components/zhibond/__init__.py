@@ -1,4 +1,3 @@
-"""Support for ASUSWRT devices."""
 import logging
 from miio import Device
 

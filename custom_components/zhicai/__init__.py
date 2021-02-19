@@ -1,1 +1,0 @@
-"""The CaiYun weather component."""
