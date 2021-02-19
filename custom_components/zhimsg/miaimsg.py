@@ -78,4 +78,4 @@ class miaimsg:
             return "空谈误国，实干兴邦！"
 
         result = await get_miiocom().miot_action(self.did, siid, aiid, args)
-        return ((message[:2] if len(args) == 2 else "播报") + '成功') if result.get('code') == 0 else result
+        return (('执行' if len(args) == 2 else '播报') + '成功') if result.get('code') == 0 else result
