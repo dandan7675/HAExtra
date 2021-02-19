@@ -101,7 +101,7 @@
 #       after: '20:00'
 #       before: '07:20'
 #   action:
-#     - service: actuator.actuate
+#     - service: zhiact.actuate
 #       data:
 #         sensor_id: sensor.zhu_wo_wen_du
 #         sensor_values: [27.5, 29.3, 30, 31, 32]
@@ -124,7 +124,7 @@
 #       after: '20:00'
 #       before: '07:20'
 #   action:
-#     - service: actuator.actuate
+#     - service: zhiact.actuate
 #       data:
 #         sensor_id: sensor.er_tong_fang_wen_du
 #         sensor_values: [22, 22.5, 23, 24, 25]
@@ -147,7 +147,7 @@
 #       after: '20:30'
 #       before: '07:20'
 #   action:
-#     - service: actuator.actuate
+#     - service: zhiact.actuate
 #       data:
 #         sensor_id: sensor.shu_fang_wen_du
 #         #sensor_values: [28, 28.5, 32, 34] #feng_shan_wen_du
@@ -172,7 +172,7 @@
 #       after: '20:30'
 #       before: '07:20'
 #   action:
-#     - service: actuator.actuate
+#     - service: zhiact.actuate
 #       data:
 #         sensor_id: sensor.shu_fang_wen_du
 #         #sensor_values: [24, 27.5, 30, 32] #feng_shan_wen_du
@@ -199,7 +199,7 @@
 #       after: '20:00'
 #       before: '07:20'
 #   action:
-#     - service: actuator.actuate
+#     - service: zhiact.actuate
 #       data:
 #         sensor_id: sensor.er_tong_fang_wen_du
 #         sensor_values: [19, 21.2, 24, 25]

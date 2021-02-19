@@ -7,7 +7,7 @@ import os
 import sys
 
 from miauth import MiAuth, _LOGGER as _LOGGER1
-from miiocloud import MiIOCloud, _LOGGER as _LOGGER2
+from miiocom import MiIOCom, _LOGGER as _LOGGER2
 from miiocmd import miio_cmd, miio_cmd_help
 
 
@@ -21,9 +21,9 @@ def usage(did):
 
 async def main(username, password, did, text):
     async with ClientSession() as session:
-        auth = MiAuth(session, username, password)
-        cloud = MiIOCloud(auth)
-        result = await miio_cmd(cloud, did, text, sys.argv[0] + ' ')
+        miauth = MiAuth(session, username, password)
+        miiocom = MiIOCom(miauth)
+        result = await miio_cmd(miiocom, did, text, sys.argv[0] + ' ')
         if not isinstance(result, str):
             result = json.dumps(result, indent=2, ensure_ascii=False)
         print(result)

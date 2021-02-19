@@ -45,23 +45,23 @@ MiIO Spec: {prefix}spec [model_keyword|type_urn]\n\
            {prefix}spec urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx04:1\n\
 '
 
-async def miio_cmd(cloud, did, text, prefix='?'):
+async def miio_cmd(miiocom, did, text, prefix='?'):
 
     cmd, arg = twins_split(text, ' ')
 
     if cmd.startswith('/'):
-        return await cloud.request(cmd, arg)
+        return await miiocom.request(cmd, arg)
 
     if cmd.startswith('prop') or cmd == 'action':
-        return await cloud.miot_request(cmd, json.loads(arg) if arg else None)
+        return await miiocom.miot_request(cmd, json.loads(arg) if arg else None)
 
     argv = arg.split(' ') if arg else []
     argc = len(argv)
     if cmd == 'list':
-        return await cloud.device_list(argc > 0 and argv[0], argc > 1 and string_to_value(argv[1]), argc > 2 and argv[2])
+        return await miiocom.device_list(argc > 0 and argv[0], argc > 1 and string_to_value(argv[1]), argc > 2 and argv[2])
 
     if cmd == 'spec':
-        return await cloud.miot_spec(argv[0] if argc > 0 else None)
+        return await miiocom.miot_spec(argv[0] if argc > 0 else None)
 
     if not did or not cmd or cmd == '?' or cmd == 'help' or cmd == '-h' or cmd == '--help':
         return miio_cmd_help(did, prefix)
@@ -83,6 +83,6 @@ async def miio_cmd(cloud, did, text, prefix='?'):
 
     if argc > 0:
         args = [string_or_value(a) for a in argv]
-        return await cloud.miot_action(did, props[0][0], props[0][1], args)
+        return await miiocom.miot_action(did, props[0][0], props[0][1], args)
 
-    return await (cloud.miot_get_props if isget else cloud.miot_set_props)(did, props)
+    return await (miiocom.miot_get_props if isget else miiocom.miot_set_props)(did, props)

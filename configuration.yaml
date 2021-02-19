@@ -10,7 +10,7 @@ homeassistant:
 logger:
   default: warning
   logs:
-    custom_components.micom: debug
+    custom_components.zhimi: debug
     custom_components.zhimsg: debug
     custom_components.zhibot: debug
 
@@ -754,7 +754,7 @@ panel_iframe:
 
 actuator:
 
-micom:
+zhimi:
     username: !secret micom_username
     password: !secret micom_password
 
