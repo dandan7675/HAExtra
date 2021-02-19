@@ -3,7 +3,7 @@
     - platform: state
       entity_id: sensor.ke_ting_er_yang_hua_tan
   action:
-    - service: actuator.actuate
+    - service: zhiact.actuate
       data:
         sensor_id: sensor.ke_ting_er_yang_hua_tan
         sensor_values: [490, 540, 650, 720]
@@ -18,7 +18,7 @@
     - platform: state
       entity_id: sensor.zhu_wo_er_yang_hua_tan
   action:
-    - service: actuator.actuate
+    - service: zhiact.actuate
       data:
         sensor_id: sensor.zhu_wo_er_yang_hua_tan
         sensor_values: [500, 600, 700, 800]
