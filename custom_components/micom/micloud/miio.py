@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 # REGIONS = ['cn', 'de', 'i2', 'ru', 'sg', 'us']
 
 
-class MiIOCloud:
+class MiIO:
 
     def __init__(self, auth, region=None):
         self.auth = auth

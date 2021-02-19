@@ -24,7 +24,7 @@ class miaimsg:
     async def async_send(self, message, data):
 
         if message.startswith('?'):
-            result = await miio_cmd(miio_cloud(), self.did, message[1:])
+            result = await miio_cmd(miio(), self.did, message[1:])
             return get_examples(self.hass, 'miai') + '\n' + miio_cmd_help(self.did) if result == 'HELP' else result
     
         if message.startswith('音量'):
@@ -39,14 +39,14 @@ class miaimsg:
             piid = self.spec.get('volume_piid', 1)
             try:
                 volume = int(volume)
-                code = await miio_cloud().miot_set_prop(self.did, siid, piid, volume)
+                code = await miio().miot_set_prop(self.did, siid, piid, volume)
                 if not message:
                     if code != 0:
                         return f"设置音量出错：{code}"
                     else:
                         raise Exception
             except:
-                return f"当前音量：{await miio_cloud().miot_get_prop(self.did, siid, piid)}"
+                return f"当前音量：{await miio().miot_get_prop(self.did, siid, piid)}"
 
         if message.startswith('查询') or message.startswith('执行') or message.startswith('静默'):
             siid = self.spec.get('execute_siid', 5)
@@ -62,5 +62,5 @@ class miaimsg:
         if not message:
             return "空谈误国，实干兴邦！"
 
-        result = await miio_cloud().miot_action(self.did, siid, aiid, args)
+        result = await miio().miot_action(self.did, siid, aiid, args)
         return None if result.get('code') == 0 else result
