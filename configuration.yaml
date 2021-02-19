@@ -675,7 +675,7 @@ smartir:
   check_updates: false
 
 climate:
-  - platform: saswell
+  - platform: zhisas
     username: !secret saswell_username
     password: !secret saswell_password
   - platform: zhibus

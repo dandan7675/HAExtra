@@ -64,9 +64,9 @@ panel_iframe:
 
 通用 ModBus 空调插件，比 HA 官方做的更通用、更好，详情请参考 [https://yonsm.github.io/modbus](https://yonsm.github.io/modbus)
 
-# 2. [saswell/climate](custom_components/saswell/climate.py)
+# 2. [zhisas/climate](custom_components/zhisas/climate.py)
 
-SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.io/saswell](https://yonsm.github.io/saswell)
+SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.io/zhisas](https://yonsm.github.io/saswell)
 
 # 3. [broadlink2/cover](custom_components/broadlink2/cover.py)
 

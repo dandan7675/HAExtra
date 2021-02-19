@@ -45,7 +45,7 @@ WEATHER_ICONS = {
 }
     
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Optional(CONF_NAME, default='CaiYun'): cv.string,
+    vol.Optional(CONF_NAME, default='ZhiCai'): cv.string,
     vol.Optional(CONF_LONGITUDE): cv.longitude,
     vol.Optional(CONF_LATITUDE): cv.latitude,
 })

@@ -2,7 +2,7 @@
 Saswell platform that offers a Saswell climate device.
 
 For more details about this platform, please refer to the documentation
-https://home-assistant.io/components/climate/saswell
+https://home-assistant.io/components/climate/zhisas
 """
 import asyncio
 import logging
@@ -26,7 +26,7 @@ from homeassistant.helpers.storage import STORAGE_DIR
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "saswell"
+DOMAIN = "zhisas"
 USER_AGENT = "Thermostat/3.1.0 (iPhone; iOS 11.3; Scale/3.00)"
 
 AUTH_URL = "http://api.scinan.com/oauth2/authorize?client_id=100002" \
@@ -37,7 +37,7 @@ CTRL_URL = "http://api.scinan.com/v1.0/sensors/control?" \
     "control_data=%%7B%%22value%%22%%3A%%22%s%%22%%7D&device_id=%s" \
     "&format=json&sensor_id=%s&sensor_type=1"
 
-DEFAULT_NAME = 'Saswell'
+DEFAULT_NAME = 'ZhiSas'
 ATTR_AVAILABLE = 'available'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
