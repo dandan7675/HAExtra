@@ -75,6 +75,6 @@ class MiIOCloud:
         async with self.auth.session.get('http://miot-spec.org/miot-spec-v2/instance?type=' + type) as r:
             return await r.json()
 
-    async def device_list(self, getVirtualModel=False, getHuamiDevices=0):
+    async def device_list(self, full=False, getVirtualModel=False, getHuamiDevices=0):
         result = await self.request('/home/device_list', {'getVirtualModel': getVirtualModel, 'getHuamiDevices': getHuamiDevices})
-        return result.get('list')
+        return result if full else [{'name': i['name'], 'did': i['did'], 'token': i['token'] } for i in result.get('list')]

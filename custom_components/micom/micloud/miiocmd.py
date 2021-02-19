@@ -36,7 +36,7 @@ Call MIoT: {prefix}<cmd=prop/get|/prop/set|action> <params>\n\
            {prefix}action {quote}{{"did":"{did or "267090026"}","siid":5,"aiid":1,"in":["您好"]}}{quote}\n\n\
 Call MiIO: {prefix}/<uri> <data>\n\
            {prefix}/home/device_list {quote}{{"getVirtualModel":false,"getHuamiDevices":1}}{quote}\n\n\
-Devs List: {prefix}list [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
+Devs List: {prefix}list [full=0|1|false|true|full] [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
            {prefix}list true 1'
 
 
@@ -53,7 +53,7 @@ async def miio_cmd(cloud, did, text):
     argv = arg.split(' ') if arg else []
     argc = len(argv)
     if cmd == 'list':
-        return await cloud.device_list(bool(argc > 0 and string_to_value(argv[0])), int(argv[1]) if argc > 1 else 0)
+        return await cloud.device_list(argc > 0 and argv[0] != '0' and argv[0] != 'false', argc > 1 and bool(string_to_value(argv[1])), int(argv[2]) if argc > 2 else 0)
 
     if cmd == 'spec':
         return await cloud.miot_spec(argv[0] if argc > 0 else None)
