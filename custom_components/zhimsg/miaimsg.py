@@ -18,10 +18,22 @@ class miaimsg:
 
     def __init__(self, hass, conf):
         self.hass = hass
-        self.did = str(conf['did'])
+        self.did = conf.get('did')
+        self.name = conf.get('name', self.did)
         self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
 
     async def async_send(self, message, data):
+
+        if not self.did:
+            devs = await miio_cloud().device_list(self.name)
+            for dev in devs:
+                model = dev['model']
+                if model in MODEL_SPECS:
+                    self.did = dev['did']
+                    self.spec = MODEL_SPECS[model]
+                    break
+            if not self.did:
+                raise Exception('已支持的音箱列表中找不到：' + self.name)
 
         if message.startswith('?'):
             if message == '?':

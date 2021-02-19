@@ -36,8 +36,8 @@ Call MIoT: {prefix}<cmd=prop/get|/prop/set|action> <params>\n\
            {prefix}action {quote}{{"did":"{did or "267090026"}","siid":5,"aiid":1,"in":["您好"]}}{quote}\n\n\
 Call MiIO: {prefix}/<uri> <data>\n\
            {prefix}/home/device_list {quote}{{"getVirtualModel":false,"getHuamiDevices":1}}{quote}\n\n\
-Devs List: {prefix}list [full=0|1|false|true|full] [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
-           {prefix}list full true 1\n\n\
+Devs List: {prefix}list [name=full|name_keyword] [getVirtualModel=false|true] [getHuamiDevices=0|1]\n\
+           {prefix}list 灯 true 0\n\n\
 MiIO Spec: {prefix}spec [model_keyword|type_urn]\n\
            {prefix}spec\n\
            {prefix}spec speaker\n\
@@ -58,7 +58,7 @@ async def miio_cmd(cloud, did, text, prefix='?'):
     argv = arg.split(' ') if arg else []
     argc = len(argv)
     if cmd == 'list':
-        return await cloud.device_list(argc > 0 and argv[0] != '0' and argv[0] != 'false', argc > 1 and bool(string_to_value(argv[1])), int(argv[2]) if argc > 2 else 0)
+        return await cloud.device_list(argc > 0 and argv[0], argc > 1 and string_to_value(argv[1]), argc > 2 and argv[2])
 
     if cmd == 'spec':
         return await cloud.miot_spec(argv[0] if argc > 0 else None)
