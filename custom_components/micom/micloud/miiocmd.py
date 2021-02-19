@@ -19,7 +19,7 @@ def string_to_value(string):
 
 
 def string_or_value(string):
-    return string_to_value(string[1:]) if string[0] == '=' else string
+    return string_to_value(string[1:]) if string[0] == '#' else string
 
 
 def miio_cmd_help(did, prefix='?'):
@@ -27,8 +27,8 @@ def miio_cmd_help(did, prefix='?'):
     return f'\
 Get Props: {prefix}<siid[-piid]>[,...]\n\
            {prefix}1,1-2,1-3,1-4,2-1,2-2,3\n\
-Set Props: {prefix}<siid[-piid]=[=]value>[,...]\n\
-           {prefix}2==60,2-2==false,3=test\n\
+Set Props: {prefix}<siid[-piid]=[#]value>[,...]\n\
+           {prefix}2=#60,2-2=#false,3=test\n\
 Do Action: {prefix}<siid[-piid]> <arg1> [...] \n\
            {prefix}5 您好\n\
            {prefix}5-4 天气 =1\n\n\
@@ -45,7 +45,7 @@ MiIO Spec: {prefix}spec [model_keyword|type_urn]\n\
            {prefix}spec urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx04:1\n\
 '
 
-async def miio_cmd(cloud, did, text):
+async def miio_cmd(cloud, did, text, prefix='?'):
 
     cmd, arg = twins_split(text, ' ')
 
@@ -63,25 +63,26 @@ async def miio_cmd(cloud, did, text):
     if cmd == 'spec':
         return await cloud.miot_spec(argv[0] if argc > 0 else None)
 
-    if not did or not cmd or cmd == 'help' or cmd == '-h' or cmd == '--help':
-        return "HELP"
-
-    if argc > 0:
-        siid, aiid = twins_split(cmd, '-', 1)
-        args = [string_or_value(a) for a in argv]
-        return await cloud.miot_action(did, int(siid), int(aiid), args)
+    if not did or not cmd or cmd == '?' or cmd == 'help' or cmd == '-h' or cmd == '--help':
+        return miio_cmd_help(did, prefix)
 
     props = []
     isget = False
     for item in cmd.split(','):
         iid, value = twins_split(item, '=')
-        siid, piid = twins_split(iid, '-', 1)
-        prop = [int(siid), int(piid)]
+        siid, apiid = twins_split(iid, '-', '1')
+        if not siid.isdigit() or not apiid.isdigit():
+            return 'ERROR: siid/piid/aiid must be integer'
+        prop = [int(siid), int(apiid)]
         if not isget:
             if value is None:
                 isget = True
             else:
                 prop.append(string_or_value(value))
         props.append(prop)
+
+    if argc > 0:
+        args = [string_or_value(a) for a in argv]
+        return await cloud.miot_action(did, props[0][0], props[0][1], args)
 
     return await (cloud.miot_get_props if isget else cloud.miot_set_props)(did, props)

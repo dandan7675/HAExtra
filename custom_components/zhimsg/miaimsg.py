@@ -1,6 +1,6 @@
 from . import get_examples
 from ..micom import miio_cloud
-from ..micom.micloud.miiocmd import miio_cmd, miio_cmd_help
+from ..micom.micloud.miiocmd import miio_cmd
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -24,8 +24,9 @@ class miaimsg:
     async def async_send(self, message, data):
 
         if message.startswith('?'):
-            result = await miio_cmd(miio_cloud(), self.did, message[1:])
-            return get_examples(self.hass, 'miai') + '\n' + miio_cmd_help(self.did) if result == 'HELP' else result
+            if message == '?':
+                return get_examples(self.hass, 'miai')
+            return await miio_cmd(miio_cloud(), self.did, message[1:])
     
         if message.startswith('音量'):
             pos = message.find('%')
