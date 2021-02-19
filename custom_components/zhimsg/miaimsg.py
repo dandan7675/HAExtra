@@ -19,7 +19,9 @@ class miaimsg:
     def __init__(self, hass, conf):
         self.hass = hass
         self.did = conf.get('did')
-        self.name = conf.get('name', self.did)
+        if self.did and isinstance(self.did, str):
+            self.did = str(self.did)
+        self.name = conf.get('name')
         self.spec = MODEL_SPECS[conf.get('model', 'lx01')]
 
     async def async_send(self, message, data):
