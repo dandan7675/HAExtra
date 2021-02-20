@@ -3,7 +3,7 @@ from miio import Device
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "zhibond"
+DOMAIN = "zhimrbond"
 
 AIRER_PROPS = [
             "dry",

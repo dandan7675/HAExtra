@@ -60,13 +60,13 @@ panel_iframe:
 
 **注意：部分命名为 2.py 是因为和 HA 官方的插件命名冲突或者派生而来**
 
-# 1. [zhibus/climate](custom_components/zhibus/climate.py)
+# 1. [zhimodbus/climate](custom_components/zhimodbus/climate.py)
 
 通用 ModBus 空调插件，比 HA 官方做的更通用、更好，详情请参考 [https://yonsm.github.io/modbus](https://yonsm.github.io/modbus)
 
-# 2. [zhisas/climate](custom_components/zhisas/climate.py)
+# 2. [zhisaswell/climate](custom_components/zhisaswell/climate.py)
 
-SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.io/zhisas](https://yonsm.github.io/saswell)
+SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.io/zhisaswell](https://yonsm.github.io/saswell)
 
 # 3. [broadlink2/cover](custom_components/broadlink2/cover.py)
 
@@ -77,9 +77,9 @@ SasWell 温控面板插件（地暖），详情请参考 [https://yonsm.github.i
 -   依赖库升级到 `broadlink==0.9.0`，解决 N1 armbian HA 0.8x 下面 segment fault 的问题；
 -   `self._travel == 0` 改成 `self._travel <= 0` 避免相关 BUG。
 
-# 4. [zhicai/weather](custom_components/zhicai/weather.py)
+# 4. [zhicaiyun/weather](custom_components/zhicaiyun/weather.py)
 
-彩云天气的标准天气插件，支持15天预报。另外，[旧版 sensror](extra/sensor/zhicai.py) 已不再使用，详情请参考[https://yonsm.github.io/zhicai](https://yonsm.github.io/caiyun)
+彩云天气的标准天气插件，支持15天预报。另外，[旧版 sensror](extra/sensor/zhicaiyun.py) 已不再使用，详情请参考[https://yonsm.github.io/zhicaiyun](https://yonsm.github.io/caiyun)
 
 # 5. [aircat/sensor](custom_components/aircat/sensor.py)
 

@@ -142,7 +142,7 @@ person:
       - device_tracker.cphone
 
 weather:
-  - platform: zhicai
+  - platform: zhicaiyun
     name: 天气
 
 # binary_sensor:
@@ -677,10 +677,10 @@ smartir:
   check_updates: false
 
 climate:
-  - platform: zhisas
+  - platform: zhisaswell
     username: !secret saswell_username
     password: !secret saswell_password
-  - platform: zhibus
+  - platform: zhimodbus
     name: [餐厅空调, 客厅空调, 主卧空调, 儿童房空调]
     fan_mode: { registers: [6, 10, 14, 18] }
     fan_modes: { 自动: 0, 一档: 1, 二档: 2, 三档: 3, 四档: 4, 五档: 5 }
@@ -696,7 +696,7 @@ climate:
     temperature_sensor: sensor.shu_fang_wen_du
     humidity_sensor: sensor.aircat2_humidity
 
-zhibond:
+zhimrbond:
   name: 晾衣架
   host: Airer
   token: !secret airer_token
